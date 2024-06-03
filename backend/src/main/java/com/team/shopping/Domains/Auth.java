@@ -1,4 +1,4 @@
-package com.StarJ.Social.Domains;
+package com.team.shopping.Domains;
 
 import jakarta.persistence.*;
 import lombok.*;

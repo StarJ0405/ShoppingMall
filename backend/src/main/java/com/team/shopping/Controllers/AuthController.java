@@ -1,9 +1,9 @@
-package com.StarJ.Social.Controllers;
+package com.team.shopping.Controllers;
 
-import com.StarJ.Social.DTOs.AuthRequestDTO;
-import com.StarJ.Social.DTOs.AuthResponseDTO;
-import com.StarJ.Social.Service.Modules.AuthService;
-import com.StarJ.Social.Service.MultiService;
+
+import com.team.shopping.DTOs.AuthRequestDTO;
+import com.team.shopping.DTOs.AuthResponseDTO;
+import com.team.shopping.Services.MultiService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

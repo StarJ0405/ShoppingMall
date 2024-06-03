@@ -1,4 +1,4 @@
-package com.StarJ.Social.DTOs;
+package com.team.shopping.DTOs;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

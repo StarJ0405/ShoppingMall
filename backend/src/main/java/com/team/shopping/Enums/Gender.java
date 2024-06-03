@@ -1,2 +1,5 @@
-package com.team.shopping.Enums;public enum Gender {
+package com.team.shopping.Enums;
+
+public enum Gender {
+    MAN, WOMAN
 }

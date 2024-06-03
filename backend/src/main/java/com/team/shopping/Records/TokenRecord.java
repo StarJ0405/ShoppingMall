@@ -1,8 +1,9 @@
-package com.StarJ.Social.Records;
+package com.team.shopping.Records;
 
 import lombok.Builder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
 @Builder
 public record TokenRecord(HttpStatus httpStatus, String username) {
 

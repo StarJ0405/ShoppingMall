@@ -1,4 +1,4 @@
-package com.StarJ.Social.Exceptions;
+package com.team.shopping.Exceptions;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;

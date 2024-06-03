@@ -1,11 +1,13 @@
-package com.StarJ.Social.Repositories;
+package com.team.shopping.Repositories;
 
-import com.StarJ.Social.Domains.Auth;
-import com.StarJ.Social.Domains.SiteUser;
+
+import com.team.shopping.Domains.Auth;
+import com.team.shopping.Domains.SiteUser;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
+
 @Repository
 public interface AuthRepository extends JpaRepository<Auth, Long> {
     boolean existsByUser(SiteUser user);

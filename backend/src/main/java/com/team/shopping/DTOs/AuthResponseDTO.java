@@ -1,7 +1,10 @@
-package com.StarJ.Social.DTOs;
+package com.team.shopping.DTOs;
 
-import com.StarJ.Social.Domains.Auth;
-import lombok.*;
+import com.team.shopping.Domains.Auth;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @Setter
