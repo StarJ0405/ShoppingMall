@@ -17,7 +17,7 @@ public class BuyDetail {
     private BuyProduct buyProduct;
 
     @ManyToOne
-    private Option option;
+    private Options option;
 
 
 }

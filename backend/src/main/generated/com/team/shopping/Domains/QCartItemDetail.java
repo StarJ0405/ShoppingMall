@@ -26,7 +26,7 @@ public class QCartItemDetail extends EntityPathBase<CartItemDetail> {
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
-    public final ListPath<Option, QOption> optionList = this.<Option, QOption>createList("optionList", Option.class, QOption.class, PathInits.DIRECT2);
+    public final ListPath<Options, QOptions> optionList = this.<Options, QOptions>createList("optionList", Options.class, QOptions.class, PathInits.DIRECT2);
 
     public QCartItemDetail(String variable) {
         this(CartItemDetail.class, forVariable(variable), INITS);

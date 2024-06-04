@@ -22,17 +22,19 @@ public class QSiteUser extends EntityPathBase<SiteUser> {
 
     public static final QSiteUser siteUser = new QSiteUser("siteUser");
 
+    public final StringPath address = createString("address");
+
     public final QAuth auth;
 
-    public final DatePath<java.time.LocalDate> birthday = createDate("birthday", java.time.LocalDate.class);
+    public final StringPath birthday = createString("birthday");
 
-    public final DatePath<java.time.LocalDate> createDate = createDate("createDate", java.time.LocalDate.class);
+    public final DateTimePath<java.time.LocalDateTime> createDate = createDateTime("createDate", java.time.LocalDateTime.class);
 
     public final StringPath email = createString("email");
 
     public final EnumPath<com.team.shopping.Enums.Gender> gender = createEnum("gender", com.team.shopping.Enums.Gender.class);
 
-    public final DatePath<java.time.LocalDate> modifyDate = createDate("modifyDate", java.time.LocalDate.class);
+    public final DateTimePath<java.time.LocalDateTime> modifyDate = createDateTime("modifyDate", java.time.LocalDateTime.class);
 
     public final StringPath nickname = createString("nickname");
 

@@ -27,4 +27,5 @@ public class AuthController {
         String newAccessToken = this.multiService.refreshToken(refreshToken);
         return ResponseEntity.status(HttpStatus.OK).body(newAccessToken);
     }
+
 }

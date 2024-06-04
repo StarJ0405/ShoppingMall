@@ -26,7 +26,7 @@ public class QBuyDetail extends EntityPathBase<BuyDetail> {
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
-    public final QOption option;
+    public final QOptions option;
 
     public QBuyDetail(String variable) {
         this(BuyDetail.class, forVariable(variable), INITS);
@@ -47,7 +47,7 @@ public class QBuyDetail extends EntityPathBase<BuyDetail> {
     public QBuyDetail(Class<? extends BuyDetail> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.buyProduct = inits.isInitialized("buyProduct") ? new QBuyProduct(forProperty("buyProduct"), inits.get("buyProduct")) : null;
-        this.option = inits.isInitialized("option") ? new QOption(forProperty("option"), inits.get("option")) : null;
+        this.option = inits.isInitialized("option") ? new QOptions(forProperty("option"), inits.get("option")) : null;
     }
 
 }
