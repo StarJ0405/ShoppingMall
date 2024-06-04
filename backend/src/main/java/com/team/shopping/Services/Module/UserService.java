@@ -33,17 +33,6 @@ public class UserService {
     }
 
     @Transactional
-    public void update(String username, String nickname, String email, String phoneNumber, String password) {
-        SiteUser user = get(username);
-        user.setNickname(nickname);
-        user.setEmail(email);
-        user.setPhoneNumber(phoneNumber);
-        user.setPassword(passwordEncoder.encode(password));
-        this.userRepository.save(user);
-    }
-
-
-    @Transactional
     public void delete(String value) {
         SiteUser user = this.userRepository.findById(value).orElseThrow(
                 () -> new IllegalArgumentException("해당 유저를 찾을 수 없습니다. user_id = " + value));
