@@ -41,7 +41,7 @@ public class SecurityConfig {
                 .csrf((csrf) -> csrf //
                         .ignoringRequestMatchers(new AntPathRequestMatcher("/api/**")).ignoringRequestMatchers(new AntPathRequestMatcher("/ws-stomp/**"))//
                 ).authorizeHttpRequests(request -> request //
-                        .requestMatchers("/ws-stomp/**").//
+                        .anyRequest().//
                                 permitAll()//
                 )
                 // 콘솔 허용

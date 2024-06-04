@@ -19,7 +19,7 @@ public class Product {
     @ManyToOne(fetch = FetchType.LAZY)
     private SiteUser author;
 
-    @OneToOne(fetch = FetchType.LAZY ,mappedBy = "product")
+    @ManyToOne(fetch = FetchType.LAZY)
     private Category category;
 
     private int price;

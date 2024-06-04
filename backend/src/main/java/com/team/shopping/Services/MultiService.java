@@ -3,8 +3,10 @@ package com.team.shopping.Services;
 
 import com.team.shopping.DTOs.AuthRequestDTO;
 import com.team.shopping.DTOs.AuthResponseDTO;
+import com.team.shopping.DTOs.SignupRequestDTO;
 import com.team.shopping.Domains.Auth;
 import com.team.shopping.Domains.SiteUser;
+import com.team.shopping.Exceptions.DataDuplicateException;
 import com.team.shopping.Records.TokenRecord;
 import com.team.shopping.Securities.CustomUserDetails;
 import com.team.shopping.Securities.JWT.JwtTokenProvider;
@@ -67,5 +69,13 @@ public class MultiService {
             return new AuthResponseDTO(user.getAuth());
         }
         return new AuthResponseDTO(authService.save(user, accessToken, refreshToken));
+    }
+    /**
+     * User
+     */
+    @Transactional
+    public SiteUser signup(SignupRequestDTO signupRequestDTO) throws DataDuplicateException{
+        userService.check(signupRequestDTO);
+        return userService.save(signupRequestDTO);
     }
 }

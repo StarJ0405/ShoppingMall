@@ -19,5 +19,5 @@ public class CartItemDetail {
     private CartItem cartItem;
 
     @OneToMany
-    private List<Option> optionList = new ArrayList<>();
+    private List<Options> optionList = new ArrayList<>();
 }

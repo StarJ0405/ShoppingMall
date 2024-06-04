@@ -22,6 +22,8 @@ public class QProductTag extends EntityPathBase<ProductTag> {
 
     public static final QProductTag productTag = new QProductTag("productTag");
 
+    public final NumberPath<Long> id = createNumber("id", Long.class);
+
     public final QProduct product;
 
     public final QTag tag;
