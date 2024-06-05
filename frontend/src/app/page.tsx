@@ -1,11 +1,10 @@
-import Image from "next/image";
-import { redirect } from "next/navigation";
+import Main from "./Global/main";
 
 export default function Home() {
-  redirect('/account/login');
+  // redirect('/account/login');
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      
-    </main>
+    <Main>
+      test
+    </Main>
   );
 }
