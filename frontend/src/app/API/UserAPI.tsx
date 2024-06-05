@@ -26,7 +26,7 @@ UserApi.interceptors.response.use((response) => {
         if (error.response.status === 401 ) {
             await refreshAccessToken();
             return UserApi(originalRequest);
-        }else if (error.response.status === 403 ) {
+        }else if (error.response.status === 403) {
             localStorage.clear();
             window.location.href = `/account/login`;
             return;
