@@ -46,17 +46,17 @@ export default function Main({children,className,user}: Readonly<{children : Rea
         </div>
       </DropDown>
       <Side open={isSideOpen} onClose={()=>setIsSideOpen(false)} className="px-2 py-4 w-[300px] left-0 top-0 h-full" outlineClassName="bg-opacity-5" escClose={true} outlineClose={true}>
-        <div className="flex justify-between items-center text-3xl font-bold">
+        <div className="flex justify-between items-center text-2xl font-bold">
           {user?
             <a href="">유저 닉네임</a>
           :
-            <a href="/account/login">로그인</a>
+            <a href="/account/login" onMouseEnter={e=>(e.target as HTMLElement).classList.add('underline')} onMouseLeave={e=>(e.target as HTMLElement).classList.remove('underline')}>로그인</a>
           }
-          <button><img alt="x" src="/x.png" className="w-[36px] h-[36px]"/></button>
+          <button><img alt="x" src="/x.png" className="w-[24px] h-[24px]"/></button>
         </div>
         <div className="overflow-y-scroll h-full">
           <div className="mt-[20px] flex flex-col">
-            <label className="text-2xl font-bold">카테고리</label>
+            <label className="text-xl font-bold">카테고리</label>
             <div className="pl-5 flex flex-col">
               <a href="" className="text-lg mt-1">브랜드패션</a>
               <a href="" className="text-lg mt-1">트랜드패션</a>
@@ -64,7 +64,7 @@ export default function Main({children,className,user}: Readonly<{children : Rea
           </div>
           
           <div className="mt-[20px] flex flex-col">
-            <label className="text-2xl font-bold">주요서비스</label>
+            <label className="text-xl font-bold">주요서비스</label>
           </div>
         </div>
       </Side>
