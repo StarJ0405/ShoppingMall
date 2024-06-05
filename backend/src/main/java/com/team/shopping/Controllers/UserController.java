@@ -1,9 +1,11 @@
 package com.team.shopping.Controllers;
 
 import com.team.shopping.DTOs.ProductRequestDTO;
+import com.team.shopping.DTOs.ProductResponseDTO;
 import com.team.shopping.DTOs.SignupRequestDTO;
-import com.team.shopping.DTOs.WishListResponseDTO;
+import com.team.shopping.DTOs.UserResponseDTO;
 import com.team.shopping.Exceptions.DataDuplicateException;
+import com.team.shopping.Records.TokenRecord;
 import com.team.shopping.Services.Module.UserService;
 import com.team.shopping.Services.MultiService;
 import lombok.RequiredArgsConstructor;
@@ -11,10 +13,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/user")
 public class UserController {
+
     private final UserService userService;
     private final MultiService multiService;
 
@@ -27,24 +32,57 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
         }
     }
+    @GetMapping("/profile")
+    public ResponseEntity<?> profile (@RequestHeader("Authorization") String accessToken) {
+        TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
+        if (tokenRecord.isOK()) {
+            String username = tokenRecord.username();
+            // 기능
+            UserResponseDTO userResponseDTO = this.multiService.getProfile(username);
+            return tokenRecord.getResponseEntity(userResponseDTO);
+        }
+        return tokenRecord.getResponseEntity();
+    }
+
+    /**
+     * wishList Function
+     **/
 
     @GetMapping("/wishList")
-    public ResponseEntity<?> wishList () {
-        String username = "2ndsprout";
-        WishListResponseDTO wishListResponseDTO = this.multiService.getWishList(username);
-        return ResponseEntity.status(HttpStatus.OK).body(wishListResponseDTO);
+    public ResponseEntity<?> wishList (@RequestHeader("Authorization") String accessToken) {
+        TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
+        if (tokenRecord.isOK()) {
+            String username = tokenRecord.username();
+            // 기능
+            List<ProductResponseDTO> wishListResponseDTO = this.multiService.getWishList(username);
+            return tokenRecord.getResponseEntity(wishListResponseDTO);
+        }
+        return tokenRecord.getResponseEntity();
     }
 
-    @PostMapping("/wishList/add")
-    public ResponseEntity<?> addWishList (@RequestBody ProductRequestDTO productRequestDTO) {
-        String username = "2ndsprout";
-        WishListResponseDTO wishListResponseDTO = this.multiService.addToWishList(username, productRequestDTO);
-        return ResponseEntity.status(HttpStatus.OK).body(wishListResponseDTO);
+    @PostMapping("/wishList")
+    public ResponseEntity<?> addWishList (@RequestHeader("Authorization") String accessToken,
+                                          @RequestBody ProductRequestDTO productRequestDTO) {
+        TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
+        if (tokenRecord.isOK()) {
+            String username = tokenRecord.username();
+            // 기능
+            List<ProductResponseDTO> wishListResponseDTO = this.multiService.addToWishList(username, productRequestDTO);
+            return tokenRecord.getResponseEntity(wishListResponseDTO);
+        }
+        return tokenRecord.getResponseEntity();
     }
-    @DeleteMapping("/wishList/delete")
-    public ResponseEntity<?> deleteToWishList (@RequestBody ProductRequestDTO productRequestDTO) {
-        String username = "2ndsprout";
-        WishListResponseDTO wishListResponseDTO = this.multiService.deleteToWishList(username, productRequestDTO);
-        return ResponseEntity.status(HttpStatus.OK).body(wishListResponseDTO);
+
+    @DeleteMapping("/wishList")
+    public ResponseEntity<?> deleteToWishList (@RequestHeader("Authorization") String accessToken,
+                                               @RequestBody ProductRequestDTO productRequestDTO) {
+        TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
+        if (tokenRecord.isOK()) {
+            String username = tokenRecord.username();
+            // 기능
+            List<ProductResponseDTO> wishListResponseDTO = this.multiService.deleteToWishList(username, productRequestDTO);
+            return tokenRecord.getResponseEntity(wishListResponseDTO);
+        }
+        return tokenRecord.getResponseEntity();
     }
 }
