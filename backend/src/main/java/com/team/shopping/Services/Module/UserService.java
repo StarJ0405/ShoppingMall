@@ -28,7 +28,7 @@ public class UserService {
     }
 
     @Transactional
-    public SiteUser get(String value) {
+    public SiteUser get(String value) throws IllegalArgumentException{
         return this.userRepository.findById(value).orElseThrow(() -> new IllegalArgumentException("해당 유저를 찾을 수 없습니다. user_id = " + value));
     }
 
@@ -43,7 +43,6 @@ public class UserService {
     }
 
     public void check(SignupRequestDTO signupRequestDTO) {
-        System.out.println(userRepository.isDuplicateEmail(signupRequestDTO.getEmail()));
         if (userRepository.isDuplicateUsername(signupRequestDTO.getUsername()))
             throw new DataDuplicateException("username");
         if (userRepository.isDuplicateEmail(signupRequestDTO.getEmail())) throw new DataDuplicateException("email");
