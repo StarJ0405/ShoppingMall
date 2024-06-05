@@ -11,31 +11,42 @@ AuthApi.interceptors.request.use(
         return config;
     },
     (error) => {
-        console.log(error);
         return Promise.reject(error);
     }
 );
 AuthApi.interceptors.response.use(
     (response) => {
         return response
-    },
-    (error) => {
-        console.log(error)
+    }, async (error) => {
+        // console.log(error)
         // 응답 에러 : 에러코드로 처리 방법 지정
         //  ex) locaStorage에 토큰이 없음 -> 안내 메세지 후 로그인 페이지로 redirect,
         //  ex) access token 만료 -> refreshtoken으로 access토큰 재요청
+        return Promise.reject(error);
     }
 );
 
 /** LOGIN API */
-export const login = async ({ username, password }:{username:string,password:string} ) => {
-    const data = { username, password };
+interface LoginProps{
+    username:string;
+    password:string;
+}
+export const Login = async (data:LoginProps) => {
     const response = await AuthApi.post(`/api/auth/login`, data);
     return response.data;
 }
 /** SIGNUP API */
-export const signUp = async ({ username, password, email, phoneNumber, nickname } :{username:string, password:string, email:string, phoneNumber:string, nickname:string}) => {
-    const data = { username, password, email, phoneNumber, nickname };
+interface SignupProps{
+    username:string
+    password:string;
+    email:string;
+    nickname:string;
+    phoneNumber:string;
+    role:number;
+    birthday:string;
+    gender:number;
+}
+export const SignUp = async (data:SignupProps) => {
     const response = await AuthApi.post(`/api/user/signup`, data);
     return response.data;
 }
