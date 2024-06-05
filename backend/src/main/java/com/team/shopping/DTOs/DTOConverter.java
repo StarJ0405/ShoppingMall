@@ -15,7 +15,7 @@ public class DTOConverter {
         }
 
         return ProductResponseDTO.builder()
-                .id(product.getId())
+                .id(product.getId())  // id를 설정합니다.
                 .count(product.getCount())
                 .a_s(product.getA_s())
                 .brand(product.getBrand())
@@ -32,7 +32,7 @@ public class DTOConverter {
                 .build();
     }
 
-    public static WishListResponseDTO toWishListResponseDTO(WishList wishList) {
+    public static List<ProductResponseDTO> toProductResponseDTO(WishList wishList) {
         List<ProductResponseDTO> productResponseDTOList = null;
         if (wishList.getProductList() != null) {
             productResponseDTOList = wishList.getProductList().stream()
@@ -40,11 +40,7 @@ public class DTOConverter {
                     .collect(Collectors.toList());
         }
 
-        return new WishListResponseDTO(
-                wishList.getId(),
-                wishList.getUser().getUsername(),
-                productResponseDTOList
-        );
+        return productResponseDTOList;
     }
 
 }

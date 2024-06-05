@@ -1,8 +1,8 @@
 package com.team.shopping.Controllers;
 
 import com.team.shopping.DTOs.ProductRequestDTO;
+import com.team.shopping.DTOs.ProductResponseDTO;
 import com.team.shopping.DTOs.SignupRequestDTO;
-import com.team.shopping.DTOs.WishListResponseDTO;
 import com.team.shopping.Exceptions.DataDuplicateException;
 import com.team.shopping.Services.Module.UserService;
 import com.team.shopping.Services.MultiService;
@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -31,20 +33,20 @@ public class UserController {
     @GetMapping("/wishList")
     public ResponseEntity<?> wishList () {
         String username = "2ndsprout";
-        WishListResponseDTO wishListResponseDTO = this.multiService.getWishList(username);
+        List<ProductResponseDTO> wishListResponseDTO = this.multiService.getWishList(username);
         return ResponseEntity.status(HttpStatus.OK).body(wishListResponseDTO);
     }
 
-    @PostMapping("/wishList/add")
+    @PostMapping("/wishList")
     public ResponseEntity<?> addWishList (@RequestBody ProductRequestDTO productRequestDTO) {
         String username = "2ndsprout";
-        WishListResponseDTO wishListResponseDTO = this.multiService.addToWishList(username, productRequestDTO);
+        List<ProductResponseDTO> wishListResponseDTO = this.multiService.addToWishList(username, productRequestDTO);
         return ResponseEntity.status(HttpStatus.OK).body(wishListResponseDTO);
     }
-    @DeleteMapping("/wishList/delete")
+    @DeleteMapping("/wishList")
     public ResponseEntity<?> deleteToWishList (@RequestBody ProductRequestDTO productRequestDTO) {
         String username = "2ndsprout";
-        WishListResponseDTO wishListResponseDTO = this.multiService.deleteToWishList(username, productRequestDTO);
+        List<ProductResponseDTO> wishListResponseDTO = this.multiService.deleteToWishList(username, productRequestDTO);
         return ResponseEntity.status(HttpStatus.OK).body(wishListResponseDTO);
     }
 }

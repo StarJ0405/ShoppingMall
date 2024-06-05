@@ -20,6 +20,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 
 @Service
@@ -94,25 +95,25 @@ public class MultiService {
     * WishList
     * */
     @Transactional
-    public WishListResponseDTO getWishList (String username) throws NoSuchElementException {
+    public List<ProductResponseDTO> getWishList (String username) throws NoSuchElementException {
         SiteUser user = this.userService.get(username);
         WishList wishList = this.wishListService.get(user);
-        return DTOConverter.toWishListResponseDTO(wishList);
+        return DTOConverter.toProductResponseDTO(wishList);
     }
 
     @Transactional
-    public WishListResponseDTO addToWishList(String username, ProductRequestDTO productRequestDTO) {
+    public List<ProductResponseDTO> addToWishList(String username, ProductRequestDTO productRequestDTO) {
         SiteUser user = this.userService.get(username);
         Product product = this.productService.getProduct(productRequestDTO);
         WishList wishList = this.wishListService.addToWishList(user, product);
-        return DTOConverter.toWishListResponseDTO(wishList);
+        return DTOConverter.toProductResponseDTO(wishList);
     }
 
     @Transactional
-    public WishListResponseDTO deleteToWishList (String username, ProductRequestDTO productRequestDTO) {
+    public List<ProductResponseDTO> deleteToWishList (String username, ProductRequestDTO productRequestDTO) {
         SiteUser user = this.userService.get(username);
         Product product = this.productService.getProduct(productRequestDTO);
         WishList wishList = this.wishListService.deleteToWishList(user, product);
-        return DTOConverter.toWishListResponseDTO(wishList);
+        return DTOConverter.toProductResponseDTO(wishList);
     }
 }
