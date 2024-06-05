@@ -24,7 +24,7 @@ public class QLove extends EntityPathBase<Love> {
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
-    public final ListPath<Product, QProduct> targetList = this.<Product, QProduct>createList("targetList", Product.class, QProduct.class, PathInits.DIRECT2);
+    public final ListPath<Article, QArticle> targetList = this.<Article, QArticle>createList("targetList", Article.class, QArticle.class, PathInits.DIRECT2);
 
     public final EnumPath<com.team.shopping.Enums.Type> targetType = createEnum("targetType", com.team.shopping.Enums.Type.class);
 
