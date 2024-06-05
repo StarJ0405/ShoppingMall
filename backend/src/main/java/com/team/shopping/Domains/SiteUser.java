@@ -20,6 +20,8 @@ public class SiteUser {
     @Column(length = 24, unique = true)
     private String username;
 
+    private String name;
+
     private String password;
 
     @Column(length = 50 , unique = true)
@@ -49,8 +51,9 @@ public class SiteUser {
     private Auth auth;
 
     @Builder
-    public SiteUser(String username, String password, String nickname, String email, UserRole role, Gender gender, String birthday, String phoneNumber){
+    public SiteUser(String username, String name, String password, String nickname, String email, UserRole role, Gender gender, String birthday, String phoneNumber){
         this.username = username;
+        this.name = name;
         this.password = password;
         this.nickname = nickname;
         this.email = email;

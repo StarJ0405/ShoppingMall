@@ -21,7 +21,7 @@ public class Love {
     private SiteUser user;
 
     @OneToMany
-    private List<Product> targetList = new ArrayList<>();
+    private List<Article> targetList = new ArrayList<>();
 
     private Type targetType;
 }

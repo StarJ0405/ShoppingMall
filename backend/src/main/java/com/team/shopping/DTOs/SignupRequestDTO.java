@@ -17,6 +17,8 @@ public class SignupRequestDTO {
 
     private String password;
 
+    private String name;
+
     @Email
     private String email;
 
@@ -29,6 +31,4 @@ public class SignupRequestDTO {
     private String birthday;
 
     private int gender;
-
-
 }

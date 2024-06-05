@@ -1,28 +1,34 @@
 package com.team.shopping.Services;
 
 
-import com.team.shopping.DTOs.AuthRequestDTO;
-import com.team.shopping.DTOs.AuthResponseDTO;
-import com.team.shopping.DTOs.SignupRequestDTO;
+import com.team.shopping.DTOs.*;
 import com.team.shopping.Domains.Auth;
+import com.team.shopping.Domains.Product;
 import com.team.shopping.Domains.SiteUser;
+import com.team.shopping.Domains.WishList;
 import com.team.shopping.Exceptions.DataDuplicateException;
 import com.team.shopping.Records.TokenRecord;
 import com.team.shopping.Securities.CustomUserDetails;
 import com.team.shopping.Securities.JWT.JwtTokenProvider;
 import com.team.shopping.Services.Module.AuthService;
+import com.team.shopping.Services.Module.ProductService;
 import com.team.shopping.Services.Module.UserService;
+import com.team.shopping.Services.Module.WishListService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 
+import java.util.NoSuchElementException;
+
 @Service
 @RequiredArgsConstructor
 public class MultiService {
     private final AuthService authService;
     private final UserService userService;
+    private final WishListService wishListService;
+    private final ProductService productService;
     //
     private final JwtTokenProvider jwtTokenProvider;
 
@@ -76,6 +82,37 @@ public class MultiService {
     @Transactional
     public SiteUser signup(SignupRequestDTO signupRequestDTO) throws DataDuplicateException{
         userService.check(signupRequestDTO);
-        return userService.save(signupRequestDTO);
+        SiteUser user = userService.save(signupRequestDTO);
+        WishList wishList = WishList.builder()
+                .user(user)
+                .build();
+        this.wishListService.save(wishList);
+        return user;
+    }
+
+    /**
+    * WishList
+    * */
+    @Transactional
+    public WishListResponseDTO getWishList (String username) throws NoSuchElementException {
+        SiteUser user = this.userService.get(username);
+        WishList wishList = this.wishListService.get(user);
+        return DTOConverter.toWishListResponseDTO(wishList);
+    }
+
+    @Transactional
+    public WishListResponseDTO addToWishList(String username, ProductRequestDTO productRequestDTO) {
+        SiteUser user = this.userService.get(username);
+        Product product = this.productService.getProduct(productRequestDTO);
+        WishList wishList = this.wishListService.addToWishList(user, product);
+        return DTOConverter.toWishListResponseDTO(wishList);
+    }
+
+    @Transactional
+    public WishListResponseDTO deleteToWishList (String username, ProductRequestDTO productRequestDTO) {
+        SiteUser user = this.userService.get(username);
+        Product product = this.productService.getProduct(productRequestDTO);
+        WishList wishList = this.wishListService.deleteToWishList(user, product);
+        return DTOConverter.toWishListResponseDTO(wishList);
     }
 }
