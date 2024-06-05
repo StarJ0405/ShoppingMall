@@ -20,6 +20,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 
 @Service
@@ -35,6 +36,7 @@ public class MultiService {
     /**
      * Auth
      */
+
     public TokenRecord checkToken(String accessToken) {
         HttpStatus httpStatus = HttpStatus.FORBIDDEN;
         String username = null;
@@ -76,9 +78,11 @@ public class MultiService {
         }
         return new AuthResponseDTO(authService.save(user, accessToken, refreshToken));
     }
+
     /**
      * User
      */
+
     @Transactional
     public SiteUser signup(SignupRequestDTO signupRequestDTO) throws DataDuplicateException{
         userService.check(signupRequestDTO);
@@ -90,29 +94,47 @@ public class MultiService {
         return user;
     }
 
+    @Transactional
+    public UserResponseDTO getProfile (String username) {
+        SiteUser siteUser = this.userService.get(username);
+        return UserResponseDTO.builder()
+                .username(siteUser.getUsername())
+                .gender(siteUser.getGender().toString())
+                .email(siteUser.getEmail())
+                .point(siteUser.getPoint())
+                .phoneNumber(siteUser.getPhoneNumber())
+                .nickname(siteUser.getNickname())
+                .birthday(siteUser.getBirthday())
+                .createDate(siteUser.getCreateDate())
+                .modifyDate(siteUser.getModifyDate())
+                .name(siteUser.getName())
+                .build();
+    }
+
     /**
     * WishList
     * */
+
     @Transactional
-    public WishListResponseDTO getWishList (String username) throws NoSuchElementException {
+    public List<ProductResponseDTO> getWishList (String username) throws NoSuchElementException {
         SiteUser user = this.userService.get(username);
         WishList wishList = this.wishListService.get(user);
-        return DTOConverter.toWishListResponseDTO(wishList);
+        return DTOConverter.toProductResponseDTOList(wishList);
     }
 
     @Transactional
-    public WishListResponseDTO addToWishList(String username, ProductRequestDTO productRequestDTO) {
+    public List<ProductResponseDTO> addToWishList(String username, ProductRequestDTO productRequestDTO) {
         SiteUser user = this.userService.get(username);
         Product product = this.productService.getProduct(productRequestDTO);
         WishList wishList = this.wishListService.addToWishList(user, product);
-        return DTOConverter.toWishListResponseDTO(wishList);
+        return DTOConverter.toProductResponseDTOList(wishList);
     }
 
     @Transactional
-    public WishListResponseDTO deleteToWishList (String username, ProductRequestDTO productRequestDTO) {
+    public List<ProductResponseDTO> deleteToWishList (String username, ProductRequestDTO productRequestDTO) {
         SiteUser user = this.userService.get(username);
         Product product = this.productService.getProduct(productRequestDTO);
         WishList wishList = this.wishListService.deleteToWishList(user, product);
-        return DTOConverter.toWishListResponseDTO(wishList);
+        return DTOConverter.toProductResponseDTOList(wishList);
     }
 }
