@@ -1,6 +1,7 @@
 package com.team.shopping.Domains;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -24,6 +25,12 @@ public class CartItem {
     private int count;
 
     private LocalDateTime createDate;
-    private LocalDateTime modifyDate;
 
+    @Builder
+    public CartItem (SiteUser user, Product product, int count, LocalDateTime createDate) {
+        this.user = user;
+        this.product = product;
+        this.count = count;
+        this.createDate = createDate;
+    }
 }

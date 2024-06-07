@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 import java.util.Optional;
 
 @Service
@@ -27,7 +28,9 @@ public class MultiService {
     private final CategoryService categoryService;
     private final WishListService wishListService;
     private final ProductService productService;
-
+    private final CartItemService cartItemService;
+    private final CartItemDetailService cartItemDetailService;
+    private final OptionsService optionsService;
     private final JwtTokenProvider jwtTokenProvider;
 
 
@@ -88,8 +91,6 @@ public class MultiService {
     public SiteUser signup(SignupRequestDTO signupRequestDTO) throws DataDuplicateException {
         userService.check(signupRequestDTO);
         SiteUser user = userService.save(signupRequestDTO);
-        Wish wishList = Wish.builder().user(user).build();
-        this.wishListService.save(wishList);
         return user;
     }
 
@@ -100,7 +101,10 @@ public class MultiService {
     }
 
     /**
-     * WishList
+     * 
+     
+     
+     List
      */
 
     @Transactional
@@ -113,7 +117,7 @@ public class MultiService {
     @Transactional
     public List<ProductResponseDTO> addToWishList(String username, ProductRequestDTO productRequestDTO) {
         SiteUser user = this.userService.get(username);
-        Product product = this.productService.getProduct(productRequestDTO);
+        Product product = this.productService.getProduct(productRequestDTO.getProductId());
         this.wishListService.addToWishList(user, product);
         List<Wish> wishList = this.wishListService.get(user);
         return DTOConverter.toProductResponseDTOList(wishList);
@@ -122,13 +126,53 @@ public class MultiService {
     @Transactional
     public List<ProductResponseDTO> deleteToWishList(String username, ProductRequestDTO productRequestDTO) {
         SiteUser user = this.userService.get(username);
-        Product product = this.productService.getProduct(productRequestDTO);
+        Product product = this.productService.getProduct(productRequestDTO.getProductId());
         this.wishListService.deleteToWishList(user, product);
         List<Wish> wishList = this.wishListService.get(user);
         return DTOConverter.toProductResponseDTOList(wishList);
     }
 
     /**
+
+     * cart
+     * */
+
+    @Transactional
+    public List<CartResponseDTO> getCart(String username) {
+        SiteUser user = this.userService.get(username);
+
+        List<CartItem> cartItems = this.cartItemService.getCartItemList(user);
+
+        return cartItems.stream()
+                .map(cartItem -> {
+                    List<CartItemDetail> cartItemDetails = this.cartItemDetailService.getList(cartItem);
+                    return DTOConverter.toCartResponseDTO(cartItem, cartItemDetails);
+                })
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public List<CartResponseDTO> addToCart(String username, CartRequestDTO cartRequestDTO, int count) {
+        SiteUser user = this.userService.get(username);
+        Product product = this.productService.getProduct(cartRequestDTO.getProductId());
+        CartItem cartItem = this.cartItemService.save(user, product, count);
+
+        List<Options> options = this.optionsService.getOptionsList(cartRequestDTO.getOptionIdList());
+
+        for (Options option : options) {
+            this.cartItemDetailService.save(cartItem, option);
+        }
+
+        List<CartItem> cartItems = this.cartItemService.getCartItemList(user);
+        return cartItems.stream()
+                .map(item -> {
+                    List<CartItemDetail> cartItemDetails = this.cartItemDetailService.getList(item);
+                    return DTOConverter.toCartResponseDTO(item, cartItemDetails);
+                })
+                .collect(Collectors.toList());
+    }
+
+
      * Product
      */
     @Transactional
