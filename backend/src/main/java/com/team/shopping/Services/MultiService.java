@@ -123,7 +123,7 @@ public class MultiService {
     }
 
     @Transactional
-    public List<ProductResponseDTO> addToWishList(String username, ProductRequestDTO productRequestDTO) {
+    public List<ProductResponseDTO> addToWishList(String username, WishListRequestDTO productRequestDTO) {
         SiteUser user = this.userService.get(username);
         Product product = this.productService.getProduct(productRequestDTO);
         WishList wishList = this.wishListService.addToWishList(user, product);
@@ -131,7 +131,7 @@ public class MultiService {
     }
 
     @Transactional
-    public List<ProductResponseDTO> deleteToWishList (String username, ProductRequestDTO productRequestDTO) {
+    public List<ProductResponseDTO> deleteToWishList (String username, WishListRequestDTO productRequestDTO) {
         SiteUser user = this.userService.get(username);
         Product product = this.productService.getProduct(productRequestDTO);
         WishList wishList = this.wishListService.deleteToWishList(user, product);

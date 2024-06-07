@@ -1,6 +1,6 @@
 package com.team.shopping.Controllers;
 
-import com.team.shopping.DTOs.ProductRequestDTO;
+import com.team.shopping.DTOs.WishListRequestDTO;
 import com.team.shopping.DTOs.ProductResponseDTO;
 import com.team.shopping.DTOs.SignupRequestDTO;
 import com.team.shopping.DTOs.UserResponseDTO;
@@ -23,7 +23,7 @@ public class UserController {
     private final UserService userService;
     private final MultiService multiService;
 
-    @PostMapping("/signup")
+    @PostMapping
     public ResponseEntity<?> signup(@RequestBody SignupRequestDTO signupRequestDTO) {
         try {
             multiService.signup(signupRequestDTO);
@@ -32,7 +32,7 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
         }
     }
-    @GetMapping("/profile")
+    @GetMapping
     public ResponseEntity<?> profile (@RequestHeader("Authorization") String accessToken) {
         TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
         if (tokenRecord.isOK()) {
@@ -62,7 +62,7 @@ public class UserController {
 
     @PostMapping("/wishList")
     public ResponseEntity<?> addWishList (@RequestHeader("Authorization") String accessToken,
-                                          @RequestBody ProductRequestDTO productRequestDTO) {
+                                          @RequestBody WishListRequestDTO productRequestDTO) {
         TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
         if (tokenRecord.isOK()) {
             String username = tokenRecord.username();
@@ -75,7 +75,7 @@ public class UserController {
 
     @DeleteMapping("/wishList")
     public ResponseEntity<?> deleteToWishList (@RequestHeader("Authorization") String accessToken,
-                                               @RequestBody ProductRequestDTO productRequestDTO) {
+                                               @RequestBody WishListRequestDTO productRequestDTO) {
         TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
         if (tokenRecord.isOK()) {
             String username = tokenRecord.username();
