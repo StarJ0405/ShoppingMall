@@ -10,7 +10,7 @@ import lombok.Setter;
 @Setter
 @Entity
 @NoArgsConstructor
-public class WishList {
+public class Wish {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,7 +23,7 @@ public class WishList {
     private Product product;
 
     @Builder
-    public WishList(SiteUser user, Product product){
+    public Wish(SiteUser user, Product product){
         this.user = user;
         this.product = product;
     }

@@ -25,7 +25,7 @@ public class Review {
     @Column(length = 50)
     private String title;
 
-    @Column(length = 200)
+    @Column(columnDefinition = "TEXT")
     private String content;
 
     private Double grade;

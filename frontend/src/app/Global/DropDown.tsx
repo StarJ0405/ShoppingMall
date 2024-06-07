@@ -26,6 +26,7 @@ const DropDown = (props:DropProps ) => {
     let position = {};
     const background= document.getElementById(props.background)?.getBoundingClientRect();
     const button= document.getElementById(props.button)?.getBoundingClientRect();
+    
     if(background&&button)
         switch(direction){
             case Direcion.UP:{
@@ -37,7 +38,7 @@ const DropDown = (props:DropProps ) => {
             }
             break;
             case Direcion.LEFT:{
-                position= {left: button.x-background.x-props.width+x, top : button.y-background.y-button.height-y, width:props.width+'px', height:props.height+'px'} 
+                position= {left: button.x-background.x-props?.width+x, top : button.y-background.y-button.height-y, width:props.width+'px', height:props.height+'px'} 
             }
             break;
             case Direcion.RIGHT:{

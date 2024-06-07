@@ -5,21 +5,21 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Getter
 @Setter
 @Entity
 @NoArgsConstructor
-public class EventProduct {
+public class PaymentProductDetail {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    private Event event;
+    @ManyToOne(fetch = FetchType.LAZY)
+    private PaymentProduct paymentProduct;
 
     @ManyToOne
-    private Product product;
+    private Options option;
+
+
 }

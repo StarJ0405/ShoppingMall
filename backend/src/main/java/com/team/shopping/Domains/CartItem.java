@@ -19,7 +19,6 @@ public class CartItem {
 
     @ManyToOne(fetch = FetchType.LAZY)
     private SiteUser user;
-
     @ManyToOne(fetch = FetchType.LAZY)
     private Product product;
 

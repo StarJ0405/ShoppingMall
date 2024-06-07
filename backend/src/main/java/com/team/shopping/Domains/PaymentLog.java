@@ -5,25 +5,23 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
 @Entity
 @NoArgsConstructor
-public class BuyProduct {
+public class PaymentLog {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    private BuyLog buyLog;
+    private SiteUser order;
 
-    @OneToMany
-    private List<Product> productList = new ArrayList<>();
+    private LocalDateTime createDate;
 
-    private int count;
-
+    @Column(columnDefinition = "TEXT")
+    private String info;
 }

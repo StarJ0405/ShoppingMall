@@ -28,6 +28,8 @@ public class QCartItem extends EntityPathBase<CartItem> {
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
+    public final DateTimePath<java.time.LocalDateTime> modifyDate = createDateTime("modifyDate", java.time.LocalDateTime.class);
+
     public final QProduct product;
 
     public final QSiteUser user;

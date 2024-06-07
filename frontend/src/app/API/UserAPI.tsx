@@ -6,8 +6,8 @@ export const UserApi = getAPI();
 UserApi.interceptors.request.use(
     (config) => {
         const TOKEN_TYPE = localStorage.getItem("tokenType");
-        let ACCESS_TOKEN = localStorage.getItem("accessToken");
-        let REFRESH_TOKEN = localStorage.getItem("refreshToken");
+        const ACCESS_TOKEN = localStorage.getItem("accessToken");
+        const REFRESH_TOKEN = localStorage.getItem("refreshToken");
         config.headers['Authorization'] = `${TOKEN_TYPE} ${ACCESS_TOKEN}`;
         config.headers['REFRESH_TOKEN'] = REFRESH_TOKEN;
         return config;
@@ -37,7 +37,7 @@ UserApi.interceptors.response.use((response) => {
 const refreshAccessToken = async () => {
     const response = await UserApi.get(`/api/auth/refresh`);
     const TOKEN_TYPE = localStorage.getItem("tokenType");
-    let ACCESS_TOKEN = response.data;
+    const ACCESS_TOKEN = response.data;
     localStorage.setItem('accessToken', ACCESS_TOKEN);
     UserApi.defaults.headers.common['Authorization'] = `${TOKEN_TYPE} ${ACCESS_TOKEN}`;
 }
@@ -46,6 +46,7 @@ export const fetchUser = async () => {
     const response = await UserApi.get(`/api/user`);
     return response.data;
 }
+
 export const updateUser = async (data:any) => {
     const response = await UserApi.put(`/api/user`, data);
     return response.data;

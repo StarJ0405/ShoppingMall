@@ -5,23 +5,18 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
-
 @Getter
 @Setter
 @Entity
 @NoArgsConstructor
-public class BuyLog {
-
+public class CartItemOptions {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    private SiteUser order;
+    private CartItem cart;
 
-    private LocalDateTime createDate;
-
-    @Column(length = 100)
-    private String info;
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Options options;
 }

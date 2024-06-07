@@ -36,9 +36,11 @@ public class UserService {
                 .build());                                  //
     }
 
+
+
     @Transactional
     public SiteUser get(String value) throws IllegalArgumentException{
-        return this.userRepository.findById(value).orElseThrow(() -> new IllegalArgumentException("해당 유저를 찾을 수 없습니다. user_id = " + value));
+        return this.userRepository.findById(value).orElseThrow(() -> new IllegalArgumentException("아이디가 일치하지 않습니다."));
     }
 
     public Optional<SiteUser> getOptional(String value) {
@@ -46,8 +48,7 @@ public class UserService {
     }
 
     @Transactional
-    public void delete(String value) {
-        SiteUser user = this.userRepository.findById(value).orElseThrow(() -> new IllegalArgumentException("해당 유저를 찾을 수 없습니다. user_id = " + value));
+    public void delete(SiteUser user) {
         this.userRepository.delete(user);
     }
 
@@ -64,4 +65,10 @@ public class UserService {
         return passwordEncoder.matches(password1, password2);
     }
 
-}
+
+    @Transactional
+    public void deleteUser(SiteUser user) {
+        userRepository.deleteByUsername(user.getUsername());
+        }
+    }
+

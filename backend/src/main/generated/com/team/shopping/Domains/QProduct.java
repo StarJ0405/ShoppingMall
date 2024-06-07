@@ -26,13 +26,9 @@ public class QProduct extends EntityPathBase<Product> {
 
     public final StringPath address = createString("address");
 
-    public final QSiteUser author;
-
     public final StringPath brand = createString("brand");
 
     public final QCategory category;
-
-    public final NumberPath<Integer> count = createNumber("count", Integer.class);
 
     public final DateTimePath<java.time.LocalDateTime> createDate = createDateTime("createDate", java.time.LocalDateTime.class);
 
@@ -50,9 +46,11 @@ public class QProduct extends EntityPathBase<Product> {
 
     public final NumberPath<Integer> price = createNumber("price", Integer.class);
 
-    public final ListPath<ProductTag, QProductTag> productTagList = this.<ProductTag, QProductTag>createList("productTagList", ProductTag.class, QProductTag.class, PathInits.DIRECT2);
-
     public final StringPath receipt = createString("receipt");
+
+    public final NumberPath<Integer> remain = createNumber("remain", Integer.class);
+
+    public final QSiteUser seller;
 
     public final StringPath title = createString("title");
 
@@ -74,8 +72,8 @@ public class QProduct extends EntityPathBase<Product> {
 
     public QProduct(Class<? extends Product> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.author = inits.isInitialized("author") ? new QSiteUser(forProperty("author"), inits.get("author")) : null;
         this.category = inits.isInitialized("category") ? new QCategory(forProperty("category"), inits.get("category")) : null;
+        this.seller = inits.isInitialized("seller") ? new QSiteUser(forProperty("seller"), inits.get("seller")) : null;
     }
 
 }

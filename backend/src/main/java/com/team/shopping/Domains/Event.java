@@ -26,7 +26,8 @@ public class Event {
     @ManyToOne(fetch = FetchType.LAZY)
     private SiteUser creator;
 
-    private LocalDateTime dateTime;
+    private LocalDateTime createDate;
+    private LocalDateTime modifyDate;
 
 
 
