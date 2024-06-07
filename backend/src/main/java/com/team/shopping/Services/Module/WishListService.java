@@ -15,7 +15,7 @@ public class WishListService {
 
     private final WishListRepository wishListRepository;
 
-    public WishList get(SiteUser user) {
+    public List<WishList> get(SiteUser user) {
         return this.wishListRepository.findByUser(user);
     }
 
@@ -24,36 +24,16 @@ public class WishListService {
     }
 
     public WishList addToWishList(SiteUser user, Product product) {
-
-        WishList wishList = this.get(user);
-
-        List<Product> productList = wishList.getProductList();
-
-        productList.add(product);
-
-        this.wishListRepository.save(wishList);
-
-        return this.wishListRepository.findById(wishList.getId()).orElse(wishList);
+        return wishListRepository.save(WishList.builder()
+                .user(user)
+                .product(product)
+                .build());
     }
 
-    public WishList deleteToWishList(SiteUser user, Product product) {
+    public void deleteToWishList(SiteUser user, Product product) {
 
-        WishList wishList = this.get(user);
+        WishList wishList = this.wishListRepository.findByUserAndProduct(user, product);
+        this.wishListRepository.delete(wishList);
 
-        if (wishList == null || wishList.getProductList() == null) {
-            return null;
-        }
-
-        List<Product> productList = wishList.getProductList();
-
-        if (!productList.contains(product)) {
-            return null;
-        }
-
-        productList.remove(product);
-
-        wishList.setProductList(productList);
-
-        return this.wishListRepository.save(wishList);
     }
 }

@@ -6,9 +6,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Getter
 @Setter
 @Entity
@@ -19,20 +16,15 @@ public class WishList {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     private SiteUser user;
 
-    @OneToMany
-    @JoinTable(
-            name = "wish_list_product_list",
-            joinColumns = @JoinColumn(name = "wish_list_id"),
-            inverseJoinColumns = @JoinColumn(name = "product_id")
-    )
-    private List<Product> productList = new ArrayList<>();
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Product product;
 
     @Builder
-    public WishList(SiteUser user, List<Product> productList){
+    public WishList(SiteUser user, Product product){
         this.user = user;
-        this.productList = productList;
+        this.product = product;
     }
 }

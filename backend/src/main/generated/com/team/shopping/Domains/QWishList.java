@@ -24,7 +24,7 @@ public class QWishList extends EntityPathBase<WishList> {
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
-    public final ListPath<Product, QProduct> productList = this.<Product, QProduct>createList("productList", Product.class, QProduct.class, PathInits.DIRECT2);
+    public final QProduct product;
 
     public final QSiteUser user;
 
@@ -46,6 +46,7 @@ public class QWishList extends EntityPathBase<WishList> {
 
     public QWishList(Class<? extends WishList> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
+        this.product = inits.isInitialized("product") ? new QProduct(forProperty("product"), inits.get("product")) : null;
         this.user = inits.isInitialized("user") ? new QSiteUser(forProperty("user"), inits.get("user")) : null;
     }
 
