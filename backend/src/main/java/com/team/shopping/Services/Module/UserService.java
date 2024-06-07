@@ -39,7 +39,7 @@ public class UserService {
 
     @Transactional
     public SiteUser get(String value) throws IllegalArgumentException{
-        return this.userRepository.findById(value).orElseThrow(() -> new IllegalArgumentException("해당 유저를 찾을 수 없습니다. user_id = " + value));
+        return this.userRepository.findById(value).orElseThrow(() -> new IllegalArgumentException("아이디가 일치하지 않습니다."));
     }
 
     public Optional<SiteUser> getOptional(String value) {
@@ -48,7 +48,7 @@ public class UserService {
 
     @Transactional
     public void delete(String value) {
-        SiteUser user = this.userRepository.findById(value).orElseThrow(() -> new IllegalArgumentException("해당 유저를 찾을 수 없습니다. user_id = " + value));
+        SiteUser user = this.userRepository.findById(value).orElseThrow(() -> new IllegalArgumentException("아이디가 일치하지 않습니다."));
         this.userRepository.delete(user);
     }
 
