@@ -48,6 +48,6 @@ public class ProductResponseDTO {
         this.receipt = receipt;
         this.a_s = a_s;
         this.brand = brand;
-        this.createDate = LocalDateTime.now();
+        this.createDate = null;
     }
 }

@@ -118,7 +118,7 @@ public class MultiService {
     @Transactional
     public List<ProductResponseDTO> getWishList (String username) throws NoSuchElementException {
         SiteUser user = this.userService.get(username);
-        WishList wishList = this.wishListService.get(user);
+        List<WishList> wishList = this.wishListService.get(user);
         return DTOConverter.toProductResponseDTOList(wishList);
     }
 
@@ -126,7 +126,8 @@ public class MultiService {
     public List<ProductResponseDTO> addToWishList(String username, WishListRequestDTO productRequestDTO) {
         SiteUser user = this.userService.get(username);
         Product product = this.productService.getProduct(productRequestDTO);
-        WishList wishList = this.wishListService.addToWishList(user, product);
+        this.wishListService.addToWishList(user, product);
+        List<WishList> wishList = this.wishListService.get(user);
         return DTOConverter.toProductResponseDTOList(wishList);
     }
 
@@ -134,7 +135,8 @@ public class MultiService {
     public List<ProductResponseDTO> deleteToWishList (String username, WishListRequestDTO productRequestDTO) {
         SiteUser user = this.userService.get(username);
         Product product = this.productService.getProduct(productRequestDTO);
-        WishList wishList = this.wishListService.deleteToWishList(user, product);
+        this.wishListService.deleteToWishList(user, product);
+        List<WishList> wishList = this.wishListService.get(user);
         return DTOConverter.toProductResponseDTOList(wishList);
     }
 }

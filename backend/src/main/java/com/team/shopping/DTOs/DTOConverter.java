@@ -3,6 +3,7 @@ package com.team.shopping.DTOs;
 import com.team.shopping.Domains.Product;
 import com.team.shopping.Domains.WishList;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,17 +29,18 @@ public class DTOConverter {
                 .build();
     }
 
-    public static List<ProductResponseDTO> toProductResponseDTOList(WishList wishList) {
+    public static List<ProductResponseDTO> toProductResponseDTOList(List<WishList> wishList) {
 
-        List<ProductResponseDTO> productResponseDTOList = null;         // productResponseDTOList 초기화
+        List<ProductResponseDTO> productResponseDTOList;
+        List<Product> productList = new ArrayList<>();
 
-        if (wishList.getProductList() != null) {
-            productResponseDTOList = wishList.getProductList().stream() // wishList 객체를 받아서 productList 를
-                                                                        // ProductResponseDTO 로 변환 선언
-                    .map(DTOConverter::toProductResponseDTO)          // DTOConverter 클래스의 toProductResponseDTO 메서드 형식으로
-                                                                        // 스트림을 사용하여 productList 의 product 객체 변환
-                    .collect(Collectors.toList());                      // List 형식으로 수집
+        for (WishList _wishList : wishList) {
+            Product product = _wishList.getProduct();
+            productList.add(product);
         }
+        productResponseDTOList = productList.stream()
+                .map(DTOConverter::toProductResponseDTO)
+                .collect(Collectors.toList());
 
         return productResponseDTOList;
     }
