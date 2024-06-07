@@ -19,8 +19,12 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody AuthRequestDTO requestDto) {
-        AuthResponseDTO responseDto = this.multiService.login(requestDto);
-        return ResponseEntity.status(HttpStatus.OK).body(responseDto);
+        try {
+            AuthResponseDTO responseDto = this.multiService.login(requestDto);
+            return ResponseEntity.status(HttpStatus.OK).body(responseDto);
+        } catch (IllegalArgumentException e) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
     }
 
 

@@ -63,8 +63,11 @@ public class MultiService {
     @Transactional
     public AuthResponseDTO login(AuthRequestDTO requestDto) {
         SiteUser user = this.userService.get(requestDto.getUsername());
+        if (user == null) {
+            throw new IllegalArgumentException("아이디가 일치하지 않습니다.");
+        }
         if (!this.userService.isMatch(requestDto.getPassword(), user.getPassword()))
-            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다. username = " + requestDto.getUsername());
+            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         String accessToken = this.jwtTokenProvider //
                 .generateAccessToken(new UsernamePasswordAuthenticationToken(new CustomUserDetails(user), user.getPassword()));
         String refreshToken = this.jwtTokenProvider //
