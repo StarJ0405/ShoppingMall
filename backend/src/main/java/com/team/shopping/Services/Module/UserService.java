@@ -2,6 +2,7 @@ package com.team.shopping.Services.Module;
 
 
 import com.team.shopping.DTOs.SignupRequestDTO;
+import com.team.shopping.Domains.Category;
 import com.team.shopping.Domains.SiteUser;
 import com.team.shopping.Enums.Gender;
 import com.team.shopping.Enums.UserRole;
@@ -37,6 +38,8 @@ public class UserService {
                 .build());                                  //
     }
 
+
+
     @Transactional
     public SiteUser get(String value) throws IllegalArgumentException{
         return this.userRepository.findById(value).orElseThrow(() -> new IllegalArgumentException("아이디가 일치하지 않습니다."));
@@ -65,4 +68,10 @@ public class UserService {
         return passwordEncoder.matches(password1, password2);
     }
 
-}
+
+    @Transactional
+    public void deleteUser(SiteUser user) {
+        userRepository.deleteByUsername(user.getUsername());
+        }
+    }
+
