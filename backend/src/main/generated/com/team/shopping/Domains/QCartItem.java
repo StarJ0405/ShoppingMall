@@ -22,13 +22,15 @@ public class QCartItem extends EntityPathBase<CartItem> {
 
     public static final QCartItem cartItem = new QCartItem("cartItem");
 
-    public final QCart cart;
+    public final NumberPath<Integer> count = createNumber("count", Integer.class);
+
+    public final DateTimePath<java.time.LocalDateTime> createDate = createDateTime("createDate", java.time.LocalDateTime.class);
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
-    public final ListPath<Options, QOptions> optionList = this.<Options, QOptions>createList("optionList", Options.class, QOptions.class, PathInits.DIRECT2);
+    public final QProduct product;
 
-    public final ListPath<Product, QProduct> productList = this.<Product, QProduct>createList("productList", Product.class, QProduct.class, PathInits.DIRECT2);
+    public final QSiteUser user;
 
     public QCartItem(String variable) {
         this(CartItem.class, forVariable(variable), INITS);
@@ -48,7 +50,8 @@ public class QCartItem extends EntityPathBase<CartItem> {
 
     public QCartItem(Class<? extends CartItem> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.cart = inits.isInitialized("cart") ? new QCart(forProperty("cart"), inits.get("cart")) : null;
+        this.product = inits.isInitialized("product") ? new QProduct(forProperty("product"), inits.get("product")) : null;
+        this.user = inits.isInitialized("user") ? new QSiteUser(forProperty("user"), inits.get("user")) : null;
     }
 
 }

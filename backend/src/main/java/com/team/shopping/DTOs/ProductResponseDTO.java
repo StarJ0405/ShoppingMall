@@ -1,5 +1,6 @@
 package com.team.shopping.DTOs;
 
+import com.team.shopping.Domains.Product;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -30,24 +31,21 @@ public class ProductResponseDTO {
     private LocalDateTime modifyDate;
 
     @Builder
-    public ProductResponseDTO(Long id, String authorUsername, String  categoryName, int price,
-                              String description, String detail, LocalDateTime dateLimit,
-                              int count, String title, String delivery, String address,
-                              String receipt, String a_s, String brand) {
-        this.id = id;
-        this.authorUsername = authorUsername;
-        this.categoryName = categoryName;
-        this.price = price;
-        this.description = description;
-        this.detail = detail;
-        this.dateLimit = dateLimit;
-        this.count = count;
-        this.title = title;
-        this.delivery = delivery;
-        this.address = address;
-        this.receipt = receipt;
-        this.a_s = a_s;
-        this.brand = brand;
+    public ProductResponseDTO(Product product) {
+        this.id = product.getId();
+        this.authorUsername = product.getAuthor().getUsername();
+        this.categoryName = product.getCategory().getName();
+        this.price = product.getPrice();
+        this.description = product.getDescription();
+        this.detail = product.getDetail();
+        this.dateLimit = product.getDateLimit();
+        this.count = product.getCount();
+        this.title = product.getTitle();
+        this.delivery = product.getTitle();
+        this.address = product.getAddress();
+        this.receipt = product.getReceipt();
+        this.a_s = product.getA_s();
+        this.brand = product.getBrand();
         this.createDate = null;
     }
 }

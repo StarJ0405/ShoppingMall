@@ -1,12 +1,12 @@
 package com.team.shopping.Domains;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -18,11 +18,20 @@ public class CartItem {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    private Cart cart;
+    private SiteUser user;
 
-    @OneToMany
-    private List<Product> productList = new ArrayList<>();
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Product product;
 
-    @OneToMany
-    private List<Options> optionList = new ArrayList<>();
+    private int count;
+
+    private LocalDateTime createDate;
+
+    @Builder
+    public CartItem (SiteUser user, Product product, int count, LocalDateTime createDate) {
+        this.user = user;
+        this.product = product;
+        this.count = count;
+        this.createDate = createDate;
+    }
 }
