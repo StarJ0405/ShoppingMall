@@ -1,7 +1,7 @@
 package com.team.shopping.DTOs;
 
 import com.team.shopping.Domains.Product;
-import com.team.shopping.Domains.WishList;
+import com.team.shopping.Domains.Wish;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,13 +13,13 @@ public class DTOConverter {
 
         return ProductResponseDTO.builder()
                 .id(product.getId())
-                .count(product.getCount())
+                .count(product.getRemain())
                 .a_s(product.getA_s())
                 .brand(product.getBrand())
                 .price(product.getPrice())
                 .categoryName(product.getCategory().getName())
                 .title(product.getTitle())
-                .authorUsername(product.getAuthor().getUsername())      // product --> productResponseDTO 로 변환
+                .authorUsername(product.getSeller().getUsername())      // product --> productResponseDTO 로 변환
                 .detail(product.getDetail())
                 .receipt(product.getReceipt())
                 .delivery(product.getDelivery())
@@ -29,12 +29,12 @@ public class DTOConverter {
                 .build();
     }
 
-    public static List<ProductResponseDTO> toProductResponseDTOList(List<WishList> wishList) {
+    public static List<ProductResponseDTO> toProductResponseDTOList(List<Wish> wishList) {
 
         List<ProductResponseDTO> productResponseDTOList;
         List<Product> productList = new ArrayList<>();
 
-        for (WishList _wishList : wishList) {
+        for (Wish _wishList : wishList) {
             Product product = _wishList.getProduct();
             productList.add(product);
         }

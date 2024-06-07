@@ -1,6 +1,6 @@
 package com.team.shopping.Controllers;
 
-import com.team.shopping.DTOs.WishListRequestDTO;
+import com.team.shopping.DTOs.ProductRequestDTO;
 import com.team.shopping.DTOs.ProductResponseDTO;
 import com.team.shopping.DTOs.SignupRequestDTO;
 import com.team.shopping.DTOs.UserResponseDTO;
@@ -62,7 +62,7 @@ public class UserController {
 
     @PostMapping("/wishList")
     public ResponseEntity<?> addWishList (@RequestHeader("Authorization") String accessToken,
-                                          @RequestBody WishListRequestDTO productRequestDTO) {
+                                          @RequestBody ProductRequestDTO productRequestDTO) {
         TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
         if (tokenRecord.isOK()) {
             String username = tokenRecord.username();
@@ -75,7 +75,7 @@ public class UserController {
 
     @DeleteMapping("/wishList")
     public ResponseEntity<?> deleteToWishList (@RequestHeader("Authorization") String accessToken,
-                                               @RequestBody WishListRequestDTO productRequestDTO) {
+                                               @RequestBody ProductRequestDTO productRequestDTO) {
         TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
         if (tokenRecord.isOK()) {
             String username = tokenRecord.username();

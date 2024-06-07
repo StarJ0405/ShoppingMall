@@ -7,8 +7,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Getter
@@ -21,14 +19,14 @@ public class Product {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    private SiteUser author;
+    private SiteUser seller;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Category category;
 
     private int price;
 
-    @Column(length = 200)
+    @Column(columnDefinition = "TEXT")
     private String description;
 
     @Column(columnDefinition = "TEXT")
@@ -36,7 +34,7 @@ public class Product {
 
     private LocalDateTime dateLimit;
 
-    private int count;
+    private int remain;
 
     @Column(length = 50)
     private String title;
@@ -61,14 +59,14 @@ public class Product {
     private LocalDateTime modifyDate;
 
     @Builder
-    public Product(SiteUser author, Category category, int price, String description, String detail, LocalDateTime dateLimit, int count, String title, String delivery, String address, String receipt, String a_s, String brand) {
-        this.author = author;
+    public Product(SiteUser seller, Category category, int price, String description, String detail, LocalDateTime dateLimit, int count, String title, String delivery, String address, String receipt, String a_s, String brand) {
+        this.seller = seller;
         this.category = category;
         this.price = price;
         this.description = description;
         this.detail = detail;
         this.dateLimit = dateLimit;
-        this.count = count;
+        this.remain = count;
         this.title = title;
         this.delivery = delivery;
         this.address = address;

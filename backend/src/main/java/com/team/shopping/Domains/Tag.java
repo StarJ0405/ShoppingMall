@@ -22,8 +22,8 @@ public class Tag {
     @Column(length = 50)
     private String name;
 
-    @OneToMany(mappedBy = "tag")
-    private List<ProductTag> productTagList = new ArrayList<>();
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Product product;
 
 
 

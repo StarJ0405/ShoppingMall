@@ -5,19 +5,18 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
-
 @Getter
 @Setter
 @Entity
 @NoArgsConstructor
-public class Cart {
+public class CartItemOptions {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    private SiteUser user;
+    private CartItem cart;
 
-    private LocalDateTime createDate;
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Options options;
 }

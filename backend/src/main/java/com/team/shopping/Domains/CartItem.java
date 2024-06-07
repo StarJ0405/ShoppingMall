@@ -5,8 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -18,11 +17,13 @@ public class CartItem {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    private Cart cart;
+    private SiteUser user;
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Product product;
 
-    @OneToMany
-    private List<Product> productList = new ArrayList<>();
+    private int count;
 
-    @OneToMany
-    private List<Options> optionList = new ArrayList<>();
+    private LocalDateTime createDate;
+    private LocalDateTime modifyDate;
+
 }

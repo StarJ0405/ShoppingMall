@@ -1,12 +1,9 @@
 package com.team.shopping.Controllers;
 
-import com.team.shopping.DTOs.ProductRequestDTO;
-import com.team.shopping.DTOs.ProductResponseDTO;
-import com.team.shopping.DTOs.UserResponseDTO;
+import com.team.shopping.DTOs.ProductCreateRequestDTO;
 import com.team.shopping.Records.TokenRecord;
 import com.team.shopping.Services.MultiService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,7 +15,7 @@ public class ProductController {
 
     @PostMapping
     public ResponseEntity<?> createProduct(@RequestHeader("Authorization") String accessToken,
-                                           @RequestBody ProductRequestDTO requestDTO) {
+                                           @RequestBody ProductCreateRequestDTO requestDTO) {
         TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
         if (tokenRecord.isOK()) {
             String username = tokenRecord.username();

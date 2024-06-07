@@ -85,7 +85,7 @@ public class MultiService {
     public SiteUser signup(SignupRequestDTO signupRequestDTO) throws DataDuplicateException {
         userService.check(signupRequestDTO);
         SiteUser user = userService.save(signupRequestDTO);
-        WishList wishList = WishList.builder()
+        Wish wishList = Wish.builder()
                 .user(user)
                 .build();
         this.wishListService.save(wishList);
@@ -116,25 +116,25 @@ public class MultiService {
     @Transactional
     public List<ProductResponseDTO> getWishList(String username) throws NoSuchElementException {
         SiteUser user = this.userService.get(username);
-        List<WishList> wishList = this.wishListService.get(user);
+        List<Wish> wishList = this.wishListService.get(user);
         return DTOConverter.toProductResponseDTOList(wishList);
     }
 
     @Transactional
-    public List<ProductResponseDTO> addToWishList(String username, WishListRequestDTO productRequestDTO) {
+    public List<ProductResponseDTO> addToWishList(String username, ProductRequestDTO productRequestDTO) {
         SiteUser user = this.userService.get(username);
         Product product = this.productService.getProduct(productRequestDTO);
         this.wishListService.addToWishList(user, product);
-        List<WishList> wishList = this.wishListService.get(user);
+        List<Wish> wishList = this.wishListService.get(user);
         return DTOConverter.toProductResponseDTOList(wishList);
     }
 
     @Transactional
-    public List<ProductResponseDTO> deleteToWishList(String username, WishListRequestDTO productRequestDTO) {
+    public List<ProductResponseDTO> deleteToWishList(String username, ProductRequestDTO productRequestDTO) {
         SiteUser user = this.userService.get(username);
         Product product = this.productService.getProduct(productRequestDTO);
         this.wishListService.deleteToWishList(user, product);
-        List<WishList> wishList = this.wishListService.get(user);
+        List<Wish> wishList = this.wishListService.get(user);
         return DTOConverter.toProductResponseDTOList(wishList);
     }
 
@@ -142,7 +142,7 @@ public class MultiService {
      * Product
      */
     @Transactional
-    public void saveProduct(ProductRequestDTO requestDTO, String username) {
+    public void saveProduct(ProductCreateRequestDTO requestDTO, String username) {
         SiteUser user = this.userService.get(username);
         if (user == null) {
             throw new NoSuchElementException("해당 유저가 존재하지 않습니다.");
