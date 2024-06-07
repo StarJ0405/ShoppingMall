@@ -11,3 +11,7 @@ export function KeyDownCheck({preKey, setPreKey, e, pre,next}:{preKey:string,set
     else if(preKey!=null)
         setPreKey('');
 }
+
+export function PhoneString(phone:string){
+    return phone?.slice(0,3)+"-"+phone?.slice(3,7)+"-"+phone?.slice(7);
+}

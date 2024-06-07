@@ -2,7 +2,6 @@ package com.team.shopping.Services.Module;
 
 
 import com.team.shopping.DTOs.SignupRequestDTO;
-import com.team.shopping.Domains.Category;
 import com.team.shopping.Domains.SiteUser;
 import com.team.shopping.Enums.Gender;
 import com.team.shopping.Enums.UserRole;
@@ -13,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.util.Optional;
 
 @Service
@@ -50,8 +48,7 @@ public class UserService {
     }
 
     @Transactional
-    public void delete(String value) {
-        SiteUser user = this.userRepository.findById(value).orElseThrow(() -> new IllegalArgumentException("아이디가 일치하지 않습니다."));
+    public void delete(SiteUser user) {
         this.userRepository.delete(user);
     }
 

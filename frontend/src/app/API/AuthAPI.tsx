@@ -47,6 +47,6 @@ interface SignupProps{
     gender:number;
 }
 export const SignUp = async (data:SignupProps) => {
-    const response = await AuthApi.post(`/api/user/signup`, data);
+    const response = await AuthApi.post(`/api/user`, data);
     return response.data;
 }
