@@ -23,5 +23,4 @@ public class Options {
 
     @ManyToOne(fetch = FetchType.LAZY)
     private OptionList optionList;
-
 }

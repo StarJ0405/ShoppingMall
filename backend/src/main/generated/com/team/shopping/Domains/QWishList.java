@@ -14,7 +14,7 @@ import com.querydsl.core.types.dsl.PathInits;
  * QWishList is a Querydsl query type for WishList
  */
 @Generated("com.querydsl.codegen.DefaultEntitySerializer")
-public class QWishList extends EntityPathBase<WishList> {
+public class QWishList extends EntityPathBase<Wish> {
 
     private static final long serialVersionUID = -2093119866L;
 
@@ -29,10 +29,10 @@ public class QWishList extends EntityPathBase<WishList> {
     public final QSiteUser user;
 
     public QWishList(String variable) {
-        this(WishList.class, forVariable(variable), INITS);
+        this(Wish.class, forVariable(variable), INITS);
     }
 
-    public QWishList(Path<? extends WishList> path) {
+    public QWishList(Path<? extends Wish> path) {
         this(path.getType(), path.getMetadata(), PathInits.getFor(path.getMetadata(), INITS));
     }
 
@@ -41,10 +41,10 @@ public class QWishList extends EntityPathBase<WishList> {
     }
 
     public QWishList(PathMetadata metadata, PathInits inits) {
-        this(WishList.class, metadata, inits);
+        this(Wish.class, metadata, inits);
     }
 
-    public QWishList(Class<? extends WishList> type, PathMetadata metadata, PathInits inits) {
+    public QWishList(Class<? extends Wish> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.product = inits.isInitialized("product") ? new QProduct(forProperty("product"), inits.get("product")) : null;
         this.user = inits.isInitialized("user") ? new QSiteUser(forProperty("user"), inits.get("user")) : null;

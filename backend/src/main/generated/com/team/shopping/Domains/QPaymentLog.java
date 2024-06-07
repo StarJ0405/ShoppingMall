@@ -11,16 +11,16 @@ import com.querydsl.core.types.dsl.PathInits;
 
 
 /**
- * QBuyLog is a Querydsl query type for BuyLog
+ * QPaymentLog is a Querydsl query type for PaymentLog
  */
 @Generated("com.querydsl.codegen.DefaultEntitySerializer")
-public class QBuyLog extends EntityPathBase<BuyLog> {
+public class QPaymentLog extends EntityPathBase<PaymentLog> {
 
-    private static final long serialVersionUID = 149743551L;
+    private static final long serialVersionUID = -58315841L;
 
     private static final PathInits INITS = PathInits.DIRECT2;
 
-    public static final QBuyLog buyLog = new QBuyLog("buyLog");
+    public static final QPaymentLog paymentLog = new QPaymentLog("paymentLog");
 
     public final DateTimePath<java.time.LocalDateTime> createDate = createDateTime("createDate", java.time.LocalDateTime.class);
 
@@ -30,23 +30,23 @@ public class QBuyLog extends EntityPathBase<BuyLog> {
 
     public final QSiteUser order;
 
-    public QBuyLog(String variable) {
-        this(BuyLog.class, forVariable(variable), INITS);
+    public QPaymentLog(String variable) {
+        this(PaymentLog.class, forVariable(variable), INITS);
     }
 
-    public QBuyLog(Path<? extends BuyLog> path) {
+    public QPaymentLog(Path<? extends PaymentLog> path) {
         this(path.getType(), path.getMetadata(), PathInits.getFor(path.getMetadata(), INITS));
     }
 
-    public QBuyLog(PathMetadata metadata) {
+    public QPaymentLog(PathMetadata metadata) {
         this(metadata, PathInits.getFor(metadata, INITS));
     }
 
-    public QBuyLog(PathMetadata metadata, PathInits inits) {
-        this(BuyLog.class, metadata, inits);
+    public QPaymentLog(PathMetadata metadata, PathInits inits) {
+        this(PaymentLog.class, metadata, inits);
     }
 
-    public QBuyLog(Class<? extends BuyLog> type, PathMetadata metadata, PathInits inits) {
+    public QPaymentLog(Class<? extends PaymentLog> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.order = inits.isInitialized("order") ? new QSiteUser(forProperty("order"), inits.get("order")) : null;
     }

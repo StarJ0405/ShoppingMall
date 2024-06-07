@@ -15,6 +15,7 @@ public class OptionList {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(length = 50)
     private String name;
 
     @ManyToOne(fetch = FetchType.LAZY)

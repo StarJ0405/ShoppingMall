@@ -17,9 +17,9 @@ public class EventProduct {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToMany
-    private List<Event> event = new ArrayList<>();
+    @ManyToOne
+    private Event event;
 
-    @OneToMany
-    private List<Product> product = new ArrayList<>();
+    @ManyToOne
+    private Product product;
 }
