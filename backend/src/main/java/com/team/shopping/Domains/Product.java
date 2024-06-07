@@ -1,6 +1,7 @@
 package com.team.shopping.Domains;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -59,6 +60,21 @@ public class Product {
 
     private LocalDateTime modifyDate;
 
-    @OneToMany(mappedBy = "product")
-    private List<ProductTag> productTagList = new ArrayList<>();
+    @Builder
+    public Product(SiteUser author, Category category, int price, String description, String detail, LocalDateTime dateLimit, int count, String title, String delivery, String address, String receipt, String a_s, String brand) {
+        this.author = author;
+        this.category = category;
+        this.price = price;
+        this.description = description;
+        this.detail = detail;
+        this.dateLimit = dateLimit;
+        this.count = count;
+        this.title = title;
+        this.delivery = delivery;
+        this.address = address;
+        this.receipt = receipt;
+        this.a_s = a_s;
+        this.brand = brand;
+        this.createDate = LocalDateTime.now();
+    }
 }
