@@ -2,6 +2,7 @@ package com.team.shopping.Services.Module;
 
 
 import com.team.shopping.DTOs.SignupRequestDTO;
+import com.team.shopping.Domains.Category;
 import com.team.shopping.Domains.SiteUser;
 import com.team.shopping.Enums.Gender;
 import com.team.shopping.Enums.UserRole;
@@ -27,6 +28,8 @@ public class UserService {
                 .username(signupRequestDTO.getUsername()).password(passwordEncoder.encode(signupRequestDTO.getPassword())).nickname(signupRequestDTO.getNickname()).email(signupRequestDTO.getEmail()).gender(Gender.values()[signupRequestDTO.getGender()]).role(UserRole.values()[signupRequestDTO.getRole()]).birthday(signupRequestDTO.getBirthday()).phoneNumber(signupRequestDTO.getPhoneNumber()).build());                                  //
     }
 
+
+
     @Transactional
     public SiteUser get(String value) throws IllegalArgumentException{
         return this.userRepository.findById(value).orElseThrow(() -> new IllegalArgumentException("해당 유저를 찾을 수 없습니다. user_id = " + value));
@@ -37,8 +40,8 @@ public class UserService {
     }
 
     @Transactional
-    public void delete(String value) {
-        SiteUser user = this.userRepository.findById(value).orElseThrow(() -> new IllegalArgumentException("해당 유저를 찾을 수 없습니다. user_id = " + value));
+    public void delete(SiteUser siteUser) {
+        SiteUser user = this.userRepository.findById(siteUser.getUsername()).orElseThrow(() -> new IllegalArgumentException("해당 유저를 찾을 수 없습니다. user_id = " + siteUser.getUsername()));
         this.userRepository.delete(user);
     }
 
@@ -55,4 +58,10 @@ public class UserService {
         return passwordEncoder.matches(password1, password2);
     }
 
-}
+
+    @Transactional
+    public void deleteUser(SiteUser user) {
+        userRepository.deleteByUsername(user.getUsername());
+        }
+    }
+

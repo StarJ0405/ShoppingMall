@@ -7,4 +7,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface UserRepository extends JpaRepository<SiteUser, String>, UserRepositoryCustom {
+    void deleteByUsername(String username);
 }

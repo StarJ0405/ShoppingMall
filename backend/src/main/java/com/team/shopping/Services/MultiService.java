@@ -3,14 +3,18 @@ package com.team.shopping.Services;
 
 import com.team.shopping.DTOs.AuthRequestDTO;
 import com.team.shopping.DTOs.AuthResponseDTO;
+import com.team.shopping.DTOs.CategoryRequestDTO;
 import com.team.shopping.DTOs.SignupRequestDTO;
 import com.team.shopping.Domains.Auth;
+import com.team.shopping.Domains.Category;
 import com.team.shopping.Domains.SiteUser;
+import com.team.shopping.Enums.UserRole;
 import com.team.shopping.Exceptions.DataDuplicateException;
 import com.team.shopping.Records.TokenRecord;
 import com.team.shopping.Securities.CustomUserDetails;
 import com.team.shopping.Securities.JWT.JwtTokenProvider;
 import com.team.shopping.Services.Module.AuthService;
+import com.team.shopping.Services.Module.CategoryService;
 import com.team.shopping.Services.Module.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -18,13 +22,17 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 
+import javax.xml.catalog.Catalog;
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class MultiService {
     private final AuthService authService;
     private final UserService userService;
-    //
+    private final CategoryService categoryService;
     private final JwtTokenProvider jwtTokenProvider;
+
 
     /**
      * Auth
@@ -70,12 +78,73 @@ public class MultiService {
         }
         return new AuthResponseDTO(authService.save(user, accessToken, refreshToken));
     }
+
     /**
      * User
      */
     @Transactional
-    public SiteUser signup(SignupRequestDTO signupRequestDTO) throws DataDuplicateException{
+    public SiteUser signup(SignupRequestDTO signupRequestDTO) throws DataDuplicateException {
         userService.check(signupRequestDTO);
         return userService.save(signupRequestDTO);
     }
+    @Transactional
+    public void deleteUser(String username, String name) {
+        SiteUser targetUser = userService.get(username);
+        SiteUser siteUser = userService.get(name);
+        if (siteUser.getRole().equals(UserRole.ADMIN)) {
+            userService.delete(targetUser);
+        } else {
+            throw new IllegalArgumentException("ADMIN 권한이 아닙니다.");
+        }
+    }
+
+    /**
+     * Category
+     */
+    @Transactional
+    public void saveCategory(String username, CategoryRequestDTO requestDto) throws DataDuplicateException{
+        SiteUser siteUser = userService.get(username);
+        if (siteUser.getRole().equals(UserRole.ADMIN)){
+            this.categoryService.check(requestDto);
+            this.categoryService.save(requestDto);
+        }else {
+            throw new IllegalArgumentException("ADMIN 권한이 아닙니다.");
+        }
+
+    }
+
+    /**
+     * 테스트용
+     */
+
+    @Transactional
+    public void updateCategory(CategoryRequestDTO requestDto) {
+        Optional<Category> _category = categoryService.get(requestDto.getId());
+        if (_category.isPresent()) {
+            categoryService.updateCheck(requestDto);
+            categoryService.update(_category.get(), requestDto.getNewName());
+        } else throw new IllegalArgumentException("해당 ID를 가진 카테고리가 존재하지 않습니다.");
+    }
+
+    @Transactional
+    public void deleteCategory(Long id) {
+        Optional<Category> _category = categoryService.get(id);
+        if (_category.isPresent())
+            categoryService.deleteCategory(_category.get());
+        else throw new IllegalArgumentException("해당 ID를 가진 카테고리가 존재하지 않습니다.");
+    }
+
+
+//    @Transactional
+//    public void updateCategory(String username, CategoryRequestDTO requestDto) throws DataDuplicateException{
+//        SiteUser siteUser = userService.get(username);
+//        if (siteUser.getRole().equals(UserRole.ADMIN)){
+//            categoryService.updateCheck(requestDto);
+//            categoryService.update(requestDto);
+//        }else {
+//            throw new IllegalArgumentException("ADMIN 권한이 아닙니다.");
+//        }
+//    }
+
+
 }

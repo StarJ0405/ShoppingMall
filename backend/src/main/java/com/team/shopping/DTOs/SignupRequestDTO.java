@@ -30,5 +30,4 @@ public class SignupRequestDTO {
 
     private int gender;
 
-
 }
