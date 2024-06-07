@@ -30,7 +30,7 @@ public class CartResponseDTO {
 
     @Builder
     public CartResponseDTO (CartItem cartItem, List<OptionResponseDTO> optionResponseDTOList) {
-        this.authorName = cartItem.getProduct().getAuthor().getName();
+        this.authorName = cartItem.getProduct().getSeller().getName();
         this.productId = cartItem.getProduct().getId();
         this.productTitle = cartItem.getProduct().getTitle();
         this.count = cartItem.getCount();

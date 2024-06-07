@@ -33,13 +33,13 @@ public class ProductResponseDTO {
     @Builder
     public ProductResponseDTO(Product product) {
         this.id = product.getId();
-        this.authorUsername = product.getAuthor().getUsername();
+        this.authorUsername = product.getSeller().getUsername();
         this.categoryName = product.getCategory().getName();
         this.price = product.getPrice();
         this.description = product.getDescription();
         this.detail = product.getDetail();
         this.dateLimit = product.getDateLimit();
-        this.count = product.getCount();
+        this.count = product.getRemain();
         this.title = product.getTitle();
         this.delivery = product.getTitle();
         this.address = product.getAddress();

@@ -13,7 +13,7 @@ public class DTOConverter {
 
     public static List<ProductResponseDTO> toProductResponseDTOList(List<Wish> wishList) {
         return wishList.stream()
-                .map(WishList::getProduct)
+                .map(Wish::getProduct)
                 .map(DTOConverter::toProductResponseDTO)
                 .collect(Collectors.toList());
     }
