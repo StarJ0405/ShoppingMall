@@ -2,6 +2,7 @@ package com.team.shopping.Domains;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
@@ -9,7 +10,8 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Entity
-public class BuyLog {
+@NoArgsConstructor
+public class PaymentLog {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,6 +22,6 @@ public class BuyLog {
 
     private LocalDateTime createDate;
 
-    @Column(length = 100)
+    @Column(columnDefinition = "TEXT")
     private String info;
 }

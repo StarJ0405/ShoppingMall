@@ -1,30 +1,32 @@
 package com.team.shopping.Domains;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Getter
 @Setter
+@NoArgsConstructor
 public class Product {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    private SiteUser author;
+    private SiteUser seller;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Category category;
 
     private int price;
 
-    @Column(length = 200)
+    @Column(columnDefinition = "TEXT")
     private String description;
 
     @Column(columnDefinition = "TEXT")
@@ -32,7 +34,7 @@ public class Product {
 
     private LocalDateTime dateLimit;
 
-    private int count;
+    private int remain;
 
     @Column(length = 50)
     private String title;
@@ -56,6 +58,21 @@ public class Product {
 
     private LocalDateTime modifyDate;
 
-    @OneToMany(mappedBy = "product")
-    private List<ProductTag> productTagList = new ArrayList<>();
+    @Builder
+    public Product(SiteUser seller, Category category, int price, String description, String detail, LocalDateTime dateLimit, int count, String title, String delivery, String address, String receipt, String a_s, String brand) {
+        this.seller = seller;
+        this.category = category;
+        this.price = price;
+        this.description = description;
+        this.detail = detail;
+        this.dateLimit = dateLimit;
+        this.remain = count;
+        this.title = title;
+        this.delivery = delivery;
+        this.address = address;
+        this.receipt = receipt;
+        this.a_s = a_s;
+        this.brand = brand;
+        this.createDate = LocalDateTime.now();
+    }
 }

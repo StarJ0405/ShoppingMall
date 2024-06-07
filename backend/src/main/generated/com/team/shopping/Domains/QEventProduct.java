@@ -18,24 +18,36 @@ public class QEventProduct extends EntityPathBase<EventProduct> {
 
     private static final long serialVersionUID = 906482966L;
 
+    private static final PathInits INITS = PathInits.DIRECT2;
+
     public static final QEventProduct eventProduct = new QEventProduct("eventProduct");
 
-    public final ListPath<Event, QEvent> event = this.<Event, QEvent>createList("event", Event.class, QEvent.class, PathInits.DIRECT2);
+    public final QEvent event;
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
-    public final ListPath<Product, QProduct> product = this.<Product, QProduct>createList("product", Product.class, QProduct.class, PathInits.DIRECT2);
+    public final QProduct product;
 
     public QEventProduct(String variable) {
-        super(EventProduct.class, forVariable(variable));
+        this(EventProduct.class, forVariable(variable), INITS);
     }
 
     public QEventProduct(Path<? extends EventProduct> path) {
-        super(path.getType(), path.getMetadata());
+        this(path.getType(), path.getMetadata(), PathInits.getFor(path.getMetadata(), INITS));
     }
 
     public QEventProduct(PathMetadata metadata) {
-        super(EventProduct.class, metadata);
+        this(metadata, PathInits.getFor(metadata, INITS));
+    }
+
+    public QEventProduct(PathMetadata metadata, PathInits inits) {
+        this(EventProduct.class, metadata, inits);
+    }
+
+    public QEventProduct(Class<? extends EventProduct> type, PathMetadata metadata, PathInits inits) {
+        super(type, metadata, inits);
+        this.event = inits.isInitialized("event") ? new QEvent(forProperty("event"), inits.get("event")) : null;
+        this.product = inits.isInitialized("product") ? new QProduct(forProperty("product"), inits.get("product")) : null;
     }
 
 }

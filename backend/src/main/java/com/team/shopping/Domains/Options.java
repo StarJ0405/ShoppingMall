@@ -2,11 +2,13 @@ package com.team.shopping.Domains;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
 @Entity
+@NoArgsConstructor
 public class Options {
 
     @Id
@@ -21,5 +23,4 @@ public class Options {
 
     @ManyToOne(fetch = FetchType.LAZY)
     private OptionList optionList;
-
 }

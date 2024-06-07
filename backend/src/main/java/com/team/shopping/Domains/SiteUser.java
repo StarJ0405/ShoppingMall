@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -20,9 +21,13 @@ public class SiteUser {
     @Column(length = 24, unique = true)
     private String username;
 
+    @Column(length = 24)
+    private String name;
+
+    @Column(columnDefinition = "TEXT")
     private String password;
 
-    @Column(length = 50 , unique = true)
+    @Column(columnDefinition = "TEXT", unique = true)
     private String email;
 
     @Column(length = 24, unique = true)
@@ -32,8 +37,9 @@ public class SiteUser {
     private String phoneNumber;
 
     private UserRole role;
+
     @Column(length = 10)
-    private String birthday;
+    private LocalDate birthday;
 
     private Gender gender;
 
@@ -43,14 +49,13 @@ public class SiteUser {
 
     private LocalDateTime modifyDate;
 
-    private String address;
-
     @OneToOne(mappedBy = "user", cascade = CascadeType.REMOVE)
     private Auth auth;
 
     @Builder
-    public SiteUser(String username, String password, String nickname, String email, UserRole role, Gender gender, String birthday, String phoneNumber){
+    public SiteUser(String username, String name, String password, String nickname, String email, UserRole role, Gender gender, LocalDate birthday, String phoneNumber){
         this.username = username;
+        this.name = name;
         this.password = password;
         this.nickname = nickname;
         this.email = email;

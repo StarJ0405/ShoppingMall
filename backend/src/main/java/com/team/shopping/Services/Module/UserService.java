@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 @Service
@@ -25,14 +26,23 @@ public class UserService {
     public SiteUser save(SignupRequestDTO signupRequestDTO) {
         return userRepository.save(SiteUser                 //
                 .builder()                                  //
-                .username(signupRequestDTO.getUsername()).password(passwordEncoder.encode(signupRequestDTO.getPassword())).nickname(signupRequestDTO.getNickname()).email(signupRequestDTO.getEmail()).gender(Gender.values()[signupRequestDTO.getGender()]).role(UserRole.values()[signupRequestDTO.getRole()]).birthday(signupRequestDTO.getBirthday()).phoneNumber(signupRequestDTO.getPhoneNumber()).build());                                  //
+                .username(signupRequestDTO.getUsername())
+                .name(signupRequestDTO.getName())
+                .password(passwordEncoder.encode(signupRequestDTO.getPassword()))
+                .nickname(signupRequestDTO.getNickname())
+                .email(signupRequestDTO.getEmail())
+                .gender(Gender.values()[signupRequestDTO
+                .getGender()]).role(UserRole.values()[signupRequestDTO.getRole()])
+                .birthday(signupRequestDTO.getBirthday())
+                .phoneNumber(signupRequestDTO.getPhoneNumber())
+                .build());                                  //
     }
 
 
 
     @Transactional
     public SiteUser get(String value) throws IllegalArgumentException{
-        return this.userRepository.findById(value).orElseThrow(() -> new IllegalArgumentException("해당 유저를 찾을 수 없습니다. user_id = " + value));
+        return this.userRepository.findById(value).orElseThrow(() -> new IllegalArgumentException("아이디가 일치하지 않습니다."));
     }
 
     public Optional<SiteUser> getOptional(String value) {
@@ -40,8 +50,8 @@ public class UserService {
     }
 
     @Transactional
-    public void delete(SiteUser siteUser) {
-        SiteUser user = this.userRepository.findById(siteUser.getUsername()).orElseThrow(() -> new IllegalArgumentException("해당 유저를 찾을 수 없습니다. user_id = " + siteUser.getUsername()));
+    public void delete(String value) {
+        SiteUser user = this.userRepository.findById(value).orElseThrow(() -> new IllegalArgumentException("아이디가 일치하지 않습니다."));
         this.userRepository.delete(user);
     }
 

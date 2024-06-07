@@ -2,22 +2,21 @@ package com.team.shopping.Domains;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Getter
 @Setter
 @Entity
-public class CartItemDetail {
+@NoArgsConstructor
+public class CartItemOptions {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    private CartItem cartItem;
+    private CartItem cart;
 
-    @OneToMany
-    private List<Options> optionList = new ArrayList<>();
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Options options;
 }

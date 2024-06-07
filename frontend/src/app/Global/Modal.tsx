@@ -1,18 +1,18 @@
 "use client";
 import React, { ReactNode, useEffect } from "react";
 import ReactDOM from "react-dom";
-import styles from "./Modal.module.scss";
 
 interface ModalProps {
   open: boolean;
   onClose: () => void;
   children: ReactNode;
+  outlineClassName?:string;
   className: string;
   escClose: boolean;
   outlineClose: boolean;
 }
 
-const Modal = ({ open, onClose, children, className, escClose, outlineClose }: ModalProps) => {
+const Modal = ({ open, onClose, children, outlineClassName, className, escClose, outlineClose }: ModalProps) => {
       useEffect(() => {
         const onWindowKeydown = (e:any) => {
           if(e.key =='Escape')
@@ -26,8 +26,8 @@ const Modal = ({ open, onClose, children, className, escClose, outlineClose }: M
     if (!open) return null;
     const portal = ReactDOM.createPortal(
         <>
-          <div className='fixed top-0 left-0 right-0 bottom-0 bg-black bg-opacity-30' onClick={() => {if(outlineClose) onClose();}} />
-          <div className={'fixed top-[50%] left-[50%] translate-x-1/2 translate-y-1/2 p-0 bg-white z-[5] rounded-2xl'+ className}>
+          <div className={outlineClassName+' fixed top-0 left-0 right-0 bottom-0 bg-black bg-opacity-30'} onClick={() => {if(outlineClose) onClose();}} />
+          <div className={className+' fixed top-[50%] left-[50%] translate-x-1/2 translate-y-1/2 p-0 bg-white z-[5] ' }>
             {children}
           </div>
         </>,
