@@ -2,10 +2,8 @@ package com.team.shopping.Services;
 
 
 import com.team.shopping.DTOs.*;
-import com.team.shopping.Domains.Auth;
-import com.team.shopping.Domains.Product;
-import com.team.shopping.Domains.SiteUser;
-import com.team.shopping.Domains.WishList;
+import com.team.shopping.Domains.*;
+import com.team.shopping.Enums.UserRole;
 import com.team.shopping.Exceptions.DataDuplicateException;
 import com.team.shopping.Records.TokenRecord;
 import com.team.shopping.Securities.CustomUserDetails;
@@ -84,7 +82,7 @@ public class MultiService {
      */
 
     @Transactional
-    public SiteUser signup(SignupRequestDTO signupRequestDTO) throws DataDuplicateException{
+    public SiteUser signup(SignupRequestDTO signupRequestDTO) throws DataDuplicateException {
         userService.check(signupRequestDTO);
         SiteUser user = userService.save(signupRequestDTO);
         WishList wishList = WishList.builder()
@@ -95,7 +93,7 @@ public class MultiService {
     }
 
     @Transactional
-    public UserResponseDTO getProfile (String username) {
+    public UserResponseDTO getProfile(String username) {
         SiteUser siteUser = this.userService.get(username);
         return UserResponseDTO.builder()
                 .username(siteUser.getUsername())
@@ -112,11 +110,11 @@ public class MultiService {
     }
 
     /**
-    * WishList
-    * */
+     * WishList
+     */
 
     @Transactional
-    public List<ProductResponseDTO> getWishList (String username) throws NoSuchElementException {
+    public List<ProductResponseDTO> getWishList(String username) throws NoSuchElementException {
         SiteUser user = this.userService.get(username);
         WishList wishList = this.wishListService.get(user);
         return DTOConverter.toProductResponseDTOList(wishList);
@@ -131,10 +129,25 @@ public class MultiService {
     }
 
     @Transactional
-    public List<ProductResponseDTO> deleteToWishList (String username, WishListRequestDTO productRequestDTO) {
+    public List<ProductResponseDTO> deleteToWishList(String username, WishListRequestDTO productRequestDTO) {
         SiteUser user = this.userService.get(username);
         Product product = this.productService.getProduct(productRequestDTO);
         WishList wishList = this.wishListService.deleteToWishList(user, product);
         return DTOConverter.toProductResponseDTOList(wishList);
+    }
+
+    /**
+     * Product
+     */
+    @Transactional
+    public void saveProduct(ProductRequestDTO requestDTO, String username) {
+        SiteUser user = this.userService.get(username);
+        if (user == null) {
+            throw new NoSuchElementException("해당 유저가 존재하지 않습니다.");
+        }
+        if (user.getRole() == UserRole.USER) {
+            throw new IllegalArgumentException("user 권한은 상품을 저장할 수 없습니다.");
+        }
+        this.productService.save(requestDTO, user);
     }
 }

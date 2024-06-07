@@ -50,8 +50,6 @@ public class QProduct extends EntityPathBase<Product> {
 
     public final NumberPath<Integer> price = createNumber("price", Integer.class);
 
-    public final ListPath<ProductTag, QProductTag> productTagList = this.<ProductTag, QProductTag>createList("productTagList", ProductTag.class, QProductTag.class, PathInits.DIRECT2);
-
     public final StringPath receipt = createString("receipt");
 
     public final StringPath title = createString("title");
