@@ -1,17 +1,17 @@
 "use client"
 
-import { useEffect, useState } from "react";
-import Side from "./Side";
-import DropDown, { Direcion } from "./DropDown";
+import { useState } from "react";
+import Side from "../Side";
+import DropDown, { Direcion } from "../DropDown";
 
 
-interface userInterface{
+interface pageInterface{
   children:React.ReactNode,
   className?:string
   user:any
 }
 
-export default function Main(props: Readonly<userInterface>) {
+export default function Main(props: Readonly<pageInterface>) {
   const className = props.className;
   const user = props.user;
 

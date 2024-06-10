@@ -124,9 +124,9 @@ public class MultiService {
     }
 
     @Transactional
-    public List<ProductResponseDTO> deleteToWishList(String username, ProductRequestDTO productRequestDTO) {
+    public List<ProductResponseDTO> deleteToWishList(String username, Long productId) {
         SiteUser user = this.userService.get(username);
-        Product product = this.productService.getProduct(productRequestDTO.getProductId());
+        Product product = this.productService.getProduct(productId);
         this.wishListService.deleteToWishList(user, product);
         List<Wish> wishList = this.wishListService.get(user);
         return DTOConverter.toProductResponseDTOList(wishList);
