@@ -42,7 +42,7 @@ const refreshAccessToken = async () => {
     UserApi.defaults.headers.common['Authorization'] = `${TOKEN_TYPE} ${ACCESS_TOKEN}`;
 }
 
-export const fetchUser = async () => {
+export const getUser = async () => {
     const response = await UserApi.get(`/api/user`);
     return response.data;
 }
@@ -53,4 +53,12 @@ export const updateUser = async (data:any) => {
 }
 export const deleteUser = async () => {
     await UserApi.delete(`/api/user`);
+}
+export const getWishList= async ()=>{
+    const response = await UserApi.get(`/api/user/wishList` );
+    return response.data;
+}
+export const deleteWishList= async (productId:number)=>{
+    const response = await UserApi.delete(`/api/user/wishList`,{headers: {'productId':productId}});
+    return response.data;
 }

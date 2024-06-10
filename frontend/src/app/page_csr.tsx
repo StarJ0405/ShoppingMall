@@ -1,7 +1,7 @@
 "use client"
 import { useEffect, useState } from "react";
-import Main from "./Global/main";
-import { fetchUser } from "./API/UserAPI";
+import Main from "./Global/Layout/MainLayout";
+import { getUser } from "./API/UserAPI";
 
 interface pageProps{
 
@@ -11,7 +11,7 @@ export default function Page(props : pageProps){
     const ACCESS_TOKEN = typeof window === 'undefined' ? null :  localStorage.getItem('accessToken');
     useEffect(()=>{
         if(ACCESS_TOKEN)
-            fetchUser()
+            getUser()
                 .then(r=>{
                     setUser(r);
                 })
