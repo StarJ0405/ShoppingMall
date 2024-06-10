@@ -3,20 +3,29 @@ package com.team.shopping.Services;
 
 import com.team.shopping.DTOs.*;
 import com.team.shopping.Domains.*;
+import com.team.shopping.Enums.ImageKey;
 import com.team.shopping.Enums.UserRole;
 import com.team.shopping.Exceptions.DataDuplicateException;
 import com.team.shopping.Records.TokenRecord;
 import com.team.shopping.Securities.CustomUserDetails;
 import com.team.shopping.Securities.JWT.JwtTokenProvider;
 import com.team.shopping.Services.Module.*;
+import com.team.shopping.ShoppingApplication;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.awt.*;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.Optional;
 
@@ -32,6 +41,7 @@ public class MultiService {
     private final CartItemDetailService cartItemDetailService;
     private final OptionsService optionsService;
     private final JwtTokenProvider jwtTokenProvider;
+    private final FileSystemService fileSystemService;
 
 
     /**
@@ -95,16 +105,24 @@ public class MultiService {
     }
 
     @Transactional
+    public void deleteUser(String username, String name) {
+        SiteUser targetUser = userService.get(username);
+        SiteUser siteUser = userService.get(name);
+        if (siteUser.getRole().equals(UserRole.ADMIN)) {
+            userService.delete(targetUser);
+        } else {
+            throw new IllegalArgumentException("ADMIN 권한이 아닙니다.");
+        }
+    }
+
+    @Transactional
     public UserResponseDTO getProfile(String username) {
         SiteUser siteUser = this.userService.get(username);
         return UserResponseDTO.builder().username(siteUser.getUsername()).gender(siteUser.getGender().toString()).email(siteUser.getEmail()).point(siteUser.getPoint()).phoneNumber(siteUser.getPhoneNumber()).nickname(siteUser.getNickname()).birthday(siteUser.getBirthday()).createDate(siteUser.getCreateDate()).modifyDate(siteUser.getModifyDate()).name(siteUser.getName()).build();
     }
 
     /**
-     * 
-     
-     
-     List
+     * List
      */
 
     @Transactional
@@ -133,9 +151,8 @@ public class MultiService {
     }
 
     /**
-
      * cart
-     * */
+     */
 
     @Transactional
     public List<CartResponseDTO> getCart(String username) {
@@ -172,7 +189,7 @@ public class MultiService {
                 .collect(Collectors.toList());
     }
 
-    /*
+    /**
      * Product
      */
     @Transactional
@@ -186,16 +203,24 @@ public class MultiService {
         }
         this.productService.save(requestDTO, user);
     }
-
+    /**
+     * Image
+     */
     @Transactional
-    public void deleteUser(String username, String name) {
-        SiteUser targetUser = userService.get(username);
-        SiteUser siteUser = userService.get(name);
-        if (siteUser.getRole().equals(UserRole.ADMIN)) {
-            userService.delete(targetUser);
-        } else {
-            throw new IllegalArgumentException("ADMIN 권한이 아닙니다.");
-        }
+    public ImageResponseDTO tempUpload(ImageRequestDTO requestDTO, String username) {
+        if (!requestDTO.getFile().isEmpty())
+            try {
+                String path = ShoppingApplication.getOsType().getLoc();
+                String fileLoc = "/users" + "_" + username + "/temp." + requestDTO.getFile().getContentType().split("/")[1];
+                File file = new File(path + fileLoc);
+                if (!file.getParentFile().exists())
+                    file.getParentFile().mkdirs();
+                requestDTO.getFile().transferTo(file);
+                return new ImageResponseDTO(fileLoc);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        return null;
     }
 
     /**
@@ -213,9 +238,6 @@ public class MultiService {
 
     }
 
-    /**
-     * 테스트용
-     */
     @Transactional
     public void deleteCategory(String username, Long id) {
         SiteUser siteUser = userService.get(username);

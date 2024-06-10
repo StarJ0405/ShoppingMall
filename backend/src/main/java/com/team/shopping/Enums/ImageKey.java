@@ -9,7 +9,7 @@ public enum ImageKey {
     Product, Article, User, Review
     //
     ;
-    public String getKey(String value){
+    public String getKey(Long value){
         return this.name()+"."+value;
     }
 }
