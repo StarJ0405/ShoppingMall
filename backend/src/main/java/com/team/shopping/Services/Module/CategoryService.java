@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -60,4 +61,7 @@ public class CategoryService {
         categoryRepository.delete(category);
     }
 
+    public List<Category> findByParentIsNull() {
+        return categoryRepository.findByParentIsNull();
+    }
 }
