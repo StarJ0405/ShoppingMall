@@ -44,7 +44,7 @@ export default function Page() {
 
     }
     function Submit() {
-        SignUp({ username: username, password: password, email: email, nickname: nickname, phoneNumber: phoneNumber.replaceAll('-', ''), role: (role-1), birthday: birthday, gender: gender })
+        SignUp({ username: username, password: password, email: email, nickname: nickname, phoneNumber: phoneNumber.replaceAll('-', ''), role: role, birthday: birthday, gender: gender })
             .then(() => {
                 window.location.href = "/account/login";
             }).catch(error => {
@@ -72,7 +72,7 @@ export default function Page() {
                 <input id='email' type='email' className='w-[400px] text-xl mt-[24px]' placeholder='이메일' onFocus={e => { e.target.placeholder = ''; setFocusing(3) }} onBlur={e => e.target.placeholder = '이메일'} onKeyDown={e => { KeyDownCheck({ preKey, setPreKey, e: e, pre: () => Move('password'), next: () => Move('nickname') }) }} onChange={e => setEmail(e.target.value)} onKeyUp={e => check(e, '^[a-zA-Z0-9.+_-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', '이메일 형식이 맞지 않습니다.')} />
                 <input id='nickname' type='text' className='w-[400px] text-xl mt-[24px]' placeholder='닉네임' onFocus={e => { e.target.placeholder = ''; setFocusing(4) }} onBlur={e => e.target.placeholder = '닉네임'} onKeyDown={e => { KeyDownCheck({ preKey, setPreKey, e: e, pre: () => Move('email'), next: () => Move('phoneNumber') }) }} onChange={e => setNickname(e.target.value)} maxLength={24} onKeyUp={e => check(e, '^[A-Za-z가-힣0-9_\s]{2,24}$', '닉네임은 한글,영어,숫자만 가능하며 최대 24자까지 가능합니다.')} />
                 <input id='phoneNumber' type='text' className='w-[400px] text-xl mt-[24px]' placeholder='전화번호' onFocus={e => { e.target.placeholder = ''; setFocusing(5) }} onBlur={e => e.target.placeholder = '전화번호'} onKeyDown={e => { KeyDownCheck({ preKey, setPreKey, e: e, pre: () => Move('nickname'), next: () => Move('role') }) }} onChange={e => setPhoneNumber(e.target.value)} onKeyUp={e => { check(e, '^0[0-9]{2}-[0-9]{4}-[0-9]{4}$', '전화번호 형식이 맞지 않습니다.(###-####-####)'); PhoneNumberCheck(e) }} maxLength={13} />
-                <select id='role' defaultValue={-1} className='w-[400px] text-xl mt-[24px]' onFocus={() => setFocusing(6)} onKeyDown={e => { KeyDownCheck({ preKey, setPreKey, e: e, pre: () => Move('phoneNumber'), next: () => Move('birthday') }) }} onChange={e => setRole(e.target.selectedIndex)}>
+                <select id='role' defaultValue={-1} className='w-[400px] text-xl mt-[24px]' onFocus={() => setFocusing(6)} onKeyDown={e => { KeyDownCheck({ preKey, setPreKey, e: e, pre: () => Move('phoneNumber'), next: () => Move('birthday') }) }} onChange={e => setRole(Number(e.target.selectedOptions[0].value))}>
                     <option disabled value={-1}>역할을 골라주세요</option>
                     <option value={0}>구매자</option>
                     <option value={1}>판매자</option>
