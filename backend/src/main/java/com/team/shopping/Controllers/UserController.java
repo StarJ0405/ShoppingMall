@@ -78,7 +78,8 @@ public class UserController {
     }
 
     @PostMapping("/wishList")
-    public ResponseEntity<?> addWishList(@RequestHeader("Authorization") String accessToken, @RequestBody ProductRequestDTO productRequestDTO) {
+    public ResponseEntity<?> addWishList(@RequestHeader("Authorization") String accessToken,
+                                         @RequestBody ProductRequestDTO productRequestDTO) {
         TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
         if (tokenRecord.isOK()) {
             String username = tokenRecord.username();
@@ -90,12 +91,26 @@ public class UserController {
     }
 
     @DeleteMapping("/wishList")
-    public ResponseEntity<?> deleteToWishList(@RequestHeader("Authorization") String accessToken, @RequestHeader("productId") Long productId) {
+    public ResponseEntity<?> deleteToWishList(@RequestHeader("Authorization") String accessToken,
+                                              @RequestHeader("productId") Long productId) {
         TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
         if (tokenRecord.isOK()) {
             String username = tokenRecord.username();
             // 기능
             List<ProductResponseDTO> wishListResponseDTO = this.multiService.deleteToWishList(username, productId);
+            return tokenRecord.getResponseEntity(wishListResponseDTO);
+        }
+        return tokenRecord.getResponseEntity();
+    }
+
+    @DeleteMapping("/wishList/Multi")
+    public ResponseEntity<?> deleteMultipleToWishList (@RequestHeader("Authorization") String accessToken,
+                                                       @RequestHeader("productIds") List<Long> productIds) {
+        TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
+        if (tokenRecord.isOK()) {
+            String username = tokenRecord.username();
+            // 기능
+            List<ProductResponseDTO> wishListResponseDTO = this.multiService.deleteMultipleToWishList(username, productIds);
             return tokenRecord.getResponseEntity(wishListResponseDTO);
         }
         return tokenRecord.getResponseEntity();

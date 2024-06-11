@@ -156,6 +156,17 @@ public class MultiService {
         return DTOConverter.toProductResponseDTOList(wishList);
     }
 
+    @Transactional
+    public List<ProductResponseDTO> deleteMultipleToWishList (String username, List<Long> productIds) {
+        SiteUser user = this.userService.get(username);
+        for (Long productId : productIds) {
+            Product product = this.productService.getProduct(productId);
+            this.wishListService.deleteToWishList(user, product);
+        }
+        List<Wish> wishList = this.wishListService.get(user);
+        return DTOConverter.toProductResponseDTOList(wishList);
+    }
+
     /**
      * cart
      */
