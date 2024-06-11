@@ -14,4 +14,6 @@ public class CartRequestDTO {
     private Long productId;
 
     private List<Long> optionIdList;
+
+    private int count;
 }

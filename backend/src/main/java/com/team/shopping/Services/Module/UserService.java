@@ -2,6 +2,7 @@ package com.team.shopping.Services.Module;
 
 
 import com.team.shopping.DTOs.SignupRequestDTO;
+import com.team.shopping.DTOs.UserRequestDTO;
 import com.team.shopping.Domains.SiteUser;
 import com.team.shopping.Enums.Gender;
 import com.team.shopping.Enums.UserRole;
@@ -35,6 +36,24 @@ public class UserService {
                 .birthday(signupRequestDTO.getBirthday())
                 .phoneNumber(signupRequestDTO.getPhoneNumber())
                 .build());
+    }
+
+    @Transactional
+    public SiteUser updateProfile(String username, UserRequestDTO userRequestDTO){
+        SiteUser siteUser = get(username);
+
+        siteUser.setName(userRequestDTO.getName());
+        siteUser.setPhoneNumber(userRequestDTO.getPhoneNumber());
+        siteUser.setNickname(userRequestDTO.getNickname());{}
+        siteUser.setEmail(userRequestDTO.getEmail());
+
+        return this.userRepository.save(siteUser);
+    }
+
+    @Transactional
+    public SiteUser updatePassword(SiteUser user, String newPassword) {
+        user.setPassword(passwordEncoder.encode(newPassword));
+        return userRepository.save(user);
     }
 
 
@@ -71,5 +90,7 @@ public class UserService {
     public void deleteUser(SiteUser user) {
         userRepository.deleteByUsername(user.getUsername());
         }
-    }
+
+
+}
 
