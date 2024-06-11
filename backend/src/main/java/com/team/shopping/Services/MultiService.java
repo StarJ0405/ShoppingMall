@@ -24,7 +24,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -41,6 +40,7 @@ public class MultiService {
     private final OptionsService optionsService;
     private final JwtTokenProvider jwtTokenProvider;
     private final FileSystemService fileSystemService;
+    private final TagService tagService;
 
 
     /**
@@ -97,10 +97,9 @@ public class MultiService {
      */
 
     @Transactional
-    public SiteUser signup(SignupRequestDTO signupRequestDTO) throws DataDuplicateException {
+    public void signup(SignupRequestDTO signupRequestDTO) throws DataDuplicateException {
         userService.check(signupRequestDTO);
-        SiteUser user = userService.save(signupRequestDTO);
-        return user;
+        userService.save(signupRequestDTO);
     }
 
     @Transactional
@@ -315,13 +314,19 @@ public class MultiService {
         }
         Category category = this.categoryService.get(requestDTO.getCategoryId());
         Product product = this.productService.save(requestDTO, user, category);
-        String newFile = "/api/product" + "_" + product.getId() + "/";
-        String newUrl = this.fileMove(requestDTO.getUrl(), newFile);
-        if (newUrl != null) {
-            fileSystemService.save(ImageKey.Product.getKey(product.getId().toString()), newUrl);
-            fileSystemService.delete(username);
+        if(requestDTO.getTagList() != null) {
+            for (String tagName : requestDTO.getTagList()) {
+                tagService.save(tagName, product);
+            }
         }
-
+        if(requestDTO.getUrl() != null) {
+            String newFile = "/api/product" + "_" + product.getId() + "/";
+            String newUrl = this.fileMove(requestDTO.getUrl(), newFile);
+            if (newUrl != null) {
+                fileSystemService.save(ImageKey.Product.getKey(product.getId().toString()), newUrl);
+                fileSystemService.delete(username);
+            }
+        }
     }
 
     /**
@@ -409,4 +414,5 @@ public class MultiService {
 
 
 }
+
 
