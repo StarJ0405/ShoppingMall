@@ -28,18 +28,18 @@ UserApi.interceptors.response.use((response) => {
             return UserApi(originalRequest);
         } else if (error.response.status === 403) {
             localStorage.clear();
-            window.location.href = `/account/login`;
+            window.location.href = '/account/login';
             return;
         } else if (error.response.status === 500) {
             localStorage.clear();
-            window.location.href = `/account/login`;
+            window.location.href = '/account/login';
             return;
         }
     return Promise.reject(error);
 });
 // 토큰 갱신
 const refreshAccessToken = async () => {
-    const response = await UserApi.get(`/api/auth/refresh`);
+    const response = await UserApi.get('/api/auth/refresh');
     const TOKEN_TYPE = localStorage.getItem('tokenType');
     const ACCESS_TOKEN = response.data;
     localStorage.setItem('accessToken', ACCESS_TOKEN);
@@ -47,27 +47,27 @@ const refreshAccessToken = async () => {
 }
 
 export const getUser = async () => {
-    const response = await UserApi.get(`/api/user`);
+    const response = await UserApi.get('/api/user');
     return response.data;
 }
 
 export const updateUser = async (data: any) => {
-    const response = await UserApi.put(`/api/user`, data);
+    const response = await UserApi.put('/api/user', data);
     return response.data;
 }
 export const deleteUser = async () => {
-    await UserApi.delete(`/api/user`);
+    await UserApi.delete('/api/user');
 }
 export const getWishList = async () => {
-    const response = await UserApi.get(`/api/user/wishList`);
+    const response = await UserApi.get('/api/user/wishList');
     return response.data;
 }
 export const deleteWishList = async (data: number) => {
-    const response = await UserApi.delete(`/api/user/wishList`, { headers: { 'productId': data } });
+    const response = await UserApi.delete('/api/user/wishList', { headers: { 'productId': data } });
     return response.data;
 }
 export const deleteWishListMultiple = async (data: any[]) => {
-    const response = await UserApi.delete(`/api/user/wishList/Multi`, { headers: { 'productIdList': data } });
+    const response = await UserApi.delete('/api/user/wishList/Multi', { headers: { 'productIdList': data } });
     return response.data;
 }
 
@@ -88,12 +88,12 @@ interface productProps {
     url:string
 }
 export const productRegist = async (data: productProps) => {
-    const response = await UserApi.post(`/api/product`, data);
+    const response = await UserApi.post('/api/product', data);
     return response.data;
 }
 
 export const saveImage = async(data:any)=>{
-    const response = await UserApi.post(`/api/image`, data,{
+    const response = await UserApi.post('/api/image', data,{
         headers: {
             'Content-Type': 'multipart/form-data'
         }
