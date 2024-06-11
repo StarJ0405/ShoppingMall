@@ -44,7 +44,7 @@ export default function Page() {
 
     }
     function Submit() {
-        SignUp({ username: username, password: password, email: email, nickname: nickname, phoneNumber: phoneNumber.replaceAll('-', ''), role: role, birthday: birthday, gender: gender })
+        SignUp({ username: username, password: password, email: email, nickname: nickname, phoneNumber: phoneNumber.replaceAll('-', ''), role: (role-1), birthday: birthday, gender: gender })
             .then(() => {
                 window.location.href = "/account/login";
             }).catch(error => {
@@ -74,8 +74,8 @@ export default function Page() {
                 <input id='phoneNumber' type='text' className='w-[400px] text-xl mt-[24px]' placeholder='전화번호' onFocus={e => { e.target.placeholder = ''; setFocusing(5) }} onBlur={e => e.target.placeholder = '전화번호'} onKeyDown={e => { KeyDownCheck({ preKey, setPreKey, e: e, pre: () => Move('nickname'), next: () => Move('role') }) }} onChange={e => setPhoneNumber(e.target.value)} onKeyUp={e => { check(e, '^0[0-9]{2}-[0-9]{4}-[0-9]{4}$', '전화번호 형식이 맞지 않습니다.(###-####-####)'); PhoneNumberCheck(e) }} maxLength={13} />
                 <select id='role' defaultValue={-1} className='w-[400px] text-xl mt-[24px]' onFocus={() => setFocusing(6)} onKeyDown={e => { KeyDownCheck({ preKey, setPreKey, e: e, pre: () => Move('phoneNumber'), next: () => Move('birthday') }) }} onChange={e => setRole(e.target.selectedIndex)}>
                     <option disabled value={-1}>역할을 골라주세요</option>
-                    <option value={0}>판매자</option>
-                    <option value={1}>구매자</option>
+                    <option value={0}>구매자</option>
+                    <option value={1}>판매자</option>
                 </select>
                 <input id='birthday' type='date' className='w-[400px] text-xl mt-[24px]' placeholder='생년월일' onFocus={e => { e.target.placeholder = ''; setFocusing(7) }} onBlur={e => e.target.placeholder = '전화번호'} onKeyDown={e => { KeyDownCheck({ preKey, setPreKey, e: e, pre: () => Move('role'), next: () => Move('male') }) }} onChange={e => setBirthday(e.target.value)} />
                 <div className='flex w-[120px] justify-between mt-[24px]'>

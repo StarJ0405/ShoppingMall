@@ -6,10 +6,10 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 public enum ImageKey {
-    Product, Article, User, Review
+    Product, Article, User, Review, Temp
     //
     ;
-    public String getKey(Long value){
+    public String getKey(String value){
         return this.name()+"."+value;
     }
 }

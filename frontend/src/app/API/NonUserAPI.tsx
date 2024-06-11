@@ -1,4 +1,4 @@
-import { getAPI } from "./AxiosAPI";
+import { getAPI } from './AxiosAPI';
 
 
 export const NonUserApi = getAPI();

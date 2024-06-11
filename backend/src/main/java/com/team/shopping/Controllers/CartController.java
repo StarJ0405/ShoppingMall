@@ -36,11 +36,26 @@ public class CartController {
         if (tokenRecord.isOK()) {
             String username = tokenRecord.username();
             // 기능
-            List<CartResponseDTO> cartResponseDTOList = this.multiService.addToCart(username, cartRequestDTO, count);
+            List<CartResponseDTO> cartResponseDTOList = this.multiService.addToCart(username, cartRequestDTO);
             return tokenRecord.getResponseEntity(cartResponseDTOList);
         }
         return tokenRecord.getResponseEntity();
     }
+
+    @PutMapping("/cartList")
+    public ResponseEntity<?> updateToCart (@RequestHeader("Authorization") String accessToken,
+                                           @RequestBody CartRequestDTO cartRequestDTO) {
+        TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
+        if (tokenRecord.isOK()) {
+            String username = tokenRecord.username();
+            // 기능
+            List<CartResponseDTO> cartResponseDTOList = this.multiService.updateToCart(username, cartRequestDTO);
+            return tokenRecord.getResponseEntity(cartResponseDTOList);
+        }
+        return tokenRecord.getResponseEntity();
+
+    }
+
 
     @DeleteMapping("/cartList")
     public ResponseEntity<?> deleteToCartList (@RequestHeader("Authorization") String accessToken,
@@ -66,4 +81,5 @@ public class CartController {
         }
         return tokenRecord.getResponseEntity();
     }
+
 }

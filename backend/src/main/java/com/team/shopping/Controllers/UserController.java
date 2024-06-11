@@ -1,7 +1,6 @@
 package com.team.shopping.Controllers;
 
-import com.team.shopping.DTOs.SignupRequestDTO;
-import com.team.shopping.DTOs.UserResponseDTO;
+import com.team.shopping.DTOs.*;
 import com.team.shopping.Exceptions.DataDuplicateException;
 import com.team.shopping.Records.TokenRecord;
 import com.team.shopping.Services.Module.UserService;
@@ -10,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 
 @RestController
@@ -29,6 +30,7 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
         }
     }
+
 
     @DeleteMapping
     public ResponseEntity<?> deleteUser(@RequestHeader("Authorization") String accessToken, @RequestBody SignupRequestDTO signupRequestDTO) {
@@ -52,6 +54,34 @@ public class UserController {
             String username = tokenRecord.username();
             // 기능
             UserResponseDTO userResponseDTO = this.multiService.getProfile(username);
+            return tokenRecord.getResponseEntity(userResponseDTO);
+        }
+        return tokenRecord.getResponseEntity();
+    }
+    
+
+    @PutMapping
+    public ResponseEntity<?> updateProfile(@RequestHeader("Authorization") String accessToken, 
+                                           @RequestBody UserRequestDTO userRequestDTO) {
+
+        TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
+        if (tokenRecord.isOK()) {
+            String username = tokenRecord.username();
+            UserResponseDTO userResponseDTO = multiService.updateProfile(username,userRequestDTO);
+
+            return tokenRecord.getResponseEntity(userResponseDTO);
+        }
+        return tokenRecord.getResponseEntity();
+
+    }
+
+    @PutMapping("/password")
+    public ResponseEntity<?> updatePassword(@RequestHeader("Authorization") String accessToken , @RequestBody UserRequestDTO userRequestDTO){
+
+        TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
+        if(tokenRecord.isOK()){
+            String username = tokenRecord.username();
+            UserResponseDTO userResponseDTO = multiService.updatePassword(username,userRequestDTO);
             return tokenRecord.getResponseEntity(userResponseDTO);
         }
         return tokenRecord.getResponseEntity();
