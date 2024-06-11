@@ -16,13 +16,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.awt.*;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.FileSystems;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
@@ -201,17 +200,40 @@ public class MultiService {
         if (user.getRole() == UserRole.USER) {
             throw new IllegalArgumentException("user 권한은 상품을 저장할 수 없습니다.");
         }
-        this.productService.save(requestDTO, user);
+        Category category = this.categoryService.get(requestDTO.getCategoryId());
+        Product product = this.productService.save(requestDTO, user, category);
+        String newFile = "/product" + "_" + product.getId() + "/";
+        String newUrl = this.fileMove(requestDTO.getUrl(), newFile);
+        if (newUrl != null) {
+            fileSystemService.save(ImageKey.Product.getKey(product.getId()), newUrl);
+        }
+
     }
+
     /**
      * Image
      */
+    @Transactional
+    public String fileMove(String url, String newUrl) {
+        try {
+            String path = ShoppingApplication.getOsType().getLoc();
+            Path tempPath = Paths.get(path + url);
+            Path newPath = Paths.get(path + newUrl + tempPath.getFileName());
+            Files.createDirectories(newPath.getParent());
+            Files.move(tempPath, newPath);
+            return newUrl + tempPath.getFileName();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     @Transactional
     public ImageResponseDTO tempUpload(ImageRequestDTO requestDTO, String username) {
         if (!requestDTO.getFile().isEmpty())
             try {
                 String path = ShoppingApplication.getOsType().getLoc();
-                String fileLoc = "/users" + "_" + username + "/temp." + requestDTO.getFile().getContentType().split("/")[1];
+                UUID uuid = UUID.randomUUID();
+                String fileLoc = "/users" + "_" + username + "/temp/" + uuid + "." + requestDTO.getFile().getContentType().split("/")[1];
                 File file = new File(path + fileLoc);
                 if (!file.getParentFile().exists())
                     file.getParentFile().mkdirs();
@@ -242,9 +264,8 @@ public class MultiService {
     public void deleteCategory(String username, Long id) {
         SiteUser siteUser = userService.get(username);
         if (siteUser.getRole().equals(UserRole.ADMIN)) {
-            Optional<Category> _category = categoryService.get(id);
-            if (_category.isPresent()) categoryService.deleteCategory(_category.get());
-            else throw new IllegalArgumentException("해당 ID를 가진 카테고리가 존재하지 않습니다.");
+            Category category = categoryService.get(id);
+            categoryService.deleteCategory(category);
         } else {
             throw new IllegalArgumentException("ADMIN 권한이 아닙니다.");
         }
@@ -256,13 +277,12 @@ public class MultiService {
     public void updateCategory(String username, CategoryRequestDTO requestDto) throws DataDuplicateException {
         SiteUser siteUser = userService.get(username);
         if (siteUser.getRole().equals(UserRole.ADMIN)) {
-            Optional<Category> _category = categoryService.get(requestDto.getId());
-            if (_category.isPresent()) {
-                categoryService.updateCheck(requestDto);
-                categoryService.update(_category.get(), requestDto.getNewName());
-            } else {
-                throw new IllegalArgumentException("ADMIN 권한이 아닙니다.");
-            }
+            Category category = categoryService.get(requestDto.getId());
+            categoryService.updateCheck(requestDto);
+            categoryService.update(category, requestDto.getNewName());
+        } else {
+            throw new IllegalArgumentException("ADMIN 권한이 아닙니다.");
         }
     }
 }
+

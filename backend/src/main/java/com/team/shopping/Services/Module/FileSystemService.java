@@ -10,10 +10,11 @@ import org.springframework.stereotype.Service;
 public class FileSystemService {
     private final FileSystemRepository fileSystemRepository;
 
-    public void upload(String imageFolderName, String valueKey) {
+    public void save(String imageFolderName, String valueKey) {
         FileSystem fileSystem = new FileSystem();
-        fileSystem.setK(valueKey);
-        fileSystem.setV(imageFolderName);
+        fileSystem.setK(imageFolderName);
+        fileSystem.setV(valueKey);
         fileSystemRepository.save(fileSystem);
     }
+
 }
