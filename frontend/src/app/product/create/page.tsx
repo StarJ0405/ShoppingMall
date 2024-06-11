@@ -30,7 +30,9 @@ export default function Page() {
     const [detail, setDetail] = useState('');
     const ACCESS_TOKEN = typeof window == 'undefined' ? null : localStorage.getItem('accessToken');
 
-
+    useEffect(()=>{
+        
+    },[]);
     useEffect(() => {
         if (ACCESS_TOKEN)
             getUser()
