@@ -3,7 +3,6 @@ package com.team.shopping.Services;
 
 import com.team.shopping.DTOs.*;
 import com.team.shopping.Domains.*;
-import com.team.shopping.Enums.ImageKey;
 import com.team.shopping.Enums.UserRole;
 import com.team.shopping.Exceptions.DataDuplicateException;
 import com.team.shopping.Records.TokenRecord;
@@ -16,18 +15,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.awt.*;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.UUID;
-import java.util.stream.Collectors;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -118,7 +112,19 @@ public class MultiService {
     @Transactional
     public UserResponseDTO getProfile(String username) {
         SiteUser siteUser = this.userService.get(username);
-        return UserResponseDTO.builder().username(siteUser.getUsername()).gender(siteUser.getGender().toString()).email(siteUser.getEmail()).point(siteUser.getPoint()).phoneNumber(siteUser.getPhoneNumber()).nickname(siteUser.getNickname()).birthday(siteUser.getBirthday()).createDate(siteUser.getCreateDate()).modifyDate(siteUser.getModifyDate()).name(siteUser.getName()).build();
+        return UserResponseDTO.builder()
+                .username(siteUser.getUsername())
+                .gender(siteUser.getGender().toString())
+                .role(siteUser.getRole().toString())
+                .email(siteUser.getEmail())
+                .point(siteUser.getPoint())
+                .phoneNumber(siteUser.getPhoneNumber())
+                .nickname(siteUser.getNickname())
+                .birthday(siteUser.getBirthday())
+                .createDate(siteUser.getCreateDate())
+                .modifyDate(siteUser.getModifyDate())
+                .name(siteUser.getName())
+                .build();
     }
 
     /**
