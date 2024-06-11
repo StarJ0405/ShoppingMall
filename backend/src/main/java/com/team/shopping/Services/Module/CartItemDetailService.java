@@ -25,4 +25,8 @@ public class CartItemDetailService {
                         .options(options)
                 .build());
     }
+
+    public void delete (CartItem cartItem) {
+        this.cartItemDetailRepository.deleteByCartItem(cartItem);
+    }
 }
