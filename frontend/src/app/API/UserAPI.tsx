@@ -22,11 +22,15 @@ UserApi.interceptors.response.use((response) => {
     return response;
 }, async (error) => {
     const originalRequest = error.config;
-    if(!originalRequest._retry)
-        if (error.response.status === 401 ) {
+    if (!originalRequest._retry)
+        if (error.response.status === 401) {
             await refreshAccessToken();
             return UserApi(originalRequest);
-        }else if (error.response.status === 403) {
+        } else if (error.response.status === 403) {
+            localStorage.clear();
+            window.location.href = `/account/login`;
+            return;
+        } else if (error.response.status === 500) {
             localStorage.clear();
             window.location.href = `/account/login`;
             return;
@@ -47,18 +51,37 @@ export const getUser = async () => {
     return response.data;
 }
 
-export const updateUser = async (data:any) => {
+export const updateUser = async (data: any) => {
     const response = await UserApi.put(`/api/user`, data);
     return response.data;
 }
 export const deleteUser = async () => {
     await UserApi.delete(`/api/user`);
 }
-export const getWishList= async ()=>{
-    const response = await UserApi.get(`/api/user/wishList` );
+export const getWishList = async () => {
+    const response = await UserApi.get(`/api/user/wishList`);
     return response.data;
 }
-export const deleteWishList= async (productId:number)=>{
-    const response = await UserApi.delete(`/api/user/wishList`,{headers: {'productId':productId}});
+export const deleteWishList = async (data: number) => {
+    const response = await UserApi.delete(`/api/user/wishList`, { headers: { 'productId': data } });
+    return response.data;
+}
+interface productProps {
+    category: number,
+    price: string,
+    description: string,
+    detail: string,
+    dateLimit: string,
+    remain: string,
+    title: string,
+    delivery: string,
+    address: string,
+    receipt: string,
+    a_s: string,
+    brand: string,
+    productTagList: string[]
+}
+export const productRegist = async (data: productProps) => {
+    const response = await UserApi.post(`/api/product`, data);
     return response.data;
 }
