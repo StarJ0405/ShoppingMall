@@ -1,14 +1,14 @@
 "use client"
 
-interface sideListProps{
-    user:any;
+interface sideListProps {
+    user: any;
 }
-export default function SideList(props:sideListProps){
+export default function SideList(props: sideListProps) {
     const user = props.user;
-   
+
     return <div className="w-[165px] mr-[20px]">
         <div className="flex flex-col items-center border-2 border-gray-400 py-2 px-4 w-full">
-            <img src="/sun.png" className="w-[58px] h-[58px]"/>
+            <img src="/sun.png" className="w-[58px] h-[58px]" />
             <a href="/account/profile">{user?.nickname}</a>
         </div>
         <div className="flex flex-col border-x-2 border-b-2 border-gray-400 py-2 px-4 w-full">
@@ -19,7 +19,7 @@ export default function SideList(props:sideListProps){
         </div>
         <div className="flex flex-col border-x-2 border-b-2 border-gray-400 py-2 px-4 w-full">
             <label className="font-bold mb-3">나의 관심 목록</label>
-            <a href="" className="text-sm text-gray-500 hover:underline">찜한 상품</a>
+            <a href="/account/wish" className="text-sm text-gray-500 hover:underline">찜한 상품</a>
             <a href="" className="text-sm text-gray-500 hover:underline">최근본 상품</a>
         </div>
         <div className="flex flex-col border-x-2 border-b-2 border-gray-400 py-2 px-4 w-full">

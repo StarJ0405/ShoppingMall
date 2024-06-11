@@ -3,21 +3,29 @@ package com.team.shopping.Services;
 
 import com.team.shopping.DTOs.*;
 import com.team.shopping.Domains.*;
+import com.team.shopping.Enums.ImageKey;
 import com.team.shopping.Enums.UserRole;
 import com.team.shopping.Exceptions.DataDuplicateException;
 import com.team.shopping.Records.TokenRecord;
 import com.team.shopping.Securities.CustomUserDetails;
 import com.team.shopping.Securities.JWT.JwtTokenProvider;
 import com.team.shopping.Services.Module.*;
+import com.team.shopping.ShoppingApplication;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -32,6 +40,7 @@ public class MultiService {
     private final CartItemDetailService cartItemDetailService;
     private final OptionsService optionsService;
     private final JwtTokenProvider jwtTokenProvider;
+    private final FileSystemService fileSystemService;
 
 
     /**
@@ -95,9 +104,20 @@ public class MultiService {
     }
 
     @Transactional
+    public void deleteUser(String username, String name) {
+        SiteUser targetUser = userService.get(username);
+        SiteUser siteUser = userService.get(name);
+        if (siteUser.getRole().equals(UserRole.ADMIN)) {
+            userService.delete(targetUser);
+        } else {
+            throw new IllegalArgumentException("ADMIN 권한이 아닙니다.");
+        }
+    }
+
+    @Transactional
     public UserResponseDTO getProfile(String username) {
         SiteUser siteUser = this.userService.get(username);
-        return UserResponseDTO.builder().username(siteUser.getUsername()).gender(siteUser.getGender().toString()).email(siteUser.getEmail()).point(siteUser.getPoint()).phoneNumber(siteUser.getPhoneNumber()).nickname(siteUser.getNickname()).birthday(siteUser.getBirthday()).createDate(siteUser.getCreateDate()).modifyDate(siteUser.getModifyDate()).name(siteUser.getName()).build();
+        return UserResponseDTO.builder().username(siteUser.getUsername()).gender(siteUser.getGender().toString()).role(siteUser.getRole().toString()).email(siteUser.getEmail()).point(siteUser.getPoint()).phoneNumber(siteUser.getPhoneNumber()).nickname(siteUser.getNickname()).birthday(siteUser.getBirthday()).createDate(siteUser.getCreateDate()).modifyDate(siteUser.getModifyDate()).name(siteUser.getName()).build();
     }
 
     @Transactional
@@ -160,15 +180,28 @@ public class MultiService {
     }
 
     @Transactional
-    public List<ProductResponseDTO> deleteToWishList(String username, ProductRequestDTO productRequestDTO) {
+    public List<ProductResponseDTO> deleteToWishList(String username, Long productId) {
         SiteUser user = this.userService.get(username);
-        Product product = this.productService.getProduct(productRequestDTO.getProductId());
+        Product product = this.productService.getProduct(productId);
         this.wishListService.deleteToWishList(user, product);
         List<Wish> wishList = this.wishListService.get(user);
         return DTOConverter.toProductResponseDTOList(wishList);
     }
 
-    /**
+
+    @Transactional
+    public List<ProductResponseDTO> deleteMultipleToWishList (String username, List<Long> productIdList) {
+        SiteUser user = this.userService.get(username);
+        for (Long productId : productIdList) {
+            Product product = this.productService.getProduct(productId);
+            this.wishListService.deleteToWishList(user, product);
+        }
+        List<Wish> wishList = this.wishListService.get(user);
+        return DTOConverter.toProductResponseDTOList(wishList);
+    }
+
+
+  /**
      * cart
      */
 
@@ -178,19 +211,17 @@ public class MultiService {
 
         List<CartItem> cartItems = this.cartItemService.getCartItemList(user);
 
-        return cartItems.stream()
-                .map(cartItem -> {
-                    List<CartItemDetail> cartItemDetails = this.cartItemDetailService.getList(cartItem);
-                    return DTOConverter.toCartResponseDTO(cartItem, cartItemDetails);
-                })
-                .collect(Collectors.toList());
+        return cartItems.stream().map(cartItem -> {
+            List<CartItemDetail> cartItemDetails = this.cartItemDetailService.getList(cartItem);
+            return DTOConverter.toCartResponseDTO(cartItem, cartItemDetails);
+        }).collect(Collectors.toList());
     }
 
     @Transactional
-    public List<CartResponseDTO> addToCart(String username, CartRequestDTO cartRequestDTO, int count) {
+    public List<CartResponseDTO> addToCart(String username, CartRequestDTO cartRequestDTO) {
         SiteUser user = this.userService.get(username);
         Product product = this.productService.getProduct(cartRequestDTO.getProductId());
-        CartItem cartItem = this.cartItemService.save(user, product, count);
+        CartItem cartItem = this.cartItemService.addToCart(user, product, cartRequestDTO.getCount());
 
         List<Options> options = this.optionsService.getOptionsList(cartRequestDTO.getOptionIdList());
 
@@ -199,6 +230,40 @@ public class MultiService {
         }
 
         List<CartItem> cartItems = this.cartItemService.getCartItemList(user);
+        return cartItems.stream().map(item -> {
+            List<CartItemDetail> cartItemDetails = this.cartItemDetailService.getList(item);
+            return DTOConverter.toCartResponseDTO(item, cartItemDetails);
+        }).collect(Collectors.toList());
+    }
+
+    @Transactional
+    public List<CartResponseDTO> updateToCart (String username, CartRequestDTO cartRequestDTO) {
+        SiteUser user = this.userService.get(username);
+        Product product = this.productService.getProduct(cartRequestDTO.getProductId());
+        CartItem cartItem = this.cartItemService.getCartItem(user, product);
+        cartItem.updateCount(cartRequestDTO.getCount());
+        this.cartItemService.save(cartItem);
+
+        List<CartItem> cartItems = this.cartItemService.getCartItemList(user);
+        return cartItems.stream()
+                .map(item -> {
+                    List<CartItemDetail> cartItemDetails = this.cartItemDetailService.getList(item);
+                    return DTOConverter.toCartResponseDTO(item, cartItemDetails);
+                })
+                .collect(Collectors.toList());
+
+    }
+
+    @Transactional
+    public List<CartResponseDTO> deleteToCart (String username, Long productId) {
+        SiteUser user = this.userService.get(username);
+        Product product = this.productService.getProduct(productId);
+        CartItem cartItem = this.cartItemService.getCartItem(user, product);
+        this.cartItemDetailService.delete(cartItem);
+        this.cartItemService.deleteCartItem(cartItem);
+
+        List<CartItem> cartItems = this.cartItemService.getCartItemList(user);
+
         return cartItems.stream()
                 .map(item -> {
                     List<CartItemDetail> cartItemDetails = this.cartItemDetailService.getList(item);
@@ -207,9 +272,35 @@ public class MultiService {
                 .collect(Collectors.toList());
     }
 
-    /*
+    @Transactional
+    public List<CartResponseDTO> deleteMultipleToCart(String username, List<Long> productIdList) {
+        SiteUser user = this.userService.get(username);
+        for (Long productId : productIdList) {
+            Product product = this.productService.getProduct(productId);
+
+            CartItem cartItem = this.cartItemService.getCartItem(user, product);
+            if (cartItem != null) {
+                this.cartItemDetailService.delete(cartItem);
+                this.cartItemService.deleteCartItem(cartItem);
+            } else {
+                System.out.println("CartItem not found for user: " + username + " and product: " + productId);
+            }
+        }
+
+        List<CartItem> cartItems = this.cartItemService.getCartItemList(user);
+
+        return cartItems.stream()
+                .map(item -> {
+                    List<CartItemDetail> cartItemDetails = this.cartItemDetailService.getList(item);
+                    return DTOConverter.toCartResponseDTO(item, cartItemDetails);
+                })
+                .collect(Collectors.toList());
+    }
+
+    /**
      * Product
      */
+
     @Transactional
     public void saveProduct(ProductCreateRequestDTO requestDTO, String username) {
         SiteUser user = this.userService.get(username);
@@ -219,18 +310,47 @@ public class MultiService {
         if (user.getRole() == UserRole.USER) {
             throw new IllegalArgumentException("user 권한은 상품을 저장할 수 없습니다.");
         }
-        this.productService.save(requestDTO, user);
+        Category category = this.categoryService.get(requestDTO.getCategoryId());
+        Product product = this.productService.save(requestDTO, user, category);
+        String newFile = "/api/product" + "_" + product.getId() + "/";
+        String newUrl = this.fileMove(requestDTO.getUrl(), newFile);
+        if (newUrl != null) {
+            fileSystemService.save(ImageKey.Product.getKey(product.getId()), newUrl);
+        }
+
+    }
+
+    /**
+     * Image
+     */
+    @Transactional
+    public String fileMove(String url, String newUrl) {
+        try {
+            String path = ShoppingApplication.getOsType().getLoc();
+            Path tempPath = Paths.get(path + url);
+            Path newPath = Paths.get(path + newUrl + tempPath.getFileName());
+            Files.createDirectories(newPath.getParent());
+            Files.move(tempPath, newPath);
+            return newUrl + tempPath.getFileName();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Transactional
-    public void deleteUser(String username, String name) {
-        SiteUser targetUser = userService.get(username);
-        SiteUser siteUser = userService.get(name);
-        if (siteUser.getRole().equals(UserRole.ADMIN)) {
-            userService.delete(targetUser);
-        } else {
-            throw new IllegalArgumentException("ADMIN 권한이 아닙니다.");
+    public ImageResponseDTO tempUpload(ImageRequestDTO requestDTO, String username) {
+        if (!requestDTO.getFile().isEmpty()) try {
+            String path = ShoppingApplication.getOsType().getLoc();
+            UUID uuid = UUID.randomUUID();
+            String fileLoc = "/api/users" + "_" + username + "/temp/" + uuid + "." + requestDTO.getFile().getContentType().split("/")[1];
+            File file = new File(path + fileLoc);
+            if (!file.getParentFile().exists()) file.getParentFile().mkdirs();
+            requestDTO.getFile().transferTo(file);
+            return new ImageResponseDTO(fileLoc);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+        return null;
     }
 
     /**
@@ -245,19 +365,14 @@ public class MultiService {
         } else {
             throw new IllegalArgumentException("ADMIN 권한이 아닙니다.");
         }
-
     }
 
-    /**
-     * 테스트용
-     */
     @Transactional
     public void deleteCategory(String username, Long id) {
         SiteUser siteUser = userService.get(username);
         if (siteUser.getRole().equals(UserRole.ADMIN)) {
-            Optional<Category> _category = categoryService.get(id);
-            if (_category.isPresent()) categoryService.deleteCategory(_category.get());
-            else throw new IllegalArgumentException("해당 ID를 가진 카테고리가 존재하지 않습니다.");
+            Category category = categoryService.get(id);
+            categoryService.deleteCategory(category);
         } else {
             throw new IllegalArgumentException("ADMIN 권한이 아닙니다.");
         }
@@ -269,15 +384,14 @@ public class MultiService {
     public void updateCategory(String username, CategoryRequestDTO requestDto) throws DataDuplicateException {
         SiteUser siteUser = userService.get(username);
         if (siteUser.getRole().equals(UserRole.ADMIN)) {
-            Optional<Category> _category = categoryService.get(requestDto.getId());
-            if (_category.isPresent()) {
-                categoryService.updateCheck(requestDto);
-                categoryService.update(_category.get(), requestDto.getNewName());
-            } else {
-                throw new IllegalArgumentException("ADMIN 권한이 아닙니다.");
-            }
+            Category category = categoryService.get(requestDto.getId());
+            categoryService.updateCheck(requestDto);
+            categoryService.update(category, requestDto.getNewName());
+        } else {
+            throw new IllegalArgumentException("ADMIN 권한이 아닙니다.");
         }
     }
 
 
 }
+

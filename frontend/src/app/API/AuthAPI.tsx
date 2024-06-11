@@ -27,26 +27,26 @@ AuthApi.interceptors.response.use(
 );
 
 /** LOGIN API */
-interface LoginProps{
-    username:string;
-    password:string;
+interface LoginProps {
+    username: string;
+    password: string;
 }
-export const Login = async (data:LoginProps) => {
+export const Login = async (data: LoginProps) => {
     const response = await AuthApi.post(`/api/auth/login`, data);
     return response.data;
 }
 /** SIGNUP API */
-interface SignupProps{
-    username:string
-    password:string;
-    email:string;
-    nickname:string;
-    phoneNumber:string;
-    role:number;
-    birthday:string;
-    gender:number;
+interface SignupProps {
+    username: string
+    password: string;
+    email: string;
+    nickname: string;
+    phoneNumber: string;
+    role: number;
+    birthday: string;
+    gender: number;
 }
-export const SignUp = async (data:SignupProps) => {
+export const SignUp = async (data: SignupProps) => {
     const response = await AuthApi.post(`/api/user`, data);
     return response.data;
 }

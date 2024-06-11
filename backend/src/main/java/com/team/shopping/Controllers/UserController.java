@@ -107,7 +107,8 @@ public class UserController {
     }
 
     @PostMapping("/wishList")
-    public ResponseEntity<?> addWishList(@RequestHeader("Authorization") String accessToken, @RequestBody ProductRequestDTO productRequestDTO) {
+    public ResponseEntity<?> addWishList(@RequestHeader("Authorization") String accessToken,
+                                         @RequestBody ProductRequestDTO productRequestDTO) {
         TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
         if (tokenRecord.isOK()) {
             String username = tokenRecord.username();
@@ -119,12 +120,26 @@ public class UserController {
     }
 
     @DeleteMapping("/wishList")
-    public ResponseEntity<?> deleteToWishList(@RequestHeader("Authorization") String accessToken, @RequestBody ProductRequestDTO productRequestDTO) {
+    public ResponseEntity<?> deleteToWishList(@RequestHeader("Authorization") String accessToken,
+                                              @RequestHeader("productId") Long productId) {
         TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
         if (tokenRecord.isOK()) {
             String username = tokenRecord.username();
             // 기능
-            List<ProductResponseDTO> wishListResponseDTO = this.multiService.deleteToWishList(username, productRequestDTO);
+            List<ProductResponseDTO> wishListResponseDTO = this.multiService.deleteToWishList(username, productId);
+            return tokenRecord.getResponseEntity(wishListResponseDTO);
+        }
+        return tokenRecord.getResponseEntity();
+    }
+
+    @DeleteMapping("/wishList/multi")
+    public ResponseEntity<?> deleteMultipleToWishList (@RequestHeader("Authorization") String accessToken,
+                                                       @RequestHeader("productIdList") List<Long> productIdList) {
+        TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
+        if (tokenRecord.isOK()) {
+            String username = tokenRecord.username();
+            // 기능
+            List<ProductResponseDTO> wishListResponseDTO = this.multiService.deleteMultipleToWishList(username, productIdList);
             return tokenRecord.getResponseEntity(wishListResponseDTO);
         }
         return tokenRecord.getResponseEntity();

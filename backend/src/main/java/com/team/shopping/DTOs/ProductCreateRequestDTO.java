@@ -1,6 +1,5 @@
 package com.team.shopping.DTOs;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -9,16 +8,15 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @NoArgsConstructor
-@AllArgsConstructor
 @Getter
 @Setter
 public class ProductCreateRequestDTO {
-    private String category;
+    private Long categoryId;
     private int price;
     private String description;
     private String detail;
     private LocalDateTime dateLimit;
-    private int count;
+    private int remain;
     private String title;
     private String delivery;
     private String address;
@@ -26,5 +24,6 @@ public class ProductCreateRequestDTO {
     private String a_s;
     private String brand;
     private List<String> productTagList;
+    private String url;
 
 }

@@ -30,16 +30,56 @@ public class CartController {
     }
 
     @PostMapping("/cartList")
-    public ResponseEntity<?> cartList (@RequestHeader("Authorization") String accessToken,
-                                       @RequestHeader("count") int count,
-                                       @RequestBody CartRequestDTO cartRequestDTO) {
+    public ResponseEntity<?> addToCartList (@RequestHeader("Authorization") String accessToken,
+                                            @RequestBody CartRequestDTO cartRequestDTO) {
         TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
         if (tokenRecord.isOK()) {
             String username = tokenRecord.username();
             // 기능
-            List<CartResponseDTO> cartResponseDTOList = this.multiService.addToCart(username, cartRequestDTO, count);
+            List<CartResponseDTO> cartResponseDTOList = this.multiService.addToCart(username, cartRequestDTO);
             return tokenRecord.getResponseEntity(cartResponseDTOList);
         }
         return tokenRecord.getResponseEntity();
     }
+
+    @PutMapping("/cartList")
+    public ResponseEntity<?> updateToCart (@RequestHeader("Authorization") String accessToken,
+                                           @RequestBody CartRequestDTO cartRequestDTO) {
+        TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
+        if (tokenRecord.isOK()) {
+            String username = tokenRecord.username();
+            // 기능
+            List<CartResponseDTO> cartResponseDTOList = this.multiService.updateToCart(username, cartRequestDTO);
+            return tokenRecord.getResponseEntity(cartResponseDTOList);
+        }
+        return tokenRecord.getResponseEntity();
+
+    }
+
+
+    @DeleteMapping("/cartList")
+    public ResponseEntity<?> deleteToCartList (@RequestHeader("Authorization") String accessToken,
+                                               @RequestHeader("productId") Long productId) {
+        TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
+        if (tokenRecord.isOK()) {
+            String username = tokenRecord.username();
+            // 기능
+            List<CartResponseDTO> cartResponseDTOList = this.multiService.deleteToCart(username, productId);
+            return tokenRecord.getResponseEntity(cartResponseDTOList);
+        }
+        return tokenRecord.getResponseEntity();
+    }
+
+    @DeleteMapping("/cartList/multi")
+    public ResponseEntity<?> deleteMultiToCartList (@RequestHeader("Authorization") String accessToken,
+                                                    @RequestHeader("productIdList") List<Long> productIdList) {
+        TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
+        if (tokenRecord.isOK()) {
+            String username = tokenRecord.username();
+            // 기능
+            List<CartResponseDTO> cartResponseDTOList = this.multiService.deleteMultipleToCart(username, productIdList);          return tokenRecord.getResponseEntity(cartResponseDTOList);
+        }
+        return tokenRecord.getResponseEntity();
+    }
+
 }
