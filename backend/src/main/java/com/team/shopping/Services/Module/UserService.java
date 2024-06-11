@@ -23,8 +23,8 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
-    public SiteUser save(SignupRequestDTO signupRequestDTO) {
-        return userRepository.save(SiteUser
+    public void save(SignupRequestDTO signupRequestDTO) {
+        userRepository.save(SiteUser
                 .builder()
                 .username(signupRequestDTO.getUsername())
                 .name(signupRequestDTO.getName())
@@ -39,12 +39,14 @@ public class UserService {
     }
 
     @Transactional
-    public SiteUser updateProfile(String username, UserRequestDTO userRequestDTO){
+    public SiteUser updateProfile(String username, UserRequestDTO userRequestDTO) {
         SiteUser siteUser = get(username);
 
         siteUser.setName(userRequestDTO.getName());
         siteUser.setPhoneNumber(userRequestDTO.getPhoneNumber());
-        siteUser.setNickname(userRequestDTO.getNickname());{}
+        siteUser.setNickname(userRequestDTO.getNickname());
+        {
+        }
         siteUser.setEmail(userRequestDTO.getEmail());
 
         return this.userRepository.save(siteUser);
@@ -57,9 +59,8 @@ public class UserService {
     }
 
 
-
     @Transactional
-    public SiteUser get(String value) throws IllegalArgumentException{
+    public SiteUser get(String value) throws IllegalArgumentException {
         return this.userRepository.findById(value).orElseThrow(() -> new DataNotFoundException("데이터가 존재하지 않습니다"));
     }
 
@@ -78,7 +79,8 @@ public class UserService {
         if (userRepository.isDuplicateEmail(signupRequestDTO.getEmail())) throw new DataDuplicateException("email");
         if (userRepository.isDuplicateNickname(signupRequestDTO.getNickname()))
             throw new DataDuplicateException("nickname");
-        if (userRepository.isDuplicatePhone(signupRequestDTO.getPhoneNumber())) throw new DataDuplicateException("phone");
+        if (userRepository.isDuplicatePhone(signupRequestDTO.getPhoneNumber()))
+            throw new DataDuplicateException("phone");
     }
 
     public boolean isMatch(String password1, String password2) {
@@ -89,7 +91,7 @@ public class UserService {
     @Transactional
     public void deleteUser(SiteUser user) {
         userRepository.deleteByUsername(user.getUsername());
-        }
+    }
 
 
 }
