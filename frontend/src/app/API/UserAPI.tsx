@@ -1,13 +1,13 @@
-import { getAPI } from "./AxiosAPI";
+import { getAPI } from './AxiosAPI';
 
 
 export const UserApi = getAPI();
 
 UserApi.interceptors.request.use(
     (config) => {
-        const TOKEN_TYPE = localStorage.getItem("tokenType");
-        const ACCESS_TOKEN = localStorage.getItem("accessToken");
-        const REFRESH_TOKEN = localStorage.getItem("refreshToken");
+        const TOKEN_TYPE = localStorage.getItem('tokenType');
+        const ACCESS_TOKEN = localStorage.getItem('accessToken');
+        const REFRESH_TOKEN = localStorage.getItem('refreshToken');
         config.headers['Authorization'] = `${TOKEN_TYPE} ${ACCESS_TOKEN}`;
         config.headers['REFRESH_TOKEN'] = REFRESH_TOKEN;
         return config;
@@ -40,7 +40,7 @@ UserApi.interceptors.response.use((response) => {
 // 토큰 갱신
 const refreshAccessToken = async () => {
     const response = await UserApi.get(`/api/auth/refresh`);
-    const TOKEN_TYPE = localStorage.getItem("tokenType");
+    const TOKEN_TYPE = localStorage.getItem('tokenType');
     const ACCESS_TOKEN = response.data;
     localStorage.setItem('accessToken', ACCESS_TOKEN);
     UserApi.defaults.headers.common['Authorization'] = `${TOKEN_TYPE} ${ACCESS_TOKEN}`;
