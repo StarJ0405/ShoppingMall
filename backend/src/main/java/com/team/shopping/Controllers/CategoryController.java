@@ -1,6 +1,8 @@
 package com.team.shopping.Controllers;
 
+import com.team.shopping.DTOs.AuthResponseDTO;
 import com.team.shopping.DTOs.CategoryRequestDTO;
+import com.team.shopping.DTOs.CategoryResponseDTO;
 import com.team.shopping.Exceptions.DataDuplicateException;
 import com.team.shopping.Records.TokenRecord;
 import com.team.shopping.Services.MultiService;
@@ -8,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
@@ -44,10 +48,6 @@ public class CategoryController {
         return tokenRecord.getResponseEntity();
     }
 
-
-
-
-
     @DeleteMapping
     public ResponseEntity<?> deleteCategory(@RequestHeader("Authorization") String accessToken,
                                             @RequestBody CategoryRequestDTO categoryRequestDTO) {
@@ -64,7 +64,15 @@ public class CategoryController {
         return tokenRecord.getResponseEntity();
     }
 
-
+    @GetMapping
+    public ResponseEntity<?> getCategory() {
+        try {
+            List<CategoryResponseDTO> categoryResponseDTOList = multiService.getCategoryList();
+            return ResponseEntity.status(HttpStatus.OK).body(categoryResponseDTOList);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
 
 
 
