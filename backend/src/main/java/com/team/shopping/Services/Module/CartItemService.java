@@ -20,13 +20,17 @@ public class CartItemService {
         return this.cartItemRepository.findAllByUser(user);
     }
 
-    public CartItem save (SiteUser user, Product product, int count) {
+    public CartItem addToCart(SiteUser user, Product product, int count) {
         return this.cartItemRepository.save(CartItem.builder()
                         .count(count)
                         .createDate(LocalDateTime.now())
                         .product(product)
                         .user(user)
                 .build());
+    }
+
+    public CartItem save (CartItem cartItem) {
+        return this.cartItemRepository.save(cartItem);
     }
 
     public CartItem getCartItem(SiteUser user, Product product) {

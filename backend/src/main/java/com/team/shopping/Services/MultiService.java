@@ -177,10 +177,10 @@ public class MultiService {
     }
 
     @Transactional
-    public List<CartResponseDTO> addToCart(String username, CartRequestDTO cartRequestDTO, int count) {
+    public List<CartResponseDTO> addToCart(String username, CartRequestDTO cartRequestDTO) {
         SiteUser user = this.userService.get(username);
         Product product = this.productService.getProduct(cartRequestDTO.getProductId());
-        CartItem cartItem = this.cartItemService.save(user, product, count);
+        CartItem cartItem = this.cartItemService.addToCart(user, product, cartRequestDTO.getCount());
 
         List<Options> options = this.optionsService.getOptionsList(cartRequestDTO.getOptionIdList());
 
@@ -194,6 +194,25 @@ public class MultiService {
             return DTOConverter.toCartResponseDTO(item, cartItemDetails);
         }).collect(Collectors.toList());
     }
+
+    @Transactional
+    public List<CartResponseDTO> updateToCart (String username, CartRequestDTO cartRequestDTO) {
+        SiteUser user = this.userService.get(username);
+        Product product = this.productService.getProduct(cartRequestDTO.getProductId());
+        CartItem cartItem = this.cartItemService.getCartItem(user, product);
+        cartItem.updateCount(cartRequestDTO.getCount());
+        this.cartItemService.save(cartItem);
+
+        List<CartItem> cartItems = this.cartItemService.getCartItemList(user);
+        return cartItems.stream()
+                .map(item -> {
+                    List<CartItemDetail> cartItemDetails = this.cartItemDetailService.getList(item);
+                    return DTOConverter.toCartResponseDTO(item, cartItemDetails);
+                })
+                .collect(Collectors.toList());
+
+    }
+
     @Transactional
     public List<CartResponseDTO> deleteToCart (String username, Long productId) {
         SiteUser user = this.userService.get(username);
