@@ -6,6 +6,7 @@ import com.team.shopping.Domains.SiteUser;
 import com.team.shopping.Enums.Gender;
 import com.team.shopping.Enums.UserRole;
 import com.team.shopping.Exceptions.DataDuplicateException;
+import com.team.shopping.Exceptions.DataNotFoundException;
 import com.team.shopping.Repositories.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -22,8 +23,8 @@ public class UserService {
 
     @Transactional
     public SiteUser save(SignupRequestDTO signupRequestDTO) {
-        return userRepository.save(SiteUser                 //
-                .builder()                                  //
+        return userRepository.save(SiteUser
+                .builder()
                 .username(signupRequestDTO.getUsername())
                 .name(signupRequestDTO.getName())
                 .password(passwordEncoder.encode(signupRequestDTO.getPassword()))
@@ -33,14 +34,14 @@ public class UserService {
                 .role(UserRole.values()[signupRequestDTO.getRole()])
                 .birthday(signupRequestDTO.getBirthday())
                 .phoneNumber(signupRequestDTO.getPhoneNumber())
-                .build());                                  //
+                .build());
     }
 
 
 
     @Transactional
     public SiteUser get(String value) throws IllegalArgumentException{
-        return this.userRepository.findById(value).orElseThrow(() -> new IllegalArgumentException("아이디가 일치하지 않습니다."));
+        return this.userRepository.findById(value).orElseThrow(() -> new DataNotFoundException("데이터가 존재하지 않습니다"));
     }
 
     public Optional<SiteUser> getOptional(String value) {
