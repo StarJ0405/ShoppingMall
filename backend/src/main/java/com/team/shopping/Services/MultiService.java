@@ -3,7 +3,6 @@ package com.team.shopping.Services;
 
 import com.team.shopping.DTOs.*;
 import com.team.shopping.Domains.*;
-import com.team.shopping.Enums.ImageKey;
 import com.team.shopping.Enums.UserRole;
 import com.team.shopping.Exceptions.DataDuplicateException;
 import com.team.shopping.Records.TokenRecord;
@@ -24,9 +23,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.UUID;
-import java.util.stream.Collectors;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -117,7 +115,19 @@ public class MultiService {
     @Transactional
     public UserResponseDTO getProfile(String username) {
         SiteUser siteUser = this.userService.get(username);
-        return UserResponseDTO.builder().username(siteUser.getUsername()).gender(siteUser.getGender().toString()).email(siteUser.getEmail()).point(siteUser.getPoint()).phoneNumber(siteUser.getPhoneNumber()).nickname(siteUser.getNickname()).birthday(siteUser.getBirthday()).createDate(siteUser.getCreateDate()).modifyDate(siteUser.getModifyDate()).name(siteUser.getName()).build();
+        return UserResponseDTO.builder()
+                .username(siteUser.getUsername())
+                .gender(siteUser.getGender().toString())
+                .role(siteUser.getRole().toString())
+                .email(siteUser.getEmail())
+                .point(siteUser.getPoint())
+                .phoneNumber(siteUser.getPhoneNumber())
+                .nickname(siteUser.getNickname())
+                .birthday(siteUser.getBirthday())
+                .createDate(siteUser.getCreateDate())
+                .modifyDate(siteUser.getModifyDate())
+                .name(siteUser.getName())
+                .build();
     }
 
     /**
@@ -145,6 +155,17 @@ public class MultiService {
         SiteUser user = this.userService.get(username);
         Product product = this.productService.getProduct(productId);
         this.wishListService.deleteToWishList(user, product);
+        List<Wish> wishList = this.wishListService.get(user);
+        return DTOConverter.toProductResponseDTOList(wishList);
+    }
+
+    @Transactional
+    public List<ProductResponseDTO> deleteMultipleToWishList (String username, List<Long> productIds) {
+        SiteUser user = this.userService.get(username);
+        for (Long productId : productIds) {
+            Product product = this.productService.getProduct(productId);
+            this.wishListService.deleteToWishList(user, product);
+        }
         List<Wish> wishList = this.wishListService.get(user);
         return DTOConverter.toProductResponseDTOList(wishList);
     }

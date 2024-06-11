@@ -1,11 +1,11 @@
 import SideList from "../SideList";
 import Main from "./MainLayout";
 
-interface pageInterface{
-    children:React.ReactNode,
-    user:any
+interface pageInterface {
+    children: React.ReactNode,
+    user: any
 }
-export default function Profile(props: Readonly<pageInterface>){
+export default function Profile(props: Readonly<pageInterface>) {
     const user = props?.user;
     return <Main user={user} >
         <div className="flex flex-col w-[1240px]">
@@ -14,7 +14,7 @@ export default function Profile(props: Readonly<pageInterface>){
                 <label className="text-xs">11번가 속 내 정보를 한번에 확인하세요!</label>
             </div>
             <div className="flex">
-                <SideList user={user}/>
+                <SideList user={user} />
                 <div className="flex flex-col mt-4">
                     {props.children}
                 </div>

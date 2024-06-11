@@ -30,8 +30,8 @@ public class UserService {
                 .password(passwordEncoder.encode(signupRequestDTO.getPassword()))
                 .nickname(signupRequestDTO.getNickname())
                 .email(signupRequestDTO.getEmail())
-                .gender(Gender.values()[signupRequestDTO
-                .getGender()]).role(UserRole.values()[signupRequestDTO.getRole()])
+                .gender(Gender.values()[signupRequestDTO.getGender()])
+                .role(UserRole.values()[signupRequestDTO.getRole()])
                 .birthday(signupRequestDTO.getBirthday())
                 .phoneNumber(signupRequestDTO.getPhoneNumber())
                 .build());

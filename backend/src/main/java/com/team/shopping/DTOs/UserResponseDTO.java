@@ -27,6 +27,8 @@ public class UserResponseDTO {
 
     private String gender;
 
+    private String role;
+
     private int point;
 
     private LocalDateTime createDate;
@@ -37,7 +39,7 @@ public class UserResponseDTO {
 
     @Builder
     public UserResponseDTO (String username, String name, String email, String nickname,
-                            String phoneNumber, LocalDate birthday, String gender, int point,
+                            String phoneNumber, LocalDate birthday, String gender, String role, int point,
                             LocalDateTime createDate, LocalDateTime modifyDate) {
         this.username = username;
         this.name = name;
@@ -46,6 +48,7 @@ public class UserResponseDTO {
         this.phoneNumber = phoneNumber;
         this.birthday = birthday;
         this.gender = gender;
+        this.role = role;
         this.point = point;
         this.createDate = createDate;
         this.modifyDate = modifyDate;
