@@ -33,4 +33,17 @@ public class DTOConverter {
 
         return new CartResponseDTO(cartItem, optionResponseDTOList);
     }
+
+    public static PaymentLogResponseDTO toPaymentLogResponseDTO(PaymentLog paymentLog, List<PaymentProduct> paymentProductList) {
+        int totalPrice = 0;
+        for (PaymentProduct paymentProduct : paymentProductList) {
+            totalPrice += paymentProduct.getPrice() * paymentProduct.getCount();
+        }
+        return PaymentLogResponseDTO.builder()
+                .paymentStatus(paymentLog.getPaymentStatus().toString())
+                .url(paymentProductList.getFirst().getUrl())
+                .productTitle(paymentProductList.getFirst().getTitle() + " 외 " + paymentProductList.size() + "개 상품")
+                .price(totalPrice)
+                .build();
+    }
 }

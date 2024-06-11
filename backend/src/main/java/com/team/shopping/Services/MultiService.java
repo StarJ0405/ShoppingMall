@@ -40,6 +40,9 @@ public class MultiService {
     private final OptionsService optionsService;
     private final JwtTokenProvider jwtTokenProvider;
     private final FileSystemService fileSystemService;
+    private final PaymentLogService paymentLogService;
+    private final PaymentProductService paymentProductService;
+    private final PaymentProductDetailService paymentProductDetailService;
 
 
     /**
@@ -222,12 +225,17 @@ public class MultiService {
     public List<CartResponseDTO> addToCart(String username, CartRequestDTO cartRequestDTO) {
         SiteUser user = this.userService.get(username);
         Product product = this.productService.getProduct(cartRequestDTO.getProductId());
-        CartItem cartItem = this.cartItemService.addToCart(user, product, cartRequestDTO.getCount());
+        CartItem cartItem = this.cartItemService.getCartItem(user, product);
 
-        List<Options> options = this.optionsService.getOptionsList(cartRequestDTO.getOptionIdList());
+        if (cartItem != null) {
+            cartItem.updateCount(cartItem.getCount() + cartRequestDTO.getCount());
+        } else {
+            cartItem = this.cartItemService.addToCart(user, product, cartRequestDTO.getCount());
+            List<Options> options = this.optionsService.getOptionsList(cartRequestDTO.getOptionIdList());
 
-        for (Options option : options) {
-            this.cartItemDetailService.save(cartItem, option);
+            for (Options option : options) {
+                this.cartItemDetailService.save(cartItem, option);
+            }
         }
 
         List<CartResponseDTO> responseDTOList = new ArrayList<>();
@@ -268,7 +276,7 @@ public class MultiService {
         CartItem cartItem = this.cartItemService.getCartItem(user, product);
         if (cartItem != null) {
             this.cartItemDetailService.delete(cartItem);
-            this.cartItemService.deleteCartItem(cartItem);
+            this.cartItemService.delete(cartItem);
         } else {
             System.out.println("CartItem not found for user: " + username + " and product: " + productId);
         }
@@ -290,7 +298,7 @@ public class MultiService {
             CartItem cartItem = this.cartItemService.getCartItem(user, product);
             if (cartItem != null) {
                 this.cartItemDetailService.delete(cartItem);
-                this.cartItemService.deleteCartItem(cartItem);
+                this.cartItemService.delete(cartItem);
             } else {
                 System.out.println("CartItem not found for user: " + username + " and product: " + productId);
             }
@@ -305,6 +313,49 @@ public class MultiService {
         return responseDTOList;
     }
 
+    /**
+     * Payment
+     * */
+
+    @Transactional
+    public List<PaymentLogResponseDTO> addPaymentLog(String username, PaymentLogRequestDTO paymentLogRequestDTO) {
+        SiteUser user = this.userService.get(username);
+        List<CartItem> cartItemList = this.cartItemService.getList(paymentLogRequestDTO.getCartItemIdList());
+
+        // PaymentLog 생성 및 저장
+        PaymentLog paymentLog = this.paymentLogService.save(user);
+
+        List<PaymentProduct> paymentProductList = new ArrayList<>();
+        List<PaymentLogResponseDTO> paymentLogResponseDTOList = new ArrayList<>();
+
+        for (CartItem cartItem : cartItemList) {
+            Product product = cartItem.getProduct();
+            SiteUser seller = product.getSeller();
+
+            // PaymentProduct 생성 및 저장
+            PaymentProduct paymentProduct = paymentProductService.save(paymentLog, product, seller, cartItem);
+            paymentProductList.add(paymentProduct);
+
+            // PaymentProductDetail 생성 및 저장
+            List<CartItemDetail> cartItemDetailList = this.cartItemDetailService.getList(cartItem);
+            for (CartItemDetail cartItemDetail : cartItemDetailList) {
+                Options option = cartItemDetail.getOptions();
+                PaymentProductDetail paymentProductDetail = this.paymentProductDetailService.save(paymentProduct, option);
+            }
+        }
+
+        // PaymentLogResponseDTO 생성
+        PaymentLogResponseDTO paymentLogResponseDTO = DTOConverter.toPaymentLogResponseDTO(paymentLog, paymentProductList);
+        paymentLogResponseDTOList.add(paymentLogResponseDTO);
+
+        // CartItem 및 관련 CartItemDetail 삭제
+        for (CartItem cartItem : cartItemList) {
+            this.cartItemDetailService.deleteByCartItem(cartItem);
+            this.cartItemService.delete(cartItem);
+        }
+
+        return paymentLogResponseDTOList;
+    }
 
     /**
      * Product

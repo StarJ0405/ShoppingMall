@@ -30,6 +30,8 @@ public class QPaymentLog extends EntityPathBase<PaymentLog> {
 
     public final QSiteUser order;
 
+    public final EnumPath<com.team.shopping.Enums.PaymentStatus> paymentStatus = createEnum("paymentStatus", com.team.shopping.Enums.PaymentStatus.class);
+
     public QPaymentLog(String variable) {
         this(PaymentLog.class, forVariable(variable), INITS);
     }

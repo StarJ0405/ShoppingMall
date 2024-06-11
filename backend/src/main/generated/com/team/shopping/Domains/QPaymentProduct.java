@@ -22,13 +22,23 @@ public class QPaymentProduct extends EntityPathBase<PaymentProduct> {
 
     public static final QPaymentProduct paymentProduct = new QPaymentProduct("paymentProduct");
 
+    public final StringPath brand = createString("brand");
+
     public final NumberPath<Integer> count = createNumber("count", Integer.class);
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
     public final QPaymentLog paymentLog;
 
-    public final QProduct product;
+    public final NumberPath<Integer> price = createNumber("price", Integer.class);
+
+    public final NumberPath<Long> productId = createNumber("productId", Long.class);
+
+    public final QSiteUser seller;
+
+    public final StringPath title = createString("title");
+
+    public final StringPath url = createString("url");
 
     public QPaymentProduct(String variable) {
         this(PaymentProduct.class, forVariable(variable), INITS);
@@ -49,7 +59,7 @@ public class QPaymentProduct extends EntityPathBase<PaymentProduct> {
     public QPaymentProduct(Class<? extends PaymentProduct> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.paymentLog = inits.isInitialized("paymentLog") ? new QPaymentLog(forProperty("paymentLog"), inits.get("paymentLog")) : null;
-        this.product = inits.isInitialized("product") ? new QProduct(forProperty("product"), inits.get("product")) : null;
+        this.seller = inits.isInitialized("seller") ? new QSiteUser(forProperty("seller"), inits.get("seller")) : null;
     }
 
 }

@@ -59,7 +59,11 @@ public class Product {
     private LocalDateTime modifyDate;
 
     @Builder
-    public Product(SiteUser seller, Category category, int price, String description, String detail, LocalDateTime dateLimit, int remain, String title, String delivery, String address, String receipt, String a_s, String brand) {
+    public Product(SiteUser seller, Category category,
+                   int price, String description, String detail,
+                   LocalDateTime dateLimit, int remain, String title,
+                   String delivery, String address, String receipt,
+                   String a_s, String brand) {
         this.seller = seller;
         this.category = category;
         this.price = price;
