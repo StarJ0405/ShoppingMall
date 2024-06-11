@@ -3,6 +3,7 @@ package com.team.shopping.Services;
 
 import com.team.shopping.DTOs.*;
 import com.team.shopping.Domains.*;
+import com.team.shopping.Enums.ImageKey;
 import com.team.shopping.Enums.UserRole;
 import com.team.shopping.Exceptions.DataDuplicateException;
 import com.team.shopping.Records.TokenRecord;
@@ -23,7 +24,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -189,10 +190,10 @@ public class MultiService {
     }
 
     @Transactional
-    public List<CartResponseDTO> addToCart(String username, CartRequestDTO cartRequestDTO, int count) {
+    public List<CartResponseDTO> addToCart(String username, CartRequestDTO cartRequestDTO) {
         SiteUser user = this.userService.get(username);
         Product product = this.productService.getProduct(cartRequestDTO.getProductId());
-        CartItem cartItem = this.cartItemService.save(user, product, count);
+        CartItem cartItem = this.cartItemService.addToCart(user, product, cartRequestDTO.getCount());
 
         List<Options> options = this.optionsService.getOptionsList(cartRequestDTO.getOptionIdList());
 
@@ -208,6 +209,25 @@ public class MultiService {
                 })
                 .collect(Collectors.toList());
     }
+
+    @Transactional
+    public List<CartResponseDTO> updateToCart (String username, CartRequestDTO cartRequestDTO) {
+        SiteUser user = this.userService.get(username);
+        Product product = this.productService.getProduct(cartRequestDTO.getProductId());
+        CartItem cartItem = this.cartItemService.getCartItem(user, product);
+        cartItem.updateCount(cartRequestDTO.getCount());
+        this.cartItemService.save(cartItem);
+
+        List<CartItem> cartItems = this.cartItemService.getCartItemList(user);
+        return cartItems.stream()
+                .map(item -> {
+                    List<CartItemDetail> cartItemDetails = this.cartItemDetailService.getList(item);
+                    return DTOConverter.toCartResponseDTO(item, cartItemDetails);
+                })
+                .collect(Collectors.toList());
+
+    }
+
     @Transactional
     public List<CartResponseDTO> deleteToCart (String username, Long productId) {
         SiteUser user = this.userService.get(username);

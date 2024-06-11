@@ -33,4 +33,8 @@ public class CartItem {
         this.count = count;
         this.createDate = createDate;
     }
+
+    public void updateCount(int count) {
+        this.count = count;
+    }
 }
