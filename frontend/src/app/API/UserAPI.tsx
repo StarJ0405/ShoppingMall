@@ -72,7 +72,7 @@ export const deleteWishListMultiple = async (data: any[]) => {
 }
 
 interface productProps {
-    category: number,
+    categoryId: number,
     price: number,
     description: string,
     detail: string,
@@ -84,7 +84,8 @@ interface productProps {
     receipt: string,
     a_s: string,
     brand: string,
-    productTagList: string[]
+    productTagList: string[],
+    url:string
 }
 export const productRegist = async (data: productProps) => {
     const response = await UserApi.post(`/api/product`, data);
