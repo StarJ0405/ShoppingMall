@@ -189,6 +189,8 @@ public class MultiService {
     }
 
 
+
+
     @Transactional
     public List<ProductResponseDTO> deleteMultipleToWishList (String username, List<Long> productIdList) {
         SiteUser user = this.userService.get(username);
@@ -236,6 +238,7 @@ public class MultiService {
         }).collect(Collectors.toList());
     }
 
+
     @Transactional
     public List<CartResponseDTO> updateToCart (String username, CartRequestDTO cartRequestDTO) {
         SiteUser user = this.userService.get(username);
@@ -255,7 +258,7 @@ public class MultiService {
     }
 
     @Transactional
-    public List<CartResponseDTO> deleteToCart (String username, Long productId) {
+    public List<CartResponseDTO> deleteToCart(String username, Long productId) {
         SiteUser user = this.userService.get(username);
         Product product = this.productService.getProduct(productId);
         CartItem cartItem = this.cartItemService.getCartItem(user, product);
@@ -315,7 +318,8 @@ public class MultiService {
         String newFile = "/api/product" + "_" + product.getId() + "/";
         String newUrl = this.fileMove(requestDTO.getUrl(), newFile);
         if (newUrl != null) {
-            fileSystemService.save(ImageKey.Product.getKey(product.getId()), newUrl);
+            fileSystemService.save(ImageKey.Product.getKey(product.getId().toString()), newUrl);
+            fileSystemService.delete(username);
         }
 
     }
@@ -341,11 +345,22 @@ public class MultiService {
     public ImageResponseDTO tempUpload(ImageRequestDTO requestDTO, String username) {
         if (!requestDTO.getFile().isEmpty()) try {
             String path = ShoppingApplication.getOsType().getLoc();
+            String tempUrl = fileSystemService.get(username);
+            if (tempUrl != null) {
+                File file = new File(path + tempUrl);
+                if (file.exists()) {
+                    file.delete();
+                    fileSystemService.delete(username);
+                }
+            }
             UUID uuid = UUID.randomUUID();
             String fileLoc = "/api/users" + "_" + username + "/temp/" + uuid + "." + requestDTO.getFile().getContentType().split("/")[1];
             File file = new File(path + fileLoc);
             if (!file.getParentFile().exists()) file.getParentFile().mkdirs();
             requestDTO.getFile().transferTo(file);
+            if (fileLoc != null) {
+                fileSystemService.save(ImageKey.Temp.getKey(username), fileLoc);
+            }
             return new ImageResponseDTO(fileLoc);
         } catch (IOException e) {
             e.printStackTrace();
