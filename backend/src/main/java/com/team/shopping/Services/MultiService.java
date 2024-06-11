@@ -149,9 +149,10 @@ public class MultiService {
     }
 
     @Transactional
-    public List<ProductResponseDTO> deleteMultipleToWishList(String username, List<Long> productIds) {
+
+    public List<ProductResponseDTO> deleteMultipleToWishList (String username, List<Long> productIdList) {
         SiteUser user = this.userService.get(username);
-        for (Long productId : productIds) {
+        for (Long productId : productIdList) {
             Product product = this.productService.getProduct(productId);
             this.wishListService.deleteToWishList(user, product);
         }
@@ -193,10 +194,53 @@ public class MultiService {
             return DTOConverter.toCartResponseDTO(item, cartItemDetails);
         }).collect(Collectors.toList());
     }
+    @Transactional
+    public List<CartResponseDTO> deleteToCart (String username, Long productId) {
+        SiteUser user = this.userService.get(username);
+        Product product = this.productService.getProduct(productId);
+        CartItem cartItem = this.cartItemService.getCartItem(user, product);
+        this.cartItemDetailService.delete(cartItem);
+        this.cartItemService.deleteCartItem(cartItem);
+
+        List<CartItem> cartItems = this.cartItemService.getCartItemList(user);
+
+        return cartItems.stream()
+                .map(item -> {
+                    List<CartItemDetail> cartItemDetails = this.cartItemDetailService.getList(item);
+                    return DTOConverter.toCartResponseDTO(item, cartItemDetails);
+                })
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public List<CartResponseDTO> deleteMultipleToCart(String username, List<Long> productIdList) {
+        SiteUser user = this.userService.get(username);
+        for (Long productId : productIdList) {
+            Product product = this.productService.getProduct(productId);
+
+            CartItem cartItem = this.cartItemService.getCartItem(user, product);
+            if (cartItem != null) {
+                this.cartItemDetailService.delete(cartItem);
+                this.cartItemService.deleteCartItem(cartItem);
+            } else {
+                System.out.println("CartItem not found for user: " + username + " and product: " + productId);
+            }
+        }
+
+        List<CartItem> cartItems = this.cartItemService.getCartItemList(user);
+
+        return cartItems.stream()
+                .map(item -> {
+                    List<CartItemDetail> cartItemDetails = this.cartItemDetailService.getList(item);
+                    return DTOConverter.toCartResponseDTO(item, cartItemDetails);
+                })
+                .collect(Collectors.toList());
+    }
 
     /**
      * Product
      */
+
     @Transactional
     public void saveProduct(ProductCreateRequestDTO requestDTO, String username) {
         SiteUser user = this.userService.get(username);

@@ -103,7 +103,7 @@ public class UserController {
         return tokenRecord.getResponseEntity();
     }
 
-    @DeleteMapping("/wishList/Multi")
+    @DeleteMapping("/wishList/multi")
     public ResponseEntity<?> deleteMultipleToWishList (@RequestHeader("Authorization") String accessToken,
                                                        @RequestHeader("productIdList") List<Long> productIdList) {
         TokenRecord tokenRecord = this.multiService.checkToken(accessToken);

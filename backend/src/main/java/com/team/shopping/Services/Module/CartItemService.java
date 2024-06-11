@@ -29,7 +29,12 @@ public class CartItemService {
                 .build());
     }
 
-    public CartItem getCartItem(SiteUser user) {
-        return this.cartItemRepository.findByUser(user);
+    public CartItem getCartItem(SiteUser user, Product product) {
+        return this.cartItemRepository.findByUserAndProduct(user, product);
     }
+
+    public void deleteCartItem(CartItem cartItem) {
+        this.cartItemRepository.delete(cartItem);
+    }
+
 }
