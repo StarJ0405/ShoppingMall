@@ -90,3 +90,12 @@ export const productRegist = async (data: productProps) => {
     const response = await UserApi.post(`/api/product`, data);
     return response.data;
 }
+
+export const saveImage = async(data:any)=>{
+    const response = await UserApi.post(`/api/image`, data,{
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        }
+    });
+    return response.data;
+}
