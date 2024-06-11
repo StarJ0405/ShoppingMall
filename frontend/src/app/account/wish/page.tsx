@@ -1,5 +1,5 @@
 "use client"
-import { deleteWishList, getUser, getWishList } from "@/app/API/UserAPI";
+import { deleteWishList, deleteWishListMultiple, getUser, getWishList } from "@/app/API/UserAPI";
 import Profile from "@/app/Global/Layout/ProfileLayout";
 import { redirect } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -28,19 +28,21 @@ export default function Page() {
       deleteWishList(id)
         .then(r => {
           setWishList(r);
+          document.getElementsByName('check').forEach((check: any) => check.checked =false);
         })
         .catch(e => console.log(e));
   }
   function DeleteAll() {
-    if (confirm("선택하신 찜한 상품들을 삭제 하시겠습니까?"))
-      document.getElementsByName('check').forEach((check: any) => {
-        if (check.checked)
-          deleteWishList(check.value)
-            .then(r => {
-              setWishList(r);
-            })
-            .catch(e => console.log(e));
-      });
+    if (confirm("선택하신 찜한 상품들을 삭제 하시겠습니까?")) {
+      const numbers = [] as unknown as number[];
+      const checks = document.getElementsByName('check');
+      checks.forEach((check: any) => check.checked ? numbers.push(check.value) : null);
+      deleteWishListMultiple(numbers)
+        .then(r => {
+          setWishList(r);
+          checks.forEach((check: any) => check.checked =false);
+        }).catch(e => console.log(e))
+    }
   }
   function SelectAll(e: any) {
     document.getElementsByName('check').forEach((check: any) => check.checked = e.target.checked);

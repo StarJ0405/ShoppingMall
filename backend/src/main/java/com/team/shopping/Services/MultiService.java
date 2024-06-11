@@ -3,6 +3,7 @@ package com.team.shopping.Services;
 
 import com.team.shopping.DTOs.*;
 import com.team.shopping.Domains.*;
+import com.team.shopping.Enums.ImageKey;
 import com.team.shopping.Enums.UserRole;
 import com.team.shopping.Exceptions.DataDuplicateException;
 import com.team.shopping.Records.TokenRecord;
@@ -23,7 +24,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -115,19 +116,7 @@ public class MultiService {
     @Transactional
     public UserResponseDTO getProfile(String username) {
         SiteUser siteUser = this.userService.get(username);
-        return UserResponseDTO.builder()
-                .username(siteUser.getUsername())
-                .gender(siteUser.getGender().toString())
-                .role(siteUser.getRole().toString())
-                .email(siteUser.getEmail())
-                .point(siteUser.getPoint())
-                .phoneNumber(siteUser.getPhoneNumber())
-                .nickname(siteUser.getNickname())
-                .birthday(siteUser.getBirthday())
-                .createDate(siteUser.getCreateDate())
-                .modifyDate(siteUser.getModifyDate())
-                .name(siteUser.getName())
-                .build();
+        return UserResponseDTO.builder().username(siteUser.getUsername()).gender(siteUser.getGender().toString()).role(siteUser.getRole().toString()).email(siteUser.getEmail()).point(siteUser.getPoint()).phoneNumber(siteUser.getPhoneNumber()).nickname(siteUser.getNickname()).birthday(siteUser.getBirthday()).createDate(siteUser.getCreateDate()).modifyDate(siteUser.getModifyDate()).name(siteUser.getName()).build();
     }
 
     /**
@@ -160,7 +149,7 @@ public class MultiService {
     }
 
     @Transactional
-    public List<ProductResponseDTO> deleteMultipleToWishList (String username, List<Long> productIds) {
+    public List<ProductResponseDTO> deleteMultipleToWishList(String username, List<Long> productIds) {
         SiteUser user = this.userService.get(username);
         for (Long productId : productIds) {
             Product product = this.productService.getProduct(productId);
@@ -180,12 +169,10 @@ public class MultiService {
 
         List<CartItem> cartItems = this.cartItemService.getCartItemList(user);
 
-        return cartItems.stream()
-                .map(cartItem -> {
-                    List<CartItemDetail> cartItemDetails = this.cartItemDetailService.getList(cartItem);
-                    return DTOConverter.toCartResponseDTO(cartItem, cartItemDetails);
-                })
-                .collect(Collectors.toList());
+        return cartItems.stream().map(cartItem -> {
+            List<CartItemDetail> cartItemDetails = this.cartItemDetailService.getList(cartItem);
+            return DTOConverter.toCartResponseDTO(cartItem, cartItemDetails);
+        }).collect(Collectors.toList());
     }
 
     @Transactional
@@ -201,12 +188,10 @@ public class MultiService {
         }
 
         List<CartItem> cartItems = this.cartItemService.getCartItemList(user);
-        return cartItems.stream()
-                .map(item -> {
-                    List<CartItemDetail> cartItemDetails = this.cartItemDetailService.getList(item);
-                    return DTOConverter.toCartResponseDTO(item, cartItemDetails);
-                })
-                .collect(Collectors.toList());
+        return cartItems.stream().map(item -> {
+            List<CartItemDetail> cartItemDetails = this.cartItemDetailService.getList(item);
+            return DTOConverter.toCartResponseDTO(item, cartItemDetails);
+        }).collect(Collectors.toList());
     }
 
     /**
@@ -250,19 +235,17 @@ public class MultiService {
 
     @Transactional
     public ImageResponseDTO tempUpload(ImageRequestDTO requestDTO, String username) {
-        if (!requestDTO.getFile().isEmpty())
-            try {
-                String path = ShoppingApplication.getOsType().getLoc();
-                UUID uuid = UUID.randomUUID();
-                String fileLoc = "/users" + "_" + username + "/temp/" + uuid + "." + requestDTO.getFile().getContentType().split("/")[1];
-                File file = new File(path + fileLoc);
-                if (!file.getParentFile().exists())
-                    file.getParentFile().mkdirs();
-                requestDTO.getFile().transferTo(file);
-                return new ImageResponseDTO(fileLoc);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        if (!requestDTO.getFile().isEmpty()) try {
+            String path = ShoppingApplication.getOsType().getLoc();
+            UUID uuid = UUID.randomUUID();
+            String fileLoc = "/users" + "_" + username + "/temp/" + uuid + "." + requestDTO.getFile().getContentType().split("/")[1];
+            File file = new File(path + fileLoc);
+            if (!file.getParentFile().exists()) file.getParentFile().mkdirs();
+            requestDTO.getFile().transferTo(file);
+            return new ImageResponseDTO(fileLoc);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return null;
     }
 

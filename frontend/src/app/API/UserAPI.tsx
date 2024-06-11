@@ -66,13 +66,18 @@ export const deleteWishList = async (data: number) => {
     const response = await UserApi.delete(`/api/user/wishList`, { headers: { 'productId': data } });
     return response.data;
 }
+export const deleteWishListMultiple = async (data: any[]) => {
+    const response = await UserApi.delete(`/api/user/wishList/Multi`, { headers: { 'productIdList': data } });
+    return response.data;
+}
+
 interface productProps {
     category: number,
-    price: string,
+    price: number,
     description: string,
     detail: string,
-    dateLimit: string,
-    remain: string,
+    dateLimit: Date,
+    remain: number,
     title: string,
     delivery: string,
     address: string,
