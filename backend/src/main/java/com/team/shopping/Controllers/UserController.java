@@ -1,9 +1,6 @@
 package com.team.shopping.Controllers;
 
-import com.team.shopping.DTOs.ProductRequestDTO;
-import com.team.shopping.DTOs.ProductResponseDTO;
-import com.team.shopping.DTOs.SignupRequestDTO;
-import com.team.shopping.DTOs.UserResponseDTO;
+import com.team.shopping.DTOs.*;
 import com.team.shopping.Exceptions.DataDuplicateException;
 import com.team.shopping.Records.TokenRecord;
 import com.team.shopping.Services.Module.UserService;
@@ -34,6 +31,7 @@ public class UserController {
         }
     }
 
+
     @DeleteMapping
     public ResponseEntity<?> deleteUser(@RequestHeader("Authorization") String accessToken, @RequestBody SignupRequestDTO signupRequestDTO) {
         try {
@@ -60,6 +58,37 @@ public class UserController {
         }
         return tokenRecord.getResponseEntity();
     }
+
+
+
+
+    @PutMapping
+    public ResponseEntity<?> updateProfile(@RequestHeader("Authorization") String accessToken, @RequestBody UserRequestDTO userRequestDTO) {
+
+        TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
+        if (tokenRecord.isOK()) {
+            String username = tokenRecord.username();
+            UserResponseDTO userResponseDTO = multiService.updateProfile(username,userRequestDTO);
+
+            return tokenRecord.getResponseEntity(userResponseDTO);
+        }
+        return tokenRecord.getResponseEntity();
+
+    }
+
+    @PutMapping("/password")
+    public ResponseEntity<?> updatePassword(@RequestHeader("Authorization") String accessToken , @RequestBody UserRequestDTO userRequestDTO){
+
+        TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
+        if(tokenRecord.isOK()){
+            String username = tokenRecord.username();
+            UserResponseDTO userResponseDTO = multiService.updatePassword(username,userRequestDTO);
+            return tokenRecord.getResponseEntity(userResponseDTO);
+        }
+        return tokenRecord.getResponseEntity();
+    }
+
+
 
     /**
      * wishList Function

@@ -17,8 +17,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.stream.Collectors;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -100,11 +100,47 @@ public class MultiService {
         return UserResponseDTO.builder().username(siteUser.getUsername()).gender(siteUser.getGender().toString()).email(siteUser.getEmail()).point(siteUser.getPoint()).phoneNumber(siteUser.getPhoneNumber()).nickname(siteUser.getNickname()).birthday(siteUser.getBirthday()).createDate(siteUser.getCreateDate()).modifyDate(siteUser.getModifyDate()).name(siteUser.getName()).build();
     }
 
+    @Transactional
+    public UserResponseDTO updateProfile(String username, UserRequestDTO newUserRequestDTO) {
+        SiteUser siteUser = userService.updateProfile(username, newUserRequestDTO);
+
+        return UserResponseDTO.builder()
+                .username(siteUser.getUsername())
+                .gender(siteUser.getGender().toString())
+                .email(siteUser.getEmail())
+                .point(siteUser.getPoint())
+                .phoneNumber(siteUser.getPhoneNumber())
+                .nickname(siteUser.getNickname())
+                .birthday(siteUser.getBirthday())
+                .createDate(siteUser.getCreateDate())
+                .modifyDate(siteUser.getModifyDate())
+                .name(siteUser.getName())
+                .build();
+    }
+
+
+    @Transactional
+    public UserResponseDTO updatePassword(String username, UserRequestDTO userRequestDTO) {
+        SiteUser user = userService.get(username);
+        if (!this.userService.isMatch(userRequestDTO.getPassword(), user.getPassword()))
+            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+        SiteUser siteUser = userService.updatePassword(user, userRequestDTO.getNewPassword());
+        return UserResponseDTO.builder()
+                .username(siteUser.getUsername())
+                .gender(siteUser.getGender().toString())
+                .email(siteUser.getEmail())
+                .point(siteUser.getPoint())
+                .phoneNumber(siteUser.getPhoneNumber())
+                .nickname(siteUser.getNickname())
+                .birthday(siteUser.getBirthday())
+                .createDate(siteUser.getCreateDate())
+                .modifyDate(siteUser.getModifyDate())
+                .name(siteUser.getName())
+                .build();
+    }
+
     /**
-     * 
-     
-     
-     List
+     * List
      */
 
     @Transactional
@@ -133,9 +169,8 @@ public class MultiService {
     }
 
     /**
-
      * cart
-     * */
+     */
 
     @Transactional
     public List<CartResponseDTO> getCart(String username) {
@@ -243,4 +278,6 @@ public class MultiService {
             }
         }
     }
+
+
 }
