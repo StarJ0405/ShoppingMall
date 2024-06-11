@@ -103,14 +103,14 @@ public class UserController {
         return tokenRecord.getResponseEntity();
     }
 
-    @DeleteMapping("/wishList/Multi")
+    @DeleteMapping("/wishList/multi")
     public ResponseEntity<?> deleteMultipleToWishList (@RequestHeader("Authorization") String accessToken,
-                                                       @RequestHeader("productIds") List<Long> productIds) {
+                                                       @RequestHeader("productIdList") List<Long> productIdList) {
         TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
         if (tokenRecord.isOK()) {
             String username = tokenRecord.username();
             // 기능
-            List<ProductResponseDTO> wishListResponseDTO = this.multiService.deleteMultipleToWishList(username, productIds);
+            List<ProductResponseDTO> wishListResponseDTO = this.multiService.deleteMultipleToWishList(username, productIdList);
             return tokenRecord.getResponseEntity(wishListResponseDTO);
         }
         return tokenRecord.getResponseEntity();
