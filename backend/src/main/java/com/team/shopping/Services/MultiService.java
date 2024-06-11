@@ -252,7 +252,7 @@ public class MultiService {
         }
         Category category = this.categoryService.get(requestDTO.getCategoryId());
         Product product = this.productService.save(requestDTO, user, category);
-        String newFile = "/product" + "_" + product.getId() + "/";
+        String newFile = "/api/product" + "_" + product.getId() + "/";
         String newUrl = this.fileMove(requestDTO.getUrl(), newFile);
         if (newUrl != null) {
             fileSystemService.save(ImageKey.Product.getKey(product.getId()), newUrl);
@@ -282,7 +282,7 @@ public class MultiService {
         if (!requestDTO.getFile().isEmpty()) try {
             String path = ShoppingApplication.getOsType().getLoc();
             UUID uuid = UUID.randomUUID();
-            String fileLoc = "/users" + "_" + username + "/temp/" + uuid + "." + requestDTO.getFile().getContentType().split("/")[1];
+            String fileLoc = "/api/users" + "_" + username + "/temp/" + uuid + "." + requestDTO.getFile().getContentType().split("/")[1];
             File file = new File(path + fileLoc);
             if (!file.getParentFile().exists()) file.getParentFile().mkdirs();
             requestDTO.getFile().transferTo(file);
@@ -305,7 +305,6 @@ public class MultiService {
         } else {
             throw new IllegalArgumentException("ADMIN 권한이 아닙니다.");
         }
-
     }
 
     @Transactional

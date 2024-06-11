@@ -2,13 +2,14 @@ package com.team.shopping.Controllers;
 
 import com.team.shopping.DTOs.ImageRequestDTO;
 import com.team.shopping.DTOs.ImageResponseDTO;
-import com.team.shopping.DTOs.ProductCreateRequestDTO;
 import com.team.shopping.Records.TokenRecord;
 import com.team.shopping.Services.MultiService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
@@ -18,7 +19,7 @@ public class ImageController {
 
     @PostMapping
     public ResponseEntity<?> tempImage(@RequestHeader("Authorization") String accessToken,
-                                       @RequestBody ImageRequestDTO imageRequestDTO) {
+                                       ImageRequestDTO imageRequestDTO) {
         TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
         if (tokenRecord.isOK()) {
             String username = tokenRecord.username();
