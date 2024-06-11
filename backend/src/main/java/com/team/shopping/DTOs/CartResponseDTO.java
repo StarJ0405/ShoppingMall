@@ -14,6 +14,8 @@ import java.util.List;
 @NoArgsConstructor
 public class CartResponseDTO {
 
+    private Long cartItemId;
+
     private String authorName;
 
     private Long productId;
@@ -30,6 +32,7 @@ public class CartResponseDTO {
 
     @Builder
     public CartResponseDTO (CartItem cartItem, List<OptionResponseDTO> optionResponseDTOList) {
+        this.cartItemId = cartItem.getId();
         this.authorName = cartItem.getProduct().getSeller().getName();
         this.productId = cartItem.getProduct().getId();
         this.productTitle = cartItem.getProduct().getTitle();

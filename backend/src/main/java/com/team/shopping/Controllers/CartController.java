@@ -31,7 +31,6 @@ public class CartController {
 
     @PostMapping("/cartList")
     public ResponseEntity<?> addToCartList (@RequestHeader("Authorization") String accessToken,
-                                            @RequestHeader("count") int count,
                                             @RequestBody CartRequestDTO cartRequestDTO) {
         TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
         if (tokenRecord.isOK()) {

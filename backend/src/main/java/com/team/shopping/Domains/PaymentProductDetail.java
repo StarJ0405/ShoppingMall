@@ -20,6 +20,4 @@ public class PaymentProductDetail {
 
     @ManyToOne
     private Options option;
-
-
 }

@@ -45,7 +45,7 @@ public class Product {
     @Column(length = 50)
     private String address;
 
-    @Column(length = 50)
+    @Column(columnDefinition = "TEXT")
     private String receipt;
 
     @Column(length = 50)

@@ -3,6 +3,7 @@ package com.team.shopping.Services;
 
 import com.team.shopping.DTOs.*;
 import com.team.shopping.Domains.*;
+import com.team.shopping.Enums.ImageKey;
 import com.team.shopping.Enums.UserRole;
 import com.team.shopping.Exceptions.DataDuplicateException;
 import com.team.shopping.Records.TokenRecord;
@@ -21,10 +22,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -177,15 +178,13 @@ public class MultiService {
     @Transactional
     public List<CartResponseDTO> getCart(String username) {
         SiteUser user = this.userService.get(username);
-
+        List<CartResponseDTO> responseDTOList = new ArrayList<>();
         List<CartItem> cartItems = this.cartItemService.getCartItemList(user);
-
-        return cartItems.stream()
-                .map(cartItem -> {
-                    List<CartItemDetail> cartItemDetails = this.cartItemDetailService.getList(cartItem);
-                    return DTOConverter.toCartResponseDTO(cartItem, cartItemDetails);
-                })
-                .collect(Collectors.toList());
+        for (CartItem item : cartItems) {
+            List<CartItemDetail> cartItemDetails = this.cartItemDetailService.getList(item);
+            responseDTOList.add(DTOConverter.toCartResponseDTO(item, cartItemDetails));
+        }
+        return responseDTOList;
     }
 
     @Transactional
@@ -200,30 +199,34 @@ public class MultiService {
             this.cartItemDetailService.save(cartItem, option);
         }
 
+        List<CartResponseDTO> responseDTOList = new ArrayList<>();
         List<CartItem> cartItems = this.cartItemService.getCartItemList(user);
-        return cartItems.stream()
-                .map(item -> {
-                    List<CartItemDetail> cartItemDetails = this.cartItemDetailService.getList(item);
-                    return DTOConverter.toCartResponseDTO(item, cartItemDetails);
-                })
-                .collect(Collectors.toList());
+        for (CartItem item : cartItems) {
+            List<CartItemDetail> cartItemDetails = this.cartItemDetailService.getList(item);
+            responseDTOList.add(DTOConverter.toCartResponseDTO(item, cartItemDetails));
+        }
+        return responseDTOList;
     }
+
     @Transactional
-    public List<CartResponseDTO> deleteToCart (String username, Long productId) {
+    public List<CartResponseDTO> deleteToCart(String username, Long productId) {
         SiteUser user = this.userService.get(username);
         Product product = this.productService.getProduct(productId);
         CartItem cartItem = this.cartItemService.getCartItem(user, product);
-        this.cartItemDetailService.delete(cartItem);
-        this.cartItemService.deleteCartItem(cartItem);
+        if (cartItem != null) {
+            this.cartItemDetailService.delete(cartItem);
+            this.cartItemService.deleteCartItem(cartItem);
+        } else {
+            System.out.println("CartItem not found for user: " + username + " and product: " + productId);
+        }
 
+        List<CartResponseDTO> responseDTOList = new ArrayList<>();
         List<CartItem> cartItems = this.cartItemService.getCartItemList(user);
-
-        return cartItems.stream()
-                .map(item -> {
-                    List<CartItemDetail> cartItemDetails = this.cartItemDetailService.getList(item);
-                    return DTOConverter.toCartResponseDTO(item, cartItemDetails);
-                })
-                .collect(Collectors.toList());
+        for (CartItem item : cartItems) {
+            List<CartItemDetail> cartItemDetails = this.cartItemDetailService.getList(item);
+            responseDTOList.add(DTOConverter.toCartResponseDTO(item, cartItemDetails));
+        }
+        return responseDTOList;
     }
 
     @Transactional
@@ -231,7 +234,6 @@ public class MultiService {
         SiteUser user = this.userService.get(username);
         for (Long productId : productIdList) {
             Product product = this.productService.getProduct(productId);
-
             CartItem cartItem = this.cartItemService.getCartItem(user, product);
             if (cartItem != null) {
                 this.cartItemDetailService.delete(cartItem);
@@ -241,15 +243,15 @@ public class MultiService {
             }
         }
 
+        List<CartResponseDTO> responseDTOList = new ArrayList<>();
         List<CartItem> cartItems = this.cartItemService.getCartItemList(user);
-
-        return cartItems.stream()
-                .map(item -> {
-                    List<CartItemDetail> cartItemDetails = this.cartItemDetailService.getList(item);
-                    return DTOConverter.toCartResponseDTO(item, cartItemDetails);
-                })
-                .collect(Collectors.toList());
+        for (CartItem item : cartItems) {
+            List<CartItemDetail> cartItemDetails = this.cartItemDetailService.getList(item);
+            responseDTOList.add(DTOConverter.toCartResponseDTO(item, cartItemDetails));
+        }
+        return responseDTOList;
     }
+
 
     /**
      * Product
