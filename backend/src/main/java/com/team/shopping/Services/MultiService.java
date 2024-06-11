@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
@@ -412,7 +413,24 @@ public class MultiService {
         }
     }
 
-
+    @Transactional
+    public List<CategoryResponseDTO> getCategoryList() {
+        List<Category> categoryList = categoryService.findByParentIsNull();
+        List<CategoryResponseDTO> result = new ArrayList<>();
+        for (Category parentCategory : categoryList) {
+            CategoryResponseDTO responseDTO = this.getCategoryWithChildren(parentCategory);
+            result.add(responseDTO);
+        }
+        return result;
+    }
+    @Transactional
+    private CategoryResponseDTO getCategoryWithChildren(Category parentCategory) {
+        List<CategoryResponseDTO> childrenDTOList = new ArrayList<>();
+        for (Category child : parentCategory.getChildren()) {
+            childrenDTOList.add(getCategoryWithChildren(child));
+        }
+        return new CategoryResponseDTO(parentCategory.getId(),parentCategory.getName(), childrenDTOList);
+    }
 }
 
 
