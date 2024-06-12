@@ -86,7 +86,7 @@ interface productProps {
     brand: string,
     productTagList: string[],
     url:string,
-    options:any
+    optionLists:any
 }
 export const productRegist = async (data: productProps) => {
     const response = await UserApi.post('/api/product', data);
