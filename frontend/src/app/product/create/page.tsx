@@ -57,11 +57,9 @@ export default function Page() {
             redirect('/account/login');
     }, [ACCESS_TOKEN]);
     function Regist() {
-
-        productRegist({ categoryId: category, price: price, description: simpleDescription, detail: detail, dateLimit: dateLimit, remain: remain, title: title, delivery: delivery, address: address, receipt: receipt, a_s: a_s, brand: brand, productTagList: tags, url: url })
+        productRegist({ categoryId: category, price: price, description: simpleDescription, detail: detail, dateLimit: dateLimit, remain: remain, title: title, delivery: delivery, address: address, receipt: receipt, a_s: a_s, brand: brand, productTagList: tags, url: url, options:options })
             .then(() => window.location.href = '/')
             .catch(e => console.log(e))
-
     }
     function Change(file: any) {
         const formData = new FormData();
@@ -132,7 +130,7 @@ export default function Page() {
                     </tr>
                     <tr>
                         <th className='border border-black'>판매 종료일</th>
-                        <td className='px-2'><input type='datetime-local' placeholder='판매 기간' defaultValue={dateLimit} onChange={e => setDateLimit(e.target.value)} /></td>
+                        <td className='px-2'><input type='datetime-local' placeholder='판매 기간' defaultValue={dateLimit} onChange={e => setDateLimit(e.target.value)} max="9999-12-31T23:59" /></td>
                     </tr>
                     <tr>
                         <th className='border border-black'>판매 수량</th>
@@ -179,7 +177,7 @@ export default function Page() {
                         <th className='border border-black'>옵션</th>
                         <td className='px-2 flex items-center'>
                             <div className='flex flex-col'>
-                                <select id="optionList" defaultValue={-1} onChange={e => { setSelectedOptionList(options[Number(e.target.selectedOptions[0].value)]) }}>
+                                <select id="optionList" defaultValue={-1} onChange={e => { setSelectedOptionList(options[Number(e.target.selectedOptions[0].value)]); (document.getElementById('option')as HTMLSelectElement).selectedIndex=0; }}>
                                     {options ?
                                         <option value={-1} disabled>등록된 옵션목록이 없습니다.</option>
                                         :
@@ -198,7 +196,7 @@ export default function Page() {
                             </div>
                             <label className='text-2xl mx-4'>→</label>
                             <div className='flex flex-col'>
-                                <select id="option" defaultValue={-1} onChange={e => { setSelectedOption((selectedOptionList as any).child[Number(e.target.selectedOptions[0].value)])}}>
+                                <select id="option" defaultValue={-1} onChange={e => { setSelectedOption((selectedOptionList as any).child[Number(e.target.selectedOptions[0].value)]) }}>
                                     {selectedOptionList.length > 0 ?
                                         options ?
                                             <option value={-1} disabled>등록된 옵션이 없습니다.</option>
@@ -207,11 +205,11 @@ export default function Page() {
                                         :
                                         <option value={-1} disabled>옵션 목록을 선택해주세요</option>
                                     }
-                                    {((selectedOptionList as any)?.child as any[])?.map((option: any, index) => <option key={index} value={index}>{option.name}</option>)}
+                                    {((selectedOptionList as any)?.child as any[])?.map((option: any, index) => <option key={index} value={index}>{option.name + ':' + option.price}</option>)}
                                 </select>
                                 <button className='btn btn-xs btn-info' disabled={selectedOptionList.length <= 0} onClick={() => openModal(1)}>옵션 추가</button>
                                 <button className='btn btn-xs btn-error' disabled={!selectedOption} onClick={() => {
-                                    (selectedOptionList as any).child = (selectedOptionList as any).child.filter((child:any)=>child.name != selectedOption.name);
+                                    (selectedOptionList as any).child = (selectedOptionList as any).child.filter((child: any) => child.name != selectedOption.name);
                                     setSelectedOption(null as any);
                                     setOptions([...options]);
                                     (document.getElementById('option') as HTMLSelectElement).selectedIndex = 0;
@@ -232,23 +230,35 @@ export default function Page() {
             </div>
         </div>
         <Modal open={isModalOpen > -1} onClose={() => setISModalOpen(-1)} className='w-[300px] h-[150px] flex flex-col justify-center items-center' escClose={true} outlineClose={true} >
-            <input id="add" type="text" maxLength={50} placeholder='작성..' autoFocus />
-            {isModalOpen == 1 ? <input type="number" id="price" min={0} placeholder='옵션 추가 비용' /> : <></>}
+            <input id="add" type="text" maxLength={50} placeholder='작성..' autoFocus onKeyDown={e => {
+                if (e.key == "Enter")
+                    if (isModalOpen == 0)
+                        document.getElementById("add_button")?.click();
+                    else
+                        document.getElementById("price")?.focus();
+
+            }} />
+            {isModalOpen == 1 ? <input type="number" id="price" min={0} placeholder='옵션 추가 비용' onKeyDown={e => { if (e.key == "Enter") document.getElementById('add_button')?.click() }} /> : <></>}
             <button id="add_button" className='btn btn-sm mt-1' onClick={() => {
                 const value = (document.getElementById('add') as HTMLInputElement).value;
                 if (value && value.length > 0)
                     if (isModalOpen == 0) {
                         // 옵션 목록
                         const now = { name: value, child: [] as any } as any;
-                        options.push(now);
-                        setOptions([...options]);
+                        if (options.filter((option: any) => option.name == value).length == 0) {
+                            options.push(now);
+                            setOptions([...options]);
+                        }
                         setISModalOpen(-1);
                     } else {
                         // 옵션
                         const price = Number((document.getElementById('price') as HTMLInputElement).value);
                         const now = { name: value, price: price } as any;
-                        (selectedOptionList as any).child.push(now);
-                        setOptions([...options]);
+                        const search = (selectedOptionList as any).child.filter((option: any) => option.name == value);
+                        if (search.length == 0) {
+                            (selectedOptionList as any).child.push(now);
+                            setOptions([...options]);
+                        } else search[0].price = price;
                         setISModalOpen(-1);
                     }
             }}>등록하기</button>
