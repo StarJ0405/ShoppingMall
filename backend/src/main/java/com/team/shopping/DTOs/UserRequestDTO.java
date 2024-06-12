@@ -18,4 +18,6 @@ public class UserRequestDTO {
 
     private String newPassword;
 
+    private String url;
+
 }

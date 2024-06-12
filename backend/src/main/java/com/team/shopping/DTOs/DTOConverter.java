@@ -6,22 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DTOConverter {
-
-
-
-    public static ProductResponseDTO toProductResponseDTO(Product product) {
-        return new ProductResponseDTO(product);
-    }
-
-    public static List<ProductResponseDTO> toProductResponseDTOList(List<Wish> wishList) {
-        List<ProductResponseDTO> productResponseDTOList = new ArrayList<>();
-        for (Wish wish : wishList) {
-            productResponseDTOList.add(toProductResponseDTO(wish.getProduct()));
-        }
-        return productResponseDTOList;
-    }
-
-
     public static OptionResponseDTO toOptionResponseDTO (Options options) {
 
         return new OptionResponseDTO(options);

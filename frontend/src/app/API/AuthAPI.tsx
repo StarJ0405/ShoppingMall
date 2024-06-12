@@ -39,6 +39,7 @@ export const Login = async (data: LoginProps) => {
 interface SignupProps {
     username: string
     password: string;
+    name:string,
     email: string;
     nickname: string;
     phoneNumber: string;

@@ -23,7 +23,7 @@ public class ProductCreateRequestDTO {
     private String receipt;
     private String a_s;
     private String brand;
-    private List<String> productTagList;
+    private List<String> tagList;
     private String url;
-
+    private List<OptionListRequestDTO> optionLists;
 }

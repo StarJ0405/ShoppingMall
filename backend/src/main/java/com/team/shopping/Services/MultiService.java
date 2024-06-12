@@ -22,10 +22,13 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
+
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -38,11 +41,14 @@ public class MultiService {
     private final CartItemService cartItemService;
     private final CartItemDetailService cartItemDetailService;
     private final OptionsService optionsService;
+    private final OptionListService optionListService;
     private final JwtTokenProvider jwtTokenProvider;
     private final FileSystemService fileSystemService;
+
     private final PaymentLogService paymentLogService;
     private final PaymentProductService paymentProductService;
     private final PaymentProductDetailService paymentProductDetailService;
+    private final TagService tagService;
 
 
     /**
@@ -124,7 +130,22 @@ public class MultiService {
     @Transactional
     public UserResponseDTO updateProfile(String username, UserRequestDTO newUserRequestDTO) {
         SiteUser siteUser = userService.updateProfile(username, newUserRequestDTO);
-
+        FileSystem fileSystem = fileSystemService.get(ImageKey.User.getKey(username));
+        if (!newUserRequestDTO.getUrl().equals(fileSystem.getV())) {
+            String newFile = "/api/user" + "_" + siteUser.getUsername() + "/";
+            String newUrl = this.fileMove(newUserRequestDTO.getUrl(), newFile);
+            if (newUrl != null) {
+                String path = ShoppingApplication.getOsType().getLoc();
+                File file = new File(path + fileSystem.getV());
+                if (file.exists()) {
+                    file.delete();
+                }
+                FileSystem tempFile = fileSystemService.get(ImageKey.Temp.getKey(username));
+                fileSystemService.delete(tempFile);
+                FileSystem userFile = fileSystemService.get(ImageKey.User.getKey(username));
+                fileSystemService.updateFile(userFile, newUrl);
+            }
+        }
         return UserResponseDTO.builder()
                 .username(siteUser.getUsername())
                 .gender(siteUser.getGender().toString())
@@ -146,6 +167,7 @@ public class MultiService {
         if (!this.userService.isMatch(userRequestDTO.getPassword(), user.getPassword()))
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         SiteUser siteUser = userService.updatePassword(user, userRequestDTO.getNewPassword());
+
         return UserResponseDTO.builder()
                 .username(siteUser.getUsername())
                 .gender(siteUser.getGender().toString())
@@ -160,6 +182,7 @@ public class MultiService {
                 .build();
     }
 
+
     /**
      * List
      */
@@ -168,7 +191,7 @@ public class MultiService {
     public List<ProductResponseDTO> getWishList(String username) throws NoSuchElementException {
         SiteUser user = this.userService.get(username);
         List<Wish> wishList = this.wishListService.get(user);
-        return DTOConverter.toProductResponseDTOList(wishList);
+        return wishList.stream().map(wish -> getProduct(wish.getProduct())).toList();
     }
 
     @Transactional
@@ -177,7 +200,7 @@ public class MultiService {
         Product product = this.productService.getProduct(productRequestDTO.getProductId());
         this.wishListService.addToWishList(user, product);
         List<Wish> wishList = this.wishListService.get(user);
-        return DTOConverter.toProductResponseDTOList(wishList);
+        return wishList.stream().map(wish -> getProduct(wish.getProduct())).toList();
     }
 
     @Transactional
@@ -186,25 +209,25 @@ public class MultiService {
         Product product = this.productService.getProduct(productId);
         this.wishListService.deleteToWishList(user, product);
         List<Wish> wishList = this.wishListService.get(user);
-        return DTOConverter.toProductResponseDTOList(wishList);
+        return wishList.stream().map(wish -> getProduct(wish.getProduct())).toList();
     }
 
 
-
-
     @Transactional
-    public List<ProductResponseDTO> deleteMultipleToWishList (String username, List<Long> productIdList) {
+    public List<ProductResponseDTO> deleteMultipleToWishList(String username, List<Long> productIdList) {
         SiteUser user = this.userService.get(username);
         for (Long productId : productIdList) {
             Product product = this.productService.getProduct(productId);
             this.wishListService.deleteToWishList(user, product);
         }
         List<Wish> wishList = this.wishListService.get(user);
-        return DTOConverter.toProductResponseDTOList(wishList);
+        return wishList.stream().map(wish -> getProduct(wish.getProduct())).toList();
     }
 
 
-  /**
+
+
+    /**
      * cart
      */
 
@@ -396,13 +419,33 @@ public class MultiService {
         }
         Category category = this.categoryService.get(requestDTO.getCategoryId());
         Product product = this.productService.save(requestDTO, user, category);
-        String newFile = "/api/product" + "_" + product.getId() + "/";
-        String newUrl = this.fileMove(requestDTO.getUrl(), newFile);
-        if (newUrl != null) {
-            fileSystemService.save(ImageKey.Product.getKey(product.getId().toString()), newUrl);
-            fileSystemService.delete(username);
+        if(requestDTO.getTagList() != null) {
+            for (String tagName : requestDTO.getTagList()) {
+                tagService.save(tagName, product);
+            }
         }
-
+        if (requestDTO.getOptionLists() != null) {
+            for (OptionListRequestDTO optionListRequestDTO : requestDTO.getOptionLists()){
+                OptionList optionList = optionListService.save(optionListRequestDTO.getName(), product);
+                for (OptionRequestDTO optionRequestDTO : optionListRequestDTO.getChild()){
+                    optionsService.save(optionRequestDTO.getCount(), optionRequestDTO.getName(), optionRequestDTO.getPrice(), optionList);
+                }
+            }
+        }
+        if (requestDTO.getUrl() != null&&!requestDTO.getUrl().isBlank()) {
+            String newFile = "/api/product" + "_" + product.getId() + "/";
+            String newUrl = this.fileMove(requestDTO.getUrl(), newFile);
+            if (newUrl != null) {
+                String path = ShoppingApplication.getOsType().getLoc();
+                File file = new File(path + requestDTO.getUrl());
+                if (file.exists()) {
+                    file.delete();
+                    FileSystem fileSystem = fileSystemService.get(ImageKey.Temp.getKey(username));
+                    fileSystemService.delete(fileSystem);
+                    fileSystemService.save(ImageKey.Product.getKey(product.getId().toString()), newUrl);
+                }
+            }
+        }
     }
 
     /**
@@ -414,8 +457,13 @@ public class MultiService {
             String path = ShoppingApplication.getOsType().getLoc();
             Path tempPath = Paths.get(path + url);
             Path newPath = Paths.get(path + newUrl + tempPath.getFileName());
+
             Files.createDirectories(newPath.getParent());
             Files.move(tempPath, newPath);
+            File file = tempPath.toFile();
+            if (file.exists()) {
+                file.delete();
+            }
             return newUrl + tempPath.getFileName();
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -424,28 +472,29 @@ public class MultiService {
 
     @Transactional
     public ImageResponseDTO tempUpload(ImageRequestDTO requestDTO, String username) {
-        if (!requestDTO.getFile().isEmpty()) try {
-            String path = ShoppingApplication.getOsType().getLoc();
-            String tempUrl = fileSystemService.get(username);
-            if (tempUrl != null) {
-                File file = new File(path + tempUrl);
-                if (file.exists()) {
-                    file.delete();
-                    fileSystemService.delete(username);
+        if (!requestDTO.getFile().isEmpty())
+            try {
+                String path = ShoppingApplication.getOsType().getLoc();
+                FileSystem fileSystem = fileSystemService.get(ImageKey.Temp.getKey(username));
+                if (fileSystem != null) {
+                    File file = new File(path + fileSystem.getV());
+                    if (file.exists()) {
+                        file.delete();
+                        fileSystemService.delete(fileSystem);
+                    }
                 }
+                UUID uuid = UUID.randomUUID();
+                String fileLoc = "/api/user" + "_" + username + "/temp/" + uuid + "." + requestDTO.getFile().getContentType().split("/")[1];
+                File file = new File(path + fileLoc);
+                if (!file.getParentFile().exists()) file.getParentFile().mkdirs();
+                requestDTO.getFile().transferTo(file);
+                if (fileLoc != null) {
+                    fileSystemService.save(ImageKey.Temp.getKey(username), fileLoc);
+                }
+                return new ImageResponseDTO(fileLoc);
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-            UUID uuid = UUID.randomUUID();
-            String fileLoc = "/api/users" + "_" + username + "/temp/" + uuid + "." + requestDTO.getFile().getContentType().split("/")[1];
-            File file = new File(path + fileLoc);
-            if (!file.getParentFile().exists()) file.getParentFile().mkdirs();
-            requestDTO.getFile().transferTo(file);
-            if (fileLoc != null) {
-                fileSystemService.save(ImageKey.Temp.getKey(username), fileLoc);
-            }
-            return new ImageResponseDTO(fileLoc);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
         return null;
     }
 
@@ -498,13 +547,38 @@ public class MultiService {
         }
         return result;
     }
+
     @Transactional
     private CategoryResponseDTO getCategoryWithChildren(Category parentCategory) {
         List<CategoryResponseDTO> childrenDTOList = new ArrayList<>();
         for (Category child : parentCategory.getChildren()) {
             childrenDTOList.add(getCategoryWithChildren(child));
         }
-        return new CategoryResponseDTO(parentCategory.getId(),parentCategory.getName(), childrenDTOList);
+        return new CategoryResponseDTO(parentCategory.getId(), parentCategory.getName(), childrenDTOList);
+    }
+    @Transactional
+    public ProductResponseDTO getProduct(Long productID) {
+        Product product = productService.getProduct(productID);
+        return getProduct(product);
+    }
+    private ProductResponseDTO getProduct(Product product) {
+        List<String> tagList = tagService.findByProduct(product);
+
+        return ProductResponseDTO.builder()
+                .product(product)
+                .tagList(tagList)
+                .build();
+    }
+    @Transactional
+    public List<ProductResponseDTO> getProductList() {
+        List<Product> productList = productService.getProductList();
+        List<ProductResponseDTO> responseDTOList = new ArrayList<>();
+        for (Product product : productList) {
+            ProductResponseDTO productResponseDTO = getProduct(product);
+            responseDTOList.add(productResponseDTO);
+        }
+        return responseDTOList;
     }
 }
+
 

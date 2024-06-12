@@ -1,5 +1,6 @@
 package com.team.shopping.Services.Module;
 
+import com.team.shopping.Domains.OptionList;
 import com.team.shopping.Domains.Options;
 import com.team.shopping.Repositories.OptionsRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,5 +20,14 @@ public class OptionsService {
 
     public Options getOption (Long optionId) {
         return this.optionsRepository.findById(optionId).orElseThrow();
+    }
+
+    public void save(int count, String name, int price, OptionList optionList) {
+        optionsRepository.save(Options.builder()
+                        .count(count)
+                        .name(name)
+                        .price(price)
+                        .optionList(optionList)
+                .build());
     }
 }
