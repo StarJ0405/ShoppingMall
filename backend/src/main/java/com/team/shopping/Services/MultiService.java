@@ -40,6 +40,7 @@ public class MultiService {
     private final CartItemService cartItemService;
     private final CartItemDetailService cartItemDetailService;
     private final OptionsService optionsService;
+    private final OptionListService optionListService;
     private final JwtTokenProvider jwtTokenProvider;
     private final FileSystemService fileSystemService;
     private final TagService tagService;
@@ -338,16 +339,26 @@ public class MultiService {
                 tagService.save(tagName, product);
             }
         }
-        String newFile = "/api/product" + "_" + product.getId() + "/";
-        String newUrl = this.fileMove(requestDTO.getUrl(), newFile);
-        if (newUrl != null) {
-            String path = ShoppingApplication.getOsType().getLoc();
-            File file = new File(path + requestDTO.getUrl());
-            if (file.exists()) {
-                file.delete();
-                FileSystem fileSystem = fileSystemService.get(ImageKey.Temp.getKey(username));
-                fileSystemService.delete(fileSystem);
-                fileSystemService.save(ImageKey.Product.getKey(product.getId().toString()), newUrl);
+        if (requestDTO.getOptionLists() != null) {
+            for (OptionListRequestDTO optionListRequestDTO : requestDTO.getOptionLists()){
+                OptionList optionList = optionListService.save(optionListRequestDTO.getName(), product);
+                for (OptionRequestDTO optionRequestDTO : optionListRequestDTO.getChild()){
+                    optionsService.save(optionRequestDTO.getCount(), optionRequestDTO.getName(), optionRequestDTO.getPrice(), optionList);
+                }
+            }
+        }
+        if (requestDTO.getUrl() != null&&!requestDTO.getUrl().isBlank()) {
+            String newFile = "/api/product" + "_" + product.getId() + "/";
+            String newUrl = this.fileMove(requestDTO.getUrl(), newFile);
+            if (newUrl != null) {
+                String path = ShoppingApplication.getOsType().getLoc();
+                File file = new File(path + requestDTO.getUrl());
+                if (file.exists()) {
+                    file.delete();
+                    FileSystem fileSystem = fileSystemService.get(ImageKey.Temp.getKey(username));
+                    fileSystemService.delete(fileSystem);
+                    fileSystemService.save(ImageKey.Product.getKey(product.getId().toString()), newUrl);
+                }
             }
         }
     }

@@ -1,6 +1,7 @@
 package com.team.shopping.Domains;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -21,5 +22,9 @@ public class OptionList {
     @ManyToOne(fetch = FetchType.LAZY)
     private Product product;
 
-
+    @Builder
+    public OptionList(String name, Product product) {
+        this.name = name;
+        this.product = product;
+    }
 }
