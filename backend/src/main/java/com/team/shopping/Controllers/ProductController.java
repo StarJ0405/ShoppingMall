@@ -39,7 +39,7 @@ public class ProductController {
         }
     }
 
-    @GetMapping("/List")
+    @GetMapping("/list")
     public ResponseEntity<?> getProductList() {
         try {
             List<ProductResponseDTO> productResponseDTOList = multiService.getProductList();
