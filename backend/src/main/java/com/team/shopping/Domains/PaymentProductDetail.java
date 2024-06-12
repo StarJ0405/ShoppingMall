@@ -32,6 +32,5 @@ public class PaymentProductDetail {
         this.optionName = optionName;
         this.optionCount = optionCount;
         this.optionPrice = optionPrice;
-
     }
 }

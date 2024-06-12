@@ -5,7 +5,6 @@ import Main from '@/app/Global/Layout/MainLayout';
 import Modal from '@/app/Global/Modal';
 import dynamic from 'next/dynamic';
 import { redirect } from 'next/navigation';
-import { describe } from 'node:test';
 import { useEffect, useState } from 'react';
 import 'react-quill/dist/quill.snow.css';
 
@@ -57,9 +56,10 @@ export default function Page() {
             redirect('/account/login');
     }, [ACCESS_TOKEN]);
     function Regist() {
-        productRegist({ categoryId: category, price: price, description: simpleDescription, detail: detail, dateLimit: dateLimit, remain: remain, title: title, delivery: delivery, address: address, receipt: receipt, a_s: a_s, brand: brand, productTagList: tags, url: url, options:options })
-            .then(() => window.location.href = '/')
-            .catch(e => console.log(e))
+        if (category != null)
+            productRegist({ categoryId: category, price: price, description: simpleDescription, detail: detail, dateLimit: dateLimit, remain: remain, title: title, delivery: delivery, address: address, receipt: receipt, a_s: a_s, brand: brand, productTagList: tags, url: url, optionLists: options })
+                .then(() => window.location.href = '/')
+                .catch(e => console.log(e))
     }
     function Change(file: any) {
         const formData = new FormData();
@@ -177,7 +177,7 @@ export default function Page() {
                         <th className='border border-black'>옵션</th>
                         <td className='px-2 flex items-center'>
                             <div className='flex flex-col'>
-                                <select id="optionList" defaultValue={-1} onChange={e => { setSelectedOptionList(options[Number(e.target.selectedOptions[0].value)]); (document.getElementById('option')as HTMLSelectElement).selectedIndex=0; }}>
+                                <select id="optionList" defaultValue={-1} onChange={e => { setSelectedOptionList(options[Number(e.target.selectedOptions[0].value)]); (document.getElementById('option') as HTMLSelectElement).selectedIndex = 0; }}>
                                     {options ?
                                         <option value={-1} disabled>등록된 옵션목록이 없습니다.</option>
                                         :
@@ -205,7 +205,7 @@ export default function Page() {
                                         :
                                         <option value={-1} disabled>옵션 목록을 선택해주세요</option>
                                     }
-                                    {((selectedOptionList as any)?.child as any[])?.map((option: any, index) => <option key={index} value={index}>{option.name + ':' + option.price}</option>)}
+                                    {((selectedOptionList as any)?.child as any[])?.map((option: any, index) => <option key={index} value={index}>{option.name + '(' + option.remain + ")" + ':' + option.price}</option>)}
                                 </select>
                                 <button className='btn btn-xs btn-info' disabled={selectedOptionList.length <= 0} onClick={() => openModal(1)}>옵션 추가</button>
                                 <button className='btn btn-xs btn-error' disabled={!selectedOption} onClick={() => {
@@ -238,7 +238,11 @@ export default function Page() {
                         document.getElementById("price")?.focus();
 
             }} />
-            {isModalOpen == 1 ? <input type="number" id="price" min={0} placeholder='옵션 추가 비용' onKeyDown={e => { if (e.key == "Enter") document.getElementById('add_button')?.click() }} /> : <></>}
+            {isModalOpen == 1 ? <>
+                <input type="number" id="price" min={0} placeholder='옵션 추가 비용' onKeyDown={e => { if (e.key == "Enter") document.getElementById('remain')?.focus() }} />
+                <input type="number" id="remain" min={0} placeholder='수량 제한' onKeyDown={e => { if (e.key == "Enter") document.getElementById('add_button')?.click() }} />
+            </>
+                : <></>}
             <button id="add_button" className='btn btn-sm mt-1' onClick={() => {
                 const value = (document.getElementById('add') as HTMLInputElement).value;
                 if (value && value.length > 0)
@@ -253,7 +257,8 @@ export default function Page() {
                     } else {
                         // 옵션
                         const price = Number((document.getElementById('price') as HTMLInputElement).value);
-                        const now = { name: value, price: price } as any;
+                        const remain = Number((document.getElementById('remain') as HTMLInputElement).value);
+                        const now = { name: value, price: price, remain: remain } as any;
                         const search = (selectedOptionList as any).child.filter((option: any) => option.name == value);
                         if (search.length == 0) {
                             (selectedOptionList as any).child.push(now);

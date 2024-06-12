@@ -22,13 +22,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
-
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -200,6 +197,7 @@ public class MultiService {
         Product product = this.productService.getProduct(productRequestDTO.getProductId());
         this.wishListService.addToWishList(user, product);
         List<Wish> wishList = this.wishListService.get(user);
+
         return wishList.stream().map(wish -> getProduct(wish.getProduct())).toList();
     }
 
@@ -223,8 +221,6 @@ public class MultiService {
         List<Wish> wishList = this.wishListService.get(user);
         return wishList.stream().map(wish -> getProduct(wish.getProduct())).toList();
     }
-
-
 
 
     /**
@@ -338,7 +334,7 @@ public class MultiService {
 
     /**
      * Payment
-     * */
+     */
 
     @Transactional
     public List<PaymentLogResponseDTO> getPaymentLogList(String username) {
@@ -368,7 +364,6 @@ public class MultiService {
 
         return paymentLogResponseDTOList;
     }
-
 
 
     @Transactional
@@ -419,20 +414,20 @@ public class MultiService {
         }
         Category category = this.categoryService.get(requestDTO.getCategoryId());
         Product product = this.productService.save(requestDTO, user, category);
-        if(requestDTO.getTagList() != null) {
+        if (requestDTO.getTagList() != null) {
             for (String tagName : requestDTO.getTagList()) {
                 tagService.save(tagName, product);
             }
         }
         if (requestDTO.getOptionLists() != null) {
-            for (OptionListRequestDTO optionListRequestDTO : requestDTO.getOptionLists()){
+            for (OptionListRequestDTO optionListRequestDTO : requestDTO.getOptionLists()) {
                 OptionList optionList = optionListService.save(optionListRequestDTO.getName(), product);
-                for (OptionRequestDTO optionRequestDTO : optionListRequestDTO.getChild()){
+                for (OptionRequestDTO optionRequestDTO : optionListRequestDTO.getChild()) {
                     optionsService.save(optionRequestDTO.getCount(), optionRequestDTO.getName(), optionRequestDTO.getPrice(), optionList);
                 }
             }
         }
-        if (requestDTO.getUrl() != null&&!requestDTO.getUrl().isBlank()) {
+        if (requestDTO.getUrl() != null && !requestDTO.getUrl().isBlank()) {
             String newFile = "/api/product" + "_" + product.getId() + "/";
             String newUrl = this.fileMove(requestDTO.getUrl(), newFile);
             if (newUrl != null) {
@@ -556,19 +551,21 @@ public class MultiService {
         }
         return new CategoryResponseDTO(parentCategory.getId(), parentCategory.getName(), childrenDTOList);
     }
+
     @Transactional
     public ProductResponseDTO getProduct(Long productID) {
         Product product = productService.getProduct(productID);
         return getProduct(product);
     }
+
     private ProductResponseDTO getProduct(Product product) {
         List<String> tagList = tagService.findByProduct(product);
-
         return ProductResponseDTO.builder()
                 .product(product)
                 .tagList(tagList)
                 .build();
     }
+
     @Transactional
     public List<ProductResponseDTO> getProductList() {
         List<Product> productList = productService.getProductList();

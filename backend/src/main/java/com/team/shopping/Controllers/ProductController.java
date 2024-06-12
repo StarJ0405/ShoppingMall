@@ -25,6 +25,15 @@ public class ProductController {
         TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
         if (tokenRecord.isOK()) {
             String username = tokenRecord.username();
+            List<OptionListRequestDTO> listRequestDTOS = requestDTO.getOptionLists();
+            if (listRequestDTOS != null)
+                for (OptionListRequestDTO listRequestDTO : listRequestDTOS)
+                    if (listRequestDTO.getChild() != null)
+                        for (OptionRequestDTO optionRequestDTO : listRequestDTO.getChild())
+                            System.out.println(optionRequestDTO.getName() + "," + optionRequestDTO.getCount() + ", " + optionRequestDTO.getPrice());
+                    else System.out.println("child is null");
+            else System.out.println("list is null");
+
             this.multiService.saveProduct(requestDTO, username);
             return tokenRecord.getResponseEntity("문제 없음");
         }
