@@ -39,12 +39,16 @@ export default function Home() {
       <table className='text-left text-base'>
         <tbody>
           <tr>
-            <th className='w-[159px]'>이름</th>
-            <td>{user?.name}</td>
+            <th className='w-[159px]'>아이디</th>
+            <td>{user?.username}</td>
+          </tr>
+          <tr>
+            <th>이름</th>
+            <td><input type="text" className='input input-bordered input-sm' defaultValue={user?.name} maxLength={24}/></td>
           </tr>
           <tr>
             <th>비밀번호</th>
-            <td>변경하기</td>
+            <td><button>변경하기</button></td>
           </tr>
           <tr>
             <th>생년월일</th>
