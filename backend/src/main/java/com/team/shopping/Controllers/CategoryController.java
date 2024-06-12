@@ -50,10 +50,10 @@ public class CategoryController {
 
     @DeleteMapping
     public ResponseEntity<?> deleteCategory(@RequestHeader("Authorization") String accessToken,
-                                            @RequestBody CategoryRequestDTO categoryRequestDTO) {
+                                            @RequestHeader Long categoryId ){
         TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
         if (tokenRecord.isOK()) {
-            try {multiService.deleteCategory(tokenRecord.username(), categoryRequestDTO.getId());
+            try {multiService.deleteCategory(tokenRecord.username(), categoryId);
                 return ResponseEntity.ok("카테고리가 성공적으로 삭제되었습니다.");
             } catch (IllegalArgumentException ex) {
                 return ResponseEntity.status(404).body(ex.getMessage());

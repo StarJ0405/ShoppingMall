@@ -185,7 +185,7 @@ public class MultiService {
     public List<ProductResponseDTO> getWishList(String username) throws NoSuchElementException {
         SiteUser user = this.userService.get(username);
         List<Wish> wishList = this.wishListService.get(user);
-        return DTOConverter.toProductResponseDTOList(wishList);
+        return wishList.stream().map(wish -> getProduct(wish.getProduct())).toList();
     }
 
     @Transactional
@@ -194,7 +194,7 @@ public class MultiService {
         Product product = this.productService.getProduct(productRequestDTO.getProductId());
         this.wishListService.addToWishList(user, product);
         List<Wish> wishList = this.wishListService.get(user);
-        return DTOConverter.toProductResponseDTOList(wishList);
+        return wishList.stream().map(wish -> getProduct(wish.getProduct())).toList();
     }
 
     @Transactional
@@ -203,7 +203,7 @@ public class MultiService {
         Product product = this.productService.getProduct(productId);
         this.wishListService.deleteToWishList(user, product);
         List<Wish> wishList = this.wishListService.get(user);
-        return DTOConverter.toProductResponseDTOList(wishList);
+        return wishList.stream().map(wish -> getProduct(wish.getProduct())).toList();
     }
 
 
@@ -215,8 +215,10 @@ public class MultiService {
             this.wishListService.deleteToWishList(user, product);
         }
         List<Wish> wishList = this.wishListService.get(user);
-        return DTOConverter.toProductResponseDTOList(wishList);
+        return wishList.stream().map(wish -> getProduct(wish.getProduct())).toList();
     }
+
+
 
 
     /**
@@ -457,6 +459,29 @@ public class MultiService {
             childrenDTOList.add(getCategoryWithChildren(child));
         }
         return new CategoryResponseDTO(parentCategory.getId(), parentCategory.getName(), childrenDTOList);
+    }
+    @Transactional
+    public ProductResponseDTO getProduct(Long productID) {
+        Product product = productService.getProduct(productID);
+        return getProduct(product);
+    }
+    private ProductResponseDTO getProduct(Product product) {
+        List<String> tagList = tagService.findByProduct(product);
+
+        return ProductResponseDTO.builder()
+                .product(product)
+                .tagList(tagList)
+                .build();
+    }
+    @Transactional
+    public List<ProductResponseDTO> getProductList() {
+        List<Product> productList = productService.getProductList();
+        List<ProductResponseDTO> responseDTOList = new ArrayList<>();
+        for (Product product : productList) {
+            ProductResponseDTO productResponseDTO = getProduct(product);
+            responseDTOList.add(productResponseDTO);
+        }
+        return responseDTOList;
     }
 }
 
