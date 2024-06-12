@@ -26,6 +26,8 @@ public class QPaymentProduct extends EntityPathBase<PaymentProduct> {
 
     public final NumberPath<Integer> count = createNumber("count", Integer.class);
 
+    public final StringPath description = createString("description");
+
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
     public final QPaymentLog paymentLog;
@@ -37,8 +39,6 @@ public class QPaymentProduct extends EntityPathBase<PaymentProduct> {
     public final StringPath seller = createString("seller");
 
     public final StringPath title = createString("title");
-
-    public final StringPath url = createString("url");
 
     public QPaymentProduct(String variable) {
         this(PaymentProduct.class, forVariable(variable), INITS);

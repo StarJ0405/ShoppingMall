@@ -19,7 +19,7 @@ public class PaymentProductResponseDTO {
 
     private int price;
 
-    private String url;
+    private String description;
 
     private String title;
 
@@ -35,7 +35,7 @@ public class PaymentProductResponseDTO {
         this.productId = paymentProduct.getProductId();
         this.seller = paymentProduct.getSeller();
         this.price = paymentProduct.getPrice();
-        this.url = paymentProduct.getUrl();
+        this.description = paymentProduct.getDescription();
         this.title = paymentProduct.getTitle();
         this.brand = paymentProduct.getBrand();
         this.count = paymentProduct.getCount();

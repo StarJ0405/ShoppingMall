@@ -23,7 +23,7 @@ public class PaymentProductService {
                 .productId(product.getId())
                 .seller(product.getSeller().getUsername())
                 .price(product.getPrice())
-                .url(product.getDescription())
+                .description(product.getDescription())
                 .title(product.getTitle())
                 .brand(product.getBrand())
                 .count(cartItem.getCount())
