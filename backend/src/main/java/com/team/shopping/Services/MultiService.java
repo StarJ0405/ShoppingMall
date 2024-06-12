@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -41,6 +42,7 @@ public class MultiService {
     private final OptionsService optionsService;
     private final JwtTokenProvider jwtTokenProvider;
     private final FileSystemService fileSystemService;
+    private final TagService tagService;
 
 
     /**
@@ -329,6 +331,11 @@ public class MultiService {
         }
         Category category = this.categoryService.get(requestDTO.getCategoryId());
         Product product = this.productService.save(requestDTO, user, category);
+        if(requestDTO.getTagList() != null) {
+            for (String tagName : requestDTO.getTagList()) {
+                tagService.save(tagName, product);
+            }
+        }
         String newFile = "/api/product" + "_" + product.getId() + "/";
         String newUrl = this.fileMove(requestDTO.getUrl(), newFile);
         if (newUrl != null) {
@@ -341,7 +348,6 @@ public class MultiService {
                 fileSystemService.save(ImageKey.Product.getKey(product.getId().toString()), newUrl);
             }
         }
-
     }
 
     /**
@@ -453,4 +459,5 @@ public class MultiService {
         return new CategoryResponseDTO(parentCategory.getId(), parentCategory.getName(), childrenDTOList);
     }
 }
+
 
