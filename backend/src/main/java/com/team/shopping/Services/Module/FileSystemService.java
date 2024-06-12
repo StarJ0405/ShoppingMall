@@ -1,7 +1,6 @@
 package com.team.shopping.Services.Module;
 
 import com.team.shopping.Domains.FileSystem;
-import com.team.shopping.Enums.ImageKey;
 import com.team.shopping.Repositories.FileSystemRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,13 +17,17 @@ public class FileSystemService {
         fileSystemRepository.save(fileSystem);
     }
 
-    public String get(String username) {
-        FileSystem fileSystem = fileSystemRepository.findByK(ImageKey.Temp.getKey(username));
-        return fileSystem != null ? fileSystem.getV() : null;
+    public void updateFile(FileSystem fileSystem, String valueKey) {
+        fileSystem.setV(valueKey);
+        fileSystemRepository.save(fileSystem);
     }
 
-    public void delete(String username) {
-        FileSystem fileSystem = fileSystemRepository.findByK(ImageKey.Temp.getKey(username));
+
+    public FileSystem get(String key) {
+        return fileSystemRepository.findByK(key);
+    }
+
+    public void delete(FileSystem fileSystem) {
         fileSystemRepository.delete(fileSystem);
     }
 }

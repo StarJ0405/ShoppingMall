@@ -52,6 +52,8 @@ public class SiteUser {
     @OneToOne(mappedBy = "user", cascade = CascadeType.REMOVE)
     private Auth auth;
 
+
+
     @Builder
     public SiteUser(String username, String name, String password, String nickname, String email, UserRole role, Gender gender, LocalDate birthday, String phoneNumber){
         this.username = username;
@@ -64,5 +66,6 @@ public class SiteUser {
         this.role = role;
         this.phoneNumber = phoneNumber;
         this.createDate = LocalDateTime.now();
+
     }
 }
