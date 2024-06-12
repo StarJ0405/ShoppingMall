@@ -8,6 +8,8 @@ import com.team.shopping.Repositories.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class ProductService {
@@ -35,5 +37,9 @@ public class ProductService {
                 .a_s(requestDTO.getA_s())
                 .brand(requestDTO.getBrand())
                 .build());
+    }
+
+    public List<Product> getProductList() {
+        return productRepository.findAll();
     }
 }

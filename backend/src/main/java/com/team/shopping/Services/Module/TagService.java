@@ -6,6 +6,8 @@ import com.team.shopping.Repositories.TagRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class TagService {
@@ -19,4 +21,7 @@ public class TagService {
 
     }
 
+    public List<String> findByProduct(Product product) {
+        return tagRepository.findTagNamesByProduct(product);
+    }
 }

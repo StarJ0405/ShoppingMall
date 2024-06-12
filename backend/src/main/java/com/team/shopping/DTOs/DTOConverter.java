@@ -7,17 +7,6 @@ import java.util.stream.Collectors;
 
 public class DTOConverter {
 
-    public static ProductResponseDTO toProductResponseDTO(Product product) {
-        return new ProductResponseDTO(product);
-    }
-
-    public static List<ProductResponseDTO> toProductResponseDTOList(List<Wish> wishList) {
-        return wishList.stream()
-                .map(Wish::getProduct)
-                .map(DTOConverter::toProductResponseDTO)
-                .collect(Collectors.toList());
-    }
-
     public static OptionResponseDTO toOptionResponseDTO (Options options) {
 
         return new OptionResponseDTO(options);
