@@ -20,10 +20,11 @@ public class PaymentProductDetailService {
     }
 
     public PaymentProductDetail save (PaymentProduct paymentProduct, Options option) {
-        PaymentProductDetail paymentProductDetail = PaymentProductDetail.builder()
+        return this.paymentProductDetailRepository.save(PaymentProductDetail.builder()
                 .paymentProduct(paymentProduct)
-                .option(option)
-                .build();
-        return this.paymentProductDetailRepository.save(paymentProductDetail);
+                .optionName(option.getName())
+                .optionCount(option.getCount())
+                .optionPrice(option.getPrice())
+                .build());
     }
 }

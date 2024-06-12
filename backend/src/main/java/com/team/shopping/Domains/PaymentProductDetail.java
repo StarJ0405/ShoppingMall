@@ -19,12 +19,19 @@ public class PaymentProductDetail {
     @ManyToOne(fetch = FetchType.LAZY)
     private PaymentProduct paymentProduct;
 
-    @ManyToOne
-    private Options option;
+    private String optionName;
+
+    private int optionCount;
+
+    private int optionPrice;
 
     @Builder
-    public PaymentProductDetail (PaymentProduct paymentProduct, Options option) {
+    public PaymentProductDetail (PaymentProduct paymentProduct, String optionName,
+                                 int optionCount, int optionPrice) {
         this.paymentProduct = paymentProduct;
-        this.option = option;
+        this.optionName = optionName;
+        this.optionCount = optionCount;
+        this.optionPrice = optionPrice;
+
     }
 }

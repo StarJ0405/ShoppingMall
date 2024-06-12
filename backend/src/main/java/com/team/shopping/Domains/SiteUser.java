@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 public class SiteUser {
+
     @Id
     @Column(length = 24, unique = true)
     private String username;
@@ -33,7 +34,7 @@ public class SiteUser {
     @Column(length = 24, unique = true)
     private String nickname;
 
-     @Column(length = 11 , unique = true)
+    @Column(length = 11 , unique = true)
     private String phoneNumber;
 
     private UserRole role;

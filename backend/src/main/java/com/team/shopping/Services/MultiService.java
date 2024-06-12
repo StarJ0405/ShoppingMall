@@ -318,44 +318,63 @@ public class MultiService {
      * */
 
     @Transactional
-    public List<PaymentLogResponseDTO> addPaymentLog(String username, PaymentLogRequestDTO paymentLogRequestDTO) {
+    public List<PaymentLogResponseDTO> getPaymentLogList(String username) {
         SiteUser user = this.userService.get(username);
-        List<CartItem> cartItemList = this.cartItemService.getList(paymentLogRequestDTO.getCartItemIdList());
+        List<PaymentLog> paymentLogList = this.paymentLogService.get(user);
 
-        // PaymentLog 생성 및 저장
-        PaymentLog paymentLog = this.paymentLogService.save(user);
-
-        List<PaymentProduct> paymentProductList = new ArrayList<>();
         List<PaymentLogResponseDTO> paymentLogResponseDTOList = new ArrayList<>();
 
-        for (CartItem cartItem : cartItemList) {
-            Product product = cartItem.getProduct();
-            SiteUser seller = product.getSeller();
+        for (PaymentLog paymentLog : paymentLogList) {
+            List<PaymentProduct> paymentProductList = this.paymentProductService.getList(paymentLog);
+            List<PaymentProductResponseDTO> paymentProductResponseDTOList = new ArrayList<>();
 
-            // PaymentProduct 생성 및 저장
-            PaymentProduct paymentProduct = paymentProductService.save(paymentLog, product, seller, cartItem);
-            paymentProductList.add(paymentProduct);
+            for (PaymentProduct paymentProduct : paymentProductList) {
+                List<PaymentProductDetail> paymentProductDetailList = this.paymentProductDetailService.getList(paymentProduct);
 
-            // PaymentProductDetail 생성 및 저장
-            List<CartItemDetail> cartItemDetailList = this.cartItemDetailService.getList(cartItem);
-            for (CartItemDetail cartItemDetail : cartItemDetailList) {
-                Options option = cartItemDetail.getOptions();
-                PaymentProductDetail paymentProductDetail = this.paymentProductDetailService.save(paymentProduct, option);
+                PaymentProductResponseDTO paymentProductResponseDTO = DTOConverter.toPaymentProductResponseDTO(paymentProduct, paymentProductDetailList);
+                paymentProductResponseDTOList.add(paymentProductResponseDTO);
             }
-        }
 
-        // PaymentLogResponseDTO 생성
-        PaymentLogResponseDTO paymentLogResponseDTO = DTOConverter.toPaymentLogResponseDTO(paymentLog, paymentProductList);
-        paymentLogResponseDTOList.add(paymentLogResponseDTO);
-
-        // CartItem 및 관련 CartItemDetail 삭제
-        for (CartItem cartItem : cartItemList) {
-            this.cartItemDetailService.deleteByCartItem(cartItem);
-            this.cartItemService.delete(cartItem);
+            PaymentLogResponseDTO paymentLogResponseDTO = DTOConverter.toPaymentLogResponseDTO(paymentLog, paymentProductResponseDTOList);
+            paymentLogResponseDTOList.add(paymentLogResponseDTO);
         }
 
         return paymentLogResponseDTOList;
     }
+
+
+    @Transactional
+    public PaymentLogResponseDTO addPaymentLog(String username, PaymentLogRequestDTO paymentLogRequestDTO) {
+        SiteUser user = this.userService.get(username);
+        List<CartItem> cartItemList = this.cartItemService.getList(paymentLogRequestDTO.getCartItemIdList());
+        PaymentLog paymentLog = paymentLogService.save(user);
+
+        for (CartItem cartItem : cartItemList) {
+
+            Product product = cartItem.getProduct();
+            PaymentProduct paymentProduct = this.paymentProductService.save(paymentLog, product, cartItem);
+            List<CartItemDetail> cartItemDetails = this.cartItemDetailService.getList(cartItem);
+
+            for (CartItemDetail cartItemDetail : cartItemDetails) {
+
+                Options option = cartItemDetail.getOptions();
+                this.paymentProductDetailService.save(paymentProduct, option);
+            }
+        }
+
+        // 새로 추가된 결제 로그 정보를 이용하여 PaymentLogResponseDTO 객체를 만들어서 반환
+        List<PaymentProduct> paymentProductList = this.paymentProductService.getList(paymentLog);
+        List<PaymentProductResponseDTO> paymentProductResponseDTOList = new ArrayList<>();
+        for (PaymentProduct paymentProduct : paymentProductList) {
+            List<PaymentProductDetail> paymentProductDetailList = this.paymentProductDetailService.getList(paymentProduct);
+            PaymentProductResponseDTO paymentProductResponseDTO = DTOConverter.toPaymentProductResponseDTO(paymentProduct, paymentProductDetailList);
+            paymentProductResponseDTOList.add(paymentProductResponseDTO);
+        }
+        PaymentLogResponseDTO paymentLogResponseDTO = DTOConverter.toPaymentLogResponseDTO(paymentLog, paymentProductResponseDTOList);
+
+        return paymentLogResponseDTO;
+    }
+
 
     /**
      * Product

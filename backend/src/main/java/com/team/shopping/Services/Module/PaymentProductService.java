@@ -17,17 +17,16 @@ public class PaymentProductService {
         return this.paymentProductRepository.findByPaymentLog(paymentLog);
     }
 
-    public PaymentProduct save (PaymentLog paymentLog, Product product, SiteUser seller, CartItem cartItem) {
-        PaymentProduct paymentProduct = PaymentProduct.builder()
+    public PaymentProduct save (PaymentLog paymentLog, Product product, CartItem cartItem) {
+        return this.paymentProductRepository.save(PaymentProduct.builder()
                 .paymentLog(paymentLog)
                 .productId(product.getId())
-                .seller(seller)
+                .seller(product.getSeller())
                 .price(product.getPrice())
                 .url(product.getDescription())
                 .title(product.getTitle())
                 .brand(product.getBrand())
                 .count(cartItem.getCount())
-                .build();
-        return this.paymentProductRepository.save(paymentProduct);
+                .build());
     }
 }

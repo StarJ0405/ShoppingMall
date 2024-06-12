@@ -30,10 +30,10 @@ public class PaymentLog {
     private String info;
 
     @Builder
-    public PaymentLog (SiteUser user, String info) {
+    public PaymentLog (SiteUser user, String info, LocalDateTime createDate, PaymentStatus paymentStatus) {
         this.order = user;
         this.info = info;
-        this.createDate = LocalDateTime.now();
-        this.paymentStatus = PaymentStatus.입금대기중;
+        this.createDate = createDate;
+        this.paymentStatus = paymentStatus;
     }
 }

@@ -24,7 +24,11 @@ public class QPaymentProductDetail extends EntityPathBase<PaymentProductDetail> 
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
-    public final QOptions option;
+    public final NumberPath<Integer> optionCount = createNumber("optionCount", Integer.class);
+
+    public final StringPath optionName = createString("optionName");
+
+    public final NumberPath<Integer> optionPrice = createNumber("optionPrice", Integer.class);
 
     public final QPaymentProduct paymentProduct;
 
@@ -46,7 +50,6 @@ public class QPaymentProductDetail extends EntityPathBase<PaymentProductDetail> 
 
     public QPaymentProductDetail(Class<? extends PaymentProductDetail> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.option = inits.isInitialized("option") ? new QOptions(forProperty("option"), inits.get("option")) : null;
         this.paymentProduct = inits.isInitialized("paymentProduct") ? new QPaymentProduct(forProperty("paymentProduct"), inits.get("paymentProduct")) : null;
     }
 

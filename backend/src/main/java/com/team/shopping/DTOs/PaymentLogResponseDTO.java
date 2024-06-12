@@ -1,11 +1,13 @@
 package com.team.shopping.DTOs;
 
+import com.team.shopping.Domains.PaymentLog;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -16,23 +18,22 @@ public class PaymentLogResponseDTO {
 
     private String paymentStatus;
 
-    private String url;
+    private String order;
 
-    private String productTitle;
+    private List<PaymentProductResponseDTO> paymentProductResponseDTOList;
 
     private int price;
 
     private LocalDateTime paymentDate;
 
     @Builder
-    public PaymentLogResponseDTO (Long paymentLogId, String paymentStatus,
-                                  String url, String productTitle, int price, LocalDateTime paymentDate) {
-        this.paymentLogId = paymentLogId;
-        this.paymentStatus = paymentStatus;
-        this.url = url;
-        this.productTitle = productTitle;
+    public PaymentLogResponseDTO (int price, PaymentLog paymentLog,
+                                  List<PaymentProductResponseDTO> paymentProductResponseDTOList) {
+        this.paymentLogId = paymentLog.getId();
+        this.paymentStatus = paymentLog.getPaymentStatus().toString();
         this.price = price;
-        this.paymentDate = paymentDate;
+        this.paymentDate = paymentLog.getCreateDate();
+        this.paymentProductResponseDTOList = paymentProductResponseDTOList;
     }
 
 

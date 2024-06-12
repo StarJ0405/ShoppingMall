@@ -13,12 +13,14 @@ import java.time.LocalDateTime;
 @Entity
 @NoArgsConstructor
 public class CartItem {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private SiteUser user;
+
     @ManyToOne(fetch = FetchType.LAZY)
     private Product product;
 

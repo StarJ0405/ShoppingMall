@@ -7,6 +7,8 @@ import java.util.List;
 
 public class DTOConverter {
 
+
+
     public static ProductResponseDTO toProductResponseDTO(Product product) {
         return new ProductResponseDTO(product);
     }
@@ -34,16 +36,35 @@ public class DTOConverter {
         return new CartResponseDTO(cartItem, optionResponseDTOList);
     }
 
-    public static PaymentLogResponseDTO toPaymentLogResponseDTO(PaymentLog paymentLog, List<PaymentProduct> paymentProductList) {
+    public static PaymentProductDetailResponseDTO toPaymentProductDetailResponseDTO (PaymentProductDetail paymentProductDetail) {
+        return new PaymentProductDetailResponseDTO(paymentProductDetail);
+    }
+
+    public static PaymentProductResponseDTO toPaymentProductResponseDTO (PaymentProduct paymentProduct, List<PaymentProductDetail> paymentProductDetailList) {
+        List<PaymentProductDetailResponseDTO> paymentProductDetailResponseDTOList = new ArrayList<>();
+        for (PaymentProductDetail paymentProductDetail : paymentProductDetailList) {
+            paymentProductDetailResponseDTOList.add(DTOConverter.toPaymentProductDetailResponseDTO(paymentProductDetail));
+        }
+        return new PaymentProductResponseDTO(paymentProduct, paymentProductDetailResponseDTOList);
+    }
+
+    public static PaymentLogResponseDTO toPaymentLogResponseDTO(PaymentLog paymentLog, List<PaymentProductResponseDTO> paymentProductResponseDTOList) {
         int totalPrice = 0;
-        for (PaymentProduct paymentProduct : paymentProductList) {
-            totalPrice += paymentProduct.getPrice() * paymentProduct.getCount();
+        for (PaymentProductResponseDTO paymentProductResponseDTO : paymentProductResponseDTOList) {
+            totalPrice += paymentProductResponseDTO.getPrice() * paymentProductResponseDTO.getCount();
+
+            for (PaymentProductDetailResponseDTO paymentProductDetailResponseDTO : paymentProductResponseDTO.getPaymentProductDetailResponseDTOList()) {
+                totalPrice += paymentProductDetailResponseDTO.getOptionPrice() * paymentProductDetailResponseDTO.getOptionCount();
+            }
         }
         return PaymentLogResponseDTO.builder()
-                .paymentStatus(paymentLog.getPaymentStatus().toString())
-                .url(paymentProductList.getFirst().getUrl())
-                .productTitle(paymentProductList.getFirst().getTitle() + " 외 " + paymentProductList.size() + "개 상품")
                 .price(totalPrice)
+                .paymentLog(paymentLog)
+                .paymentProductResponseDTOList(paymentProductResponseDTOList)
                 .build();
     }
+
+
+
+
 }
