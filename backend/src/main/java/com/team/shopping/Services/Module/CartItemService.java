@@ -16,6 +16,10 @@ public class CartItemService {
 
     private final CartItemRepository cartItemRepository;
 
+    public CartItem get (Long id) {
+        return this.cartItemRepository.findById(id).orElseThrow();
+    }
+
     public List<CartItem> getCartItemList (SiteUser user) {
         return this.cartItemRepository.findAllByUser(user);
     }
@@ -37,8 +41,11 @@ public class CartItemService {
         return this.cartItemRepository.findByUserAndProduct(user, product);
     }
 
-    public void deleteCartItem(CartItem cartItem) {
+    public void delete(CartItem cartItem) {
         this.cartItemRepository.delete(cartItem);
     }
 
+    public List<CartItem> getList (List<Long> cartItemIdList) {
+        return this.cartItemRepository.findAllById(cartItemIdList);
+    }
 }

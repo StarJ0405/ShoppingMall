@@ -1,6 +1,7 @@
 package com.team.shopping.Domains;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -18,8 +19,19 @@ public class PaymentProductDetail {
     @ManyToOne(fetch = FetchType.LAZY)
     private PaymentProduct paymentProduct;
 
-    @ManyToOne
-    private Options option;
+    private String optionName;
 
+    private int optionCount;
 
+    private int optionPrice;
+
+    @Builder
+    public PaymentProductDetail (PaymentProduct paymentProduct, String optionName,
+                                 int optionCount, int optionPrice) {
+        this.paymentProduct = paymentProduct;
+        this.optionName = optionName;
+        this.optionCount = optionCount;
+        this.optionPrice = optionPrice;
+
+    }
 }
