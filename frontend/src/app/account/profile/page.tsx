@@ -1,23 +1,51 @@
 'use client'
 import { getUser } from '@/app/API/UserAPI';
-import { PhoneString } from '@/app/Global/Method';
+import { PhoneNumberCheck, PhoneString, checkInput } from '@/app/Global/Method';
 import { redirect } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Profile from '@/app/Global/Layout/ProfileLayout';
 
 export default function Home() {
   const [user, setUser] = useState(null as any);
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [nickname, setNickname] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [birthday, setBirthday] = useState('');
+  const [error, setError] = useState('');
+
   const ACCESS_TOKEN = typeof window == 'undefined' ? null : localStorage.getItem('accessToken');
   useEffect(() => {
     if (ACCESS_TOKEN)
       getUser()
         .then(r => {
           setUser(r);
+          setName(r.name);
+          setEmail(r.email);
+          setNickname(r.nickname);
+          setPhoneNumber(r.phoneNumber);
+          setBirthday(r.birthday);
         })
         .catch(e => console.log(e));
     else
       redirect('/account/login');
   }, [ACCESS_TOKEN]);
+  function IsDisabled() {
+    return name != user?.name || email != user?.email || nickname != user?.nickname || phoneNumber != user?.phoneNumber || birthday != user?.birthday;
+  }
+  function Check(pattern: string, test: string) {
+    return new RegExp(pattern).test(test);
+  }
+  function Submit() {
+    if (!Check('^([가-힣]){2,}$', name))
+      return setError('이름은 한글 2글자 이상으로 구성되어야 합니다.');
+    if (!Check('^[a-zA-Z0-9.+_-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{3,}$', email))
+      return setError('이메일 형식이 맞지 않습니다.');
+    if (!Check('^[A-Za-z가-힣0-9_\s]{2,24}$', nickname))
+      return setError('닉네임은 한글,영어,숫자만 가능하며 최대 24자까지 가능합니다.');
+    if (!Check('^0[0-9]{10}$', phoneNumber))
+      return setError('전화번호 형식이 맞지 않습니다.(###-####-####)');
+  }
   return <Profile user={user}>
     <div className='flex items-end'>
       <label className='text-xl font-bold'><label className='text-xl text-red-500 font-bold'>회원정보</label> 변경</label>
@@ -33,37 +61,45 @@ export default function Home() {
       <li className='text-red-500'>행정구역이 변경되어 사용할 수 없는 주소는 회원정보에서 삭제됩니다.</li>
     </ul>
     <div className='mt-3 flex flex-col'>
-      <div>
-        <label className='font-bold text-lg'>{user?.nickname}님의 11번가 기본정보</label>
-      </div>
+      <label className='font-bold text-lg'>{user?.nickname}님의 11번가 기본정보</label>
+      <label className='text-xs font-bold text-red-500'>{error}</label>
       <table className='text-left text-base'>
         <tbody>
-          <tr>
+        <tr className='h-[40px]'>
+            <th className='w-[159px]'>프로필 이미지</th>
+            <td><img src={user?.url ? user.url : '/white.png'} alt="프로필 이미지" className='w-[128px] h-128px]'/></td>
+          </tr>
+          <tr className='h-[40px]'>
             <th className='w-[159px]'>아이디</th>
-            <td>{user?.username}</td>
+            <td><input type="text" className='input input-bordered input-sm' defaultValue={user?.username} readOnly maxLength={24} /></td>
           </tr>
-          <tr>
-            <th>이름</th>
-            <td><input type="text" className='input input-bordered input-sm' defaultValue={user?.name} maxLength={24}/></td>
-          </tr>
-          <tr>
+          <tr className='h-[40px]'>
             <th>비밀번호</th>
-            <td><button>변경하기</button></td>
+            <td><button className='btn border border-gray-300 btn-sm'>변경하기</button></td>
           </tr>
-          <tr>
+          <tr className='h-[40px]'>
+            <th>이름</th>
+            <td><input type="text" className='input input-bordered input-sm' defaultValue={name} onChange={e => setName(e.target.value)} maxLength={5} onFocus={e => checkInput(e, '^([가-힣]){2,}$', () => setError(''), () => setError('이름은 한글 2글자 이상으로 구성되어야 합니다.'))} onKeyUp={e => checkInput(e, '^([가-힣]){2,}$', () => setError(''), () => setError('이름은 한글 2글자 이상으로 구성되어야 합니다.'))} /></td>
+          </tr>
+          <tr className='h-[40px]'>
             <th>생년월일</th>
-            <td>{user?.birthday}</td>
+            <td><input type="date" className='input input-bordered input-sm' defaultValue={birthday} onChange={e => setBirthday(e.target.value)} max={"9999-12-31"} /></td>
           </tr>
-          <tr>
-            <th>휴대전화</th>
-            <td>{PhoneString(user?.phoneNumber)}</td>
-          </tr>
-          <tr>
+          <tr className='h-[40px]'>
             <th>이메일</th>
-            <td>{user?.email}</td>
+            <td><input type="text" className='input input-bordered input-sm' defaultValue={email} minLength={3} onChange={e => setEmail(e.target.value)} onFocus={e => checkInput(e, '^[a-zA-Z0-9.+_-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{3,}$', () => setError(''), () => setError('이메일 형식이 맞지 않습니다.'))} onKeyUp={e => checkInput(e, '^[a-zA-Z0-9.+_-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{3,}$', () => setError(''), () => setError('이메일 형식이 맞지 않습니다.'))} /></td>
+          </tr>
+          <tr className='h-[40px]'>
+            <th>닉네임</th>
+            <td><input type="text" className='input input-bordered input-sm' defaultValue={nickname} maxLength={24} onChange={e => setNickname(e.target.value)} onFocus={e => checkInput(e, '^[A-Za-z가-힣0-9_\s]{2,24}$', () => setError(''), () => setError('닉네임은 한글,영어,숫자만 가능하며 최대 24자까지 가능합니다.'))} onKeyUp={e => checkInput(e, '^[A-Za-z가-힣0-9_\s]{2,24}$', () => setError(''), () => setError('닉네임은 한글,영어,숫자만 가능하며 최대 24자까지 가능합니다.'))} /></td>
+          </tr>
+          <tr className='h-[40px]'>
+            <th>전화번호</th>
+            <td><input type="text" className='input input-bordered input-sm' defaultValue={PhoneString(phoneNumber)} maxLength={13} onChange={e => { PhoneNumberCheck(e); setPhoneNumber(e.target.value.replaceAll('-', '')) }} onFocus={e => { PhoneNumberCheck(e); checkInput(e, '^0[0-9]{2}-[0-9]{4}-[0-9]{4}$', () => setError(''), () => setError('전화번호 형식이 맞지 않습니다.(###-####-####)')); }} onKeyUp={e => { PhoneNumberCheck(e); checkInput(e, '^0[0-9]{2}-[0-9]{4}-[0-9]{4}$', () => setError(''), () => setError('전화번호 형식이 맞지 않습니다.(###-####-####)')); }} /></td>
           </tr>
         </tbody>
       </table>
+      <button id='submit' className='btn btn-error btn-sm text-white w-[400px] mx-0 mt-2' disabled={!IsDisabled()} onClick={() => Submit()}>변경하기</button>
     </div>
   </Profile>;
 }

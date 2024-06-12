@@ -21,3 +21,20 @@ export function checkInput(check: any, pattern: string, True: () => void, False:
     else
         False();
 }
+export function PhoneNumberCheck(e: any) {
+    const input = e.target as HTMLInputElement;
+    input.value = input.value.replace(/[^0-9]/g, '');
+    if (input.value.length > 3 && input.value.charAt(3) != '-') {
+        const value = input.value;
+        input.value = value.slice(0, 3) + '-' + value.slice(3);
+    }
+    if (input.value.length > 8 && input.value.charAt(8) != '-') {
+        const value = input.value;
+        input.value = value.slice(0, 8) + '-' + value.slice(8);
+    }
+    if (input.value.length > 13)
+        input.value = input.value.slice(0, 13);
+    if (input.value.lastIndexOf('-') == input.value.length - 1)
+        input.value = input.value.slice(0, input.value.length - 1);
+
+}
