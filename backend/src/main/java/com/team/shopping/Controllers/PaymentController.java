@@ -1,14 +1,12 @@
 package com.team.shopping.Controllers;
 
+import com.team.shopping.DTOs.PaymentLogRequestDTO;
 import com.team.shopping.DTOs.PaymentLogResponseDTO;
 import com.team.shopping.Records.TokenRecord;
 import com.team.shopping.Services.MultiService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -27,6 +25,19 @@ public class PaymentController {
             // 기능
             List<PaymentLogResponseDTO> paymentLogResponseDTOList = this.multiService.getPaymentLogList(username);
             return tokenRecord.getResponseEntity(paymentLogResponseDTOList);
+        }
+        return tokenRecord.getResponseEntity();
+    }
+
+    @PostMapping("/logList")
+    public ResponseEntity<?> logList (@RequestHeader("Authorization") String accessToken,
+                                      @RequestBody PaymentLogRequestDTO paymentLogRequestDTO) {
+        TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
+        if (tokenRecord.isOK()) {
+            String username = tokenRecord.username();
+            // 기능
+            PaymentLogResponseDTO paymentLogResponseDTO = this.multiService.addPaymentLog(username, paymentLogRequestDTO);
+            return tokenRecord.getResponseEntity(paymentLogResponseDTO);
         }
         return tokenRecord.getResponseEntity();
     }

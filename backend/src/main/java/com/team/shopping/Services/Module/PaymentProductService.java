@@ -21,7 +21,7 @@ public class PaymentProductService {
         return this.paymentProductRepository.save(PaymentProduct.builder()
                 .paymentLog(paymentLog)
                 .productId(product.getId())
-                .seller(product.getSeller())
+                .seller(product.getSeller().getUsername())
                 .price(product.getPrice())
                 .url(product.getDescription())
                 .title(product.getTitle())

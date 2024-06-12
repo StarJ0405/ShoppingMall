@@ -1,7 +1,6 @@
 package com.team.shopping.DTOs;
 
 import com.team.shopping.Domains.PaymentProduct;
-import com.team.shopping.Domains.SiteUser;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,7 +15,7 @@ public class PaymentProductResponseDTO {
 
     private Long productId;
 
-    private SiteUser seller;
+    private String seller;
 
     private int price;
 

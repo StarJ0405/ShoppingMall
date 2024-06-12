@@ -31,6 +31,7 @@ public class PaymentLogResponseDTO {
                                   List<PaymentProductResponseDTO> paymentProductResponseDTOList) {
         this.paymentLogId = paymentLog.getId();
         this.paymentStatus = paymentLog.getPaymentStatus().toString();
+        this.order = paymentLog.getOrder().getName();
         this.price = price;
         this.paymentDate = paymentLog.getCreateDate();
         this.paymentProductResponseDTOList = paymentProductResponseDTOList;

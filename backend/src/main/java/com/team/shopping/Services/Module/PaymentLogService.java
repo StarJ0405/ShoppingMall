@@ -14,7 +14,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PaymentLogService {
 
-    private PaymentLogRepository paymentLogRepository;
+    private final PaymentLogRepository paymentLogRepository;
 
     public PaymentLog save (SiteUser user) {
         return this.paymentLogRepository.save(PaymentLog.builder()

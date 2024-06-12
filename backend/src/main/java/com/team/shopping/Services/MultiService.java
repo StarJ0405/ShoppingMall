@@ -322,6 +322,10 @@ public class MultiService {
         SiteUser user = this.userService.get(username);
         List<PaymentLog> paymentLogList = this.paymentLogService.get(user);
 
+        if (paymentLogList == null) {
+            return null;
+        }
+
         List<PaymentLogResponseDTO> paymentLogResponseDTOList = new ArrayList<>();
 
         for (PaymentLog paymentLog : paymentLogList) {
@@ -341,6 +345,7 @@ public class MultiService {
 
         return paymentLogResponseDTOList;
     }
+
 
 
     @Transactional

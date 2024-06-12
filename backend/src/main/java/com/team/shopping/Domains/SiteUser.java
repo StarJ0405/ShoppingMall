@@ -17,7 +17,6 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 public class SiteUser {
-
     @Id
     @Column(length = 24, unique = true)
     private String username;
@@ -34,7 +33,7 @@ public class SiteUser {
     @Column(length = 24, unique = true)
     private String nickname;
 
-    @Column(length = 11 , unique = true)
+    @Column(length = 11, unique = true)
     private String phoneNumber;
 
     private UserRole role;
@@ -53,17 +52,19 @@ public class SiteUser {
     @OneToOne(mappedBy = "user", cascade = CascadeType.REMOVE)
     private Auth auth;
 
+
     @Builder
-    public SiteUser(String username, String name, String password, String nickname, String email, UserRole role, Gender gender, LocalDate birthday, String phoneNumber){
+    public SiteUser(String username, String name, String password, String nickname, String email, UserRole role, Gender gender, LocalDate birthday, String phoneNumber) {
         this.username = username;
         this.name = name;
         this.password = password;
         this.nickname = nickname;
         this.email = email;
         this.gender = gender;
-        this.birthday= birthday;
+        this.birthday = birthday;
         this.role = role;
         this.phoneNumber = phoneNumber;
         this.createDate = LocalDateTime.now();
+
     }
 }

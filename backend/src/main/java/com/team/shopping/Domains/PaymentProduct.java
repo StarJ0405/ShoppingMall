@@ -21,7 +21,7 @@ public class PaymentProduct {
 
     private Long productId;
 
-    private SiteUser seller;
+    private String seller;
 
     private int price;
 
@@ -38,7 +38,7 @@ public class PaymentProduct {
 
     @Builder
     public PaymentProduct (PaymentLog paymentLog, Long productId,
-                           SiteUser seller, int price, String url,
+                           String seller, int price, String url,
                            String title, String brand, int count) {
 
         this.paymentLog = paymentLog;
