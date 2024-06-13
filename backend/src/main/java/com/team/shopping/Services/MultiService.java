@@ -169,7 +169,7 @@ public class MultiService {
     public UserResponseDTO updatePassword(String username, UserRequestDTO userRequestDTO) {
         SiteUser user = userService.get(username);
         if (!this.userService.isMatch(userRequestDTO.getPassword(), user.getPassword()))
-            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+            throw new IllegalArgumentException("not match");
         SiteUser siteUser = userService.updatePassword(user, userRequestDTO.getNewPassword());
 
         return UserResponseDTO.builder().username(siteUser.getUsername()).gender(siteUser.getGender().toString()).email(siteUser.getEmail()).point(siteUser.getPoint()).phoneNumber(siteUser.getPhoneNumber()).nickname(siteUser.getNickname()).birthday(siteUser.getBirthday()).createDate(siteUser.getCreateDate()).modifyDate(siteUser.getModifyDate()).name(siteUser.getName()).build();
