@@ -9,18 +9,6 @@ const nextConfig = {
 			{
 				source: '/api/:path*',
 				destination: 'http://localhost:8080/api/:path*',
-			},
-			{
-				source: '/ws-stomp',
-				destination: 'http://localhost:8080/ws-stomp',
-			},
-			{
-				source: '/ws-stomp/',
-				destination: 'http://localhost:8080/ws-stomp/',
-			},
-			{
-				source: '/ws-stomp/:path*',
-				destination: 'http://localhost:8080/ws-stomp/:path*',
 			}
 		]
 	},
