@@ -57,6 +57,8 @@ export default function Page() {
                     case 'email': { setError('이메일 중복'); break; }
                     case 'nickname': { setError('닉네임 중복'); break; }
                     case 'phone': { setError('전화번호 중복'); break; }
+                    default:
+                        console.log(error);
                 }
             });
     }

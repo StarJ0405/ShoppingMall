@@ -101,7 +101,8 @@ public class MultiService {
 
     @Transactional
     public void signup(SignupRequestDTO signupRequestDTO) throws DataDuplicateException {
-        userService.check(signupRequestDTO);
+        userService.usernameCheck(signupRequestDTO.getUsername());
+        userService.otherCheck(signupRequestDTO.getEmail(), signupRequestDTO.getNickname(), signupRequestDTO.getPhoneNumber());
         userService.save(signupRequestDTO);
     }
 
@@ -143,6 +144,8 @@ public class MultiService {
 
     @Transactional
     public UserResponseDTO updateProfile(String username, UserRequestDTO newUserRequestDTO) {
+        userService.otherCheck(newUserRequestDTO.getEmail(), newUserRequestDTO.getNickname(), newUserRequestDTO.getPhoneNumber());
+
         SiteUser siteUser = userService.updateProfile(username, newUserRequestDTO);
         Optional<FileSystem> _fileSystem = fileSystemService.get(ImageKey.USER.getKey(username));
         String path = ShoppingApplication.getOsType().getLoc();
