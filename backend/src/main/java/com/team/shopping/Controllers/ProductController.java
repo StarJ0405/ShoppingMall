@@ -24,14 +24,7 @@ public class ProductController {
             String username = tokenRecord.username();
             List<OptionListRequestDTO> listRequestDTOS = requestDTO.getOptionLists();
             if (listRequestDTOS != null)
-                for (OptionListRequestDTO listRequestDTO : listRequestDTOS)
-                    if (listRequestDTO.getChild() != null)
-                        for (OptionRequestDTO optionRequestDTO : listRequestDTO.getChild())
-                            System.out.println(optionRequestDTO.getName() + "," + optionRequestDTO.getCount() + ", " + optionRequestDTO.getPrice());
-                    else System.out.println("child is null");
-            else System.out.println("list is null");
-
-            this.multiService.saveProduct(requestDTO, username);
+                this.multiService.saveProduct(requestDTO, username);
             return tokenRecord.getResponseEntity("문제 없음");
         }
         return tokenRecord.getResponseEntity();
@@ -43,7 +36,7 @@ public class ProductController {
             ProductResponseDTO productResponseDTO = multiService.getProduct(productId);
             return ResponseEntity.status(HttpStatus.OK).body(productResponseDTO);
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
 
@@ -53,37 +46,29 @@ public class ProductController {
             List<ProductResponseDTO> productResponseDTOList = multiService.getProductList();
             return ResponseEntity.status(HttpStatus.OK).body(productResponseDTOList);
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("not productList");
         }
     }
 
     @PostMapping("/question")
     public ResponseEntity<?> productQuestion(@RequestHeader("Authorization") String accessToken, @RequestBody ProductQARequestDTO requestDTO) {
-        try {
-            TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
-            if (tokenRecord.isOK()) {
-                String username = tokenRecord.username();
-                this.multiService.productQASave(username, requestDTO);
-                return tokenRecord.getResponseEntity("문제 없음");
-            }
-            return tokenRecord.getResponseEntity();
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
+        if (tokenRecord.isOK()) {
+            String username = tokenRecord.username();
+            this.multiService.productQASave(username, requestDTO);
+            return tokenRecord.getResponseEntity("문제 없음");
         }
+        return tokenRecord.getResponseEntity();
     }
 
     @PostMapping("/answer")
     public ResponseEntity<?> productAnswer(@RequestHeader("Authorization") String accessToken, @RequestBody ProductQARequestDTO requestDTO) {
         TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
-        try {
-            if (tokenRecord.isOK()) {
-                String username = tokenRecord.username();
-                this.multiService.productQAUpdate(username, requestDTO);
-                return tokenRecord.getResponseEntity("문제 없음");
-            }
-            return tokenRecord.getResponseEntity();
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        if (tokenRecord.isOK()) {
+            String username = tokenRecord.username();
+            this.multiService.productQAUpdate(username, requestDTO);
+            return tokenRecord.getResponseEntity("문제 없음");
         }
+        return tokenRecord.getResponseEntity();
     }
 }

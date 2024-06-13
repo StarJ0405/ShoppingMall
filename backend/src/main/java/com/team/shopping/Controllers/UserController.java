@@ -52,7 +52,6 @@ public class UserController {
         TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
         if (tokenRecord.isOK()) {
             String username = tokenRecord.username();
-            // 기능
             UserResponseDTO userResponseDTO = this.multiService.getProfile(username);
             return tokenRecord.getResponseEntity(userResponseDTO);
         }
