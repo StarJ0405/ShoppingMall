@@ -241,17 +241,17 @@ public class MultiService {
         SiteUser user = this.userService.get(username);
         Product product = this.productService.getProduct(cartRequestDTO.getProductId());
         CartItem cartItem = this.cartItemService.getCartItem(user, product);
+        if (product != null)
+            if (cartItem != null) {
+                cartItem.updateCount(cartItem.getCount() + cartRequestDTO.getCount());
+            } else {
+                cartItem = this.cartItemService.addToCart(user, product, cartRequestDTO.getCount());
+                List<Options> options = this.optionsService.getOptionsList(cartRequestDTO.getOptionIdList());
 
-        if (cartItem != null) {
-            cartItem.updateCount(cartItem.getCount() + cartRequestDTO.getCount());
-        } else {
-            cartItem = this.cartItemService.addToCart(user, product, cartRequestDTO.getCount());
-            List<Options> options = this.optionsService.getOptionsList(cartRequestDTO.getOptionIdList());
-
-            for (Options option : options) {
-                this.cartItemDetailService.save(cartItem, option);
+                for (Options option : options) {
+                    this.cartItemDetailService.save(cartItem, option);
+                }
             }
-        }
 
         List<CartResponseDTO> responseDTOList = new ArrayList<>();
         List<CartItem> cartItems = this.cartItemService.getCartItemList(user);
@@ -268,10 +268,13 @@ public class MultiService {
     public List<CartResponseDTO> updateToCart(String username, CartRequestDTO cartRequestDTO) {
         SiteUser user = this.userService.get(username);
         Product product = this.productService.getProduct(cartRequestDTO.getProductId());
-        CartItem cartItem = this.cartItemService.getCartItem(user, product);
-        cartItem.updateCount(cartRequestDTO.getCount());
-        this.cartItemService.save(cartItem);
-
+        if (product != null) {
+            CartItem cartItem = this.cartItemService.getCartItem(user, product);
+            if (cartItem != null) {
+                cartItem.updateCount(cartRequestDTO.getCount());
+                this.cartItemService.save(cartItem);
+            }
+        }
         List<CartItem> cartItems = this.cartItemService.getCartItemList(user);
         List<CartResponseDTO> responseDTOList = new ArrayList<>();
 
@@ -289,12 +292,12 @@ public class MultiService {
         SiteUser user = this.userService.get(username);
         Product product = this.productService.getProduct(productId);
         CartItem cartItem = this.cartItemService.getCartItem(user, product);
-        if (cartItem != null) {
-            this.cartItemDetailService.delete(cartItem);
-            this.cartItemService.delete(cartItem);
-        } else {
-            System.out.println("CartItem not found for user: " + username + " and product: " + productId);
-        }
+        if (product != null)
+            if (cartItem != null) {
+                this.cartItemDetailService.delete(cartItem);
+                this.cartItemService.delete(cartItem);
+            }
+
 
         List<CartResponseDTO> responseDTOList = new ArrayList<>();
         List<CartItem> cartItems = this.cartItemService.getCartItemList(user);
@@ -311,12 +314,11 @@ public class MultiService {
         for (Long productId : productIdList) {
             Product product = this.productService.getProduct(productId);
             CartItem cartItem = this.cartItemService.getCartItem(user, product);
-            if (cartItem != null) {
-                this.cartItemDetailService.delete(cartItem);
-                this.cartItemService.delete(cartItem);
-            } else {
-                System.out.println("CartItem not found for user: " + username + " and product: " + productId);
-            }
+            if (product != null)
+                if (cartItem != null) {
+                    this.cartItemDetailService.delete(cartItem);
+                    this.cartItemService.delete(cartItem);
+                }
         }
 
         List<CartResponseDTO> responseDTOList = new ArrayList<>();
@@ -442,6 +444,9 @@ public class MultiService {
     @Transactional
     public ProductResponseDTO getProduct(Long productID) {
         Product product = productService.getProduct(productID);
+        if (product == null) {
+            throw new NoSuchElementException("not product");
+        }
         return getProduct(product);
     }
 
@@ -468,13 +473,8 @@ public class MultiService {
     public void productQASave(String username, ProductQARequestDTO requestDTO) {
         SiteUser user = this.userService.get(username);
         Product product = productService.getProduct(requestDTO.getProductId());
-        if (user == null)
-            throw new NoSuchElementException("not user");
-
-        if (user.getRole() != UserRole.USER)
-            throw new NoSuchElementException("not role");
-
-        this.productQAService.save(requestDTO.getTitle(), user, product);
+        if (user != null && product != null && user.getRole().equals(UserRole.USER))
+            this.productQAService.save(requestDTO.getTitle(), user, product);
     }
 
     @Transactional
@@ -482,17 +482,8 @@ public class MultiService {
         SiteUser user = this.userService.get(username);
         Optional<ProductQA> _productQA = productQAService.getProductQA(requestDTO.getProductQAId());
         Product product = productService.getProduct(requestDTO.getProductId());
-        if (product.getSeller() != user)
-            throw new NoSuchElementException("not seller");
-
-        if (user == null)
-            throw new NoSuchElementException("not user");
-
-        if (user.getRole() != UserRole.SELLER)
-            throw new NoSuchElementException("not role");
-
-        this.productQAService.update(requestDTO.getContent(), user, _productQA.get());
-
+        if (user != null && product != null && user.getRole().equals(UserRole.SELLER))
+            this.productQAService.update(requestDTO.getContent(), user, _productQA.get());
     }
 
     /**
@@ -546,13 +537,11 @@ public class MultiService {
      * Category
      */
     @Transactional
-    public void saveCategory(String username, CategoryRequestDTO requestDto) throws DataDuplicateException {
+    public void saveCategory(String username, CategoryRequestDTO requestDto) {
         SiteUser siteUser = userService.get(username);
         if (siteUser.getRole().equals(UserRole.ADMIN)) {
             this.categoryService.check(requestDto);
             this.categoryService.save(requestDto);
-        } else {
-            throw new IllegalArgumentException("ADMIN 권한이 아닙니다.");
         }
     }
 
@@ -561,23 +550,21 @@ public class MultiService {
         SiteUser siteUser = userService.get(username);
         if (siteUser.getRole().equals(UserRole.ADMIN)) {
             Category category = categoryService.get(id);
-            categoryService.deleteCategory(category);
-        } else {
-            throw new IllegalArgumentException("ADMIN 권한이 아닙니다.");
+            if (category != null)
+                categoryService.deleteCategory(category);
         }
-
     }
 
 
     @Transactional
-    public void updateCategory(String username, CategoryRequestDTO requestDto) throws DataDuplicateException {
+    public void updateCategory(String username, CategoryRequestDTO requestDto) {
         SiteUser siteUser = userService.get(username);
         if (siteUser.getRole().equals(UserRole.ADMIN)) {
             Category category = categoryService.get(requestDto.getId());
-            categoryService.updateCheck(requestDto);
-            categoryService.update(category, requestDto.getNewName());
-        } else {
-            throw new IllegalArgumentException("ADMIN 권한이 아닙니다.");
+            if (category != null) {
+                categoryService.updateCheck(requestDto);
+                categoryService.update(category, requestDto.getNewName());
+            }
         }
     }
 
