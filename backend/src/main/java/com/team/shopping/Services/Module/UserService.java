@@ -7,7 +7,6 @@ import com.team.shopping.Domains.SiteUser;
 import com.team.shopping.Enums.Gender;
 import com.team.shopping.Enums.UserRole;
 import com.team.shopping.Exceptions.DataDuplicateException;
-import com.team.shopping.Exceptions.DataNotFoundException;
 import com.team.shopping.Repositories.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -61,7 +60,7 @@ public class UserService {
 
     @Transactional
     public SiteUser get(String value) throws IllegalArgumentException {
-        return this.userRepository.findById(value).orElseThrow(() -> new DataNotFoundException("데이터가 존재하지 않습니다"));
+        return this.userRepository.findById(value).orElse(null);
     }
 
     public Optional<SiteUser> getOptional(String value) {
