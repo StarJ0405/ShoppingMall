@@ -23,7 +23,7 @@ public class AuthController {
             AuthResponseDTO responseDto = this.multiService.login(requestDto);
             return ResponseEntity.status(HttpStatus.OK).body(responseDto);
         } catch (IllegalArgumentException e) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
 
