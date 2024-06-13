@@ -26,14 +26,37 @@ public class PaymentLog {
 
     private PaymentStatus paymentStatus;
 
+    private String orderedName;
+
+    private String phoneNumber;
+
+    private String mainAddress;
+
+    private String addressDetail;
+
+    private int postNumber;
+
+    private String deliveryMessage;
+
+    private int  trackingNumber;
+
     @Column(columnDefinition = "TEXT")
     private String info;
 
     @Builder
-    public PaymentLog (SiteUser user, String info, LocalDateTime createDate, PaymentStatus paymentStatus) {
+    public PaymentLog (SiteUser user, String info, LocalDateTime createDate,
+                       PaymentStatus paymentStatus, String orderedName,
+                       String phoneNumber, String mainAddress, String addressDetail,
+                       int postNumber, String deliveryMessage) {
         this.order = user;
         this.info = info;
         this.createDate = createDate;
         this.paymentStatus = paymentStatus;
+        this.orderedName = orderedName;
+        this.phoneNumber = phoneNumber;
+        this.mainAddress = mainAddress;
+        this.addressDetail = addressDetail;
+        this.postNumber = postNumber;
+        this.deliveryMessage = deliveryMessage;
     }
 }
