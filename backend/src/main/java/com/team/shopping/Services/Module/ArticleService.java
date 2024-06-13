@@ -38,8 +38,7 @@ public class ArticleService {
                 .build());
     }
 
-    public Article update(ArticleRequestDTO articleRequestDTO) {
-        Article article = this.articleRepository.findById(articleRequestDTO.getArticleId()).orElseThrow();// 기존에있는 걸 찾아오고
+    public Article update(Article article, ArticleRequestDTO articleRequestDTO) {// 기존에있는 걸 찾아오고
         article.setTitle(articleRequestDTO.getTitle());
         article.setContent(articleRequestDTO.getContent());
         article.setModifyDate(LocalDateTime.now());

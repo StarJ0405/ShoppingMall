@@ -590,15 +590,19 @@ public class MultiService {
                 .build();
     }
     @Transactional
-    public ArticleResponseDTO updateArticle(String username, ArticleRequestDTO articleRequestDTO) {
-        SiteUser siteUser = this.userService.get(username);
-        Article article = this.articleService.update(articleRequestDTO );
-
-        return ArticleResponseDTO.builder()
-                .article(article)
-                .siteUser(siteUser)
-                .build();
-
+    public ArticleResponseDTO updateArticle(String username ,ArticleRequestDTO articleRequestDTO) {
+        SiteUser user = userService.get(username);
+        Article _article = this.articleService.get(articleRequestDTO.getArticleId());
+        if (!user.getUsername().equals(_article.getAuthor().getUsername()) || !user.getRole().equals(UserRole.ADMIN)) {
+            throw new IllegalArgumentException("not role");
+        }
+        else {
+            Article article = this.articleService.update(_article, articleRequestDTO);
+            return ArticleResponseDTO.builder()
+                    .article(article)
+                    .siteUser(article.getAuthor())
+                    .build();
+        }
     }
     @Transactional
     public void deleteArticle(String username, Long articleId) {
@@ -607,7 +611,10 @@ public class MultiService {
         if (!user.getUsername().equals(article.getAuthor().getUsername()) || !user.getRole().equals(UserRole.ADMIN)) {
             throw new IllegalArgumentException("not role");
         }
-        this.articleService.delete(articleId);
+        else{
+            this.articleService.delete(articleId);
+        }
+
     }
     @Transactional
     public List<ArticleResponseDTO> getArticleList(int type){ // Long 을 Type 형식으로 바꿔야함
