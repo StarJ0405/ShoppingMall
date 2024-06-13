@@ -128,15 +128,14 @@ public class MultiService {
     public UserResponseDTO updateProfile(String username, UserRequestDTO newUserRequestDTO) {
         SiteUser siteUser = userService.updateProfile(username, newUserRequestDTO);
         FileSystem fileSystem = fileSystemService.get(ImageKey.User.getKey(username));
-        if (!newUserRequestDTO.getUrl().equals(fileSystem.getV())) {
+        if (fileSystem != null && !newUserRequestDTO.getUrl().equals(fileSystem.getV())) {
             String newFile = "/api/user" + "_" + siteUser.getUsername() + "/";
             String newUrl = this.fileMove(newUserRequestDTO.getUrl(), newFile);
             if (newUrl != null) {
                 String path = ShoppingApplication.getOsType().getLoc();
                 File file = new File(path + fileSystem.getV());
-                if (file.exists()) {
+                if (file.exists())
                     file.delete();
-                }
                 FileSystem tempFile = fileSystemService.get(ImageKey.Temp.getKey(username));
                 fileSystemService.delete(tempFile);
                 FileSystem userFile = fileSystemService.get(ImageKey.User.getKey(username));

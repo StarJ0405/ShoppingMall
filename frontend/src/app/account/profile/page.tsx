@@ -1,9 +1,10 @@
 'use client'
-import { getUser } from '@/app/API/UserAPI';
+import { getUser, saveImage, updateUser, updateUserPassword } from '@/app/API/UserAPI';
 import { PhoneNumberCheck, PhoneString, checkInput } from '@/app/Global/Method';
 import { redirect } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Profile from '@/app/Global/Layout/ProfileLayout';
+import Modal from '@/app/Global/Modal';
 
 export default function Home() {
   const [user, setUser] = useState(null as any);
@@ -13,7 +14,18 @@ export default function Home() {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [birthday, setBirthday] = useState('');
   const [error, setError] = useState('');
+  const [url, setUrl] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [canShow, setCanShow] = useState(false);
+  const [passwordError, setPasswordError] = useState('');
 
+  function Change(file: any) {
+    const formData = new FormData();
+    formData.append('file', file);
+    saveImage(formData)
+      .then(r => setUrl(r?.url))
+      .catch(e => console.log(e))
+  }
   const ACCESS_TOKEN = typeof window == 'undefined' ? null : localStorage.getItem('accessToken');
   useEffect(() => {
     if (ACCESS_TOKEN)
@@ -25,13 +37,14 @@ export default function Home() {
           setNickname(r.nickname);
           setPhoneNumber(r.phoneNumber);
           setBirthday(r.birthday);
+          setUrl(r.url);
         })
         .catch(e => console.log(e));
     else
       redirect('/account/login');
   }, [ACCESS_TOKEN]);
   function IsDisabled() {
-    return name != user?.name || email != user?.email || nickname != user?.nickname || phoneNumber != user?.phoneNumber || birthday != user?.birthday;
+    return name != user?.name || email != user?.email || nickname != user?.nickname || phoneNumber != user?.phoneNumber || birthday != user?.birthday || url != user?.url;
   }
   function Check(pattern: string, test: string) {
     return new RegExp(pattern).test(test);
@@ -45,6 +58,25 @@ export default function Home() {
       return setError('닉네임은 한글,영어,숫자만 가능하며 최대 24자까지 가능합니다.');
     if (!Check('^0[0-9]{10}$', phoneNumber))
       return setError('전화번호 형식이 맞지 않습니다.(###-####-####)');
+
+    updateUser({ name: name, email: email, phoneNumber: phoneNumber, nickname: nickname, password: "", newPassword: "", url: url })
+      .then(r => setUser(r))
+      .catch(e => console.log(e));
+  }
+  function ChangePassword() {
+    const old = (document.getElementById('old_password') as HTMLInputElement).value
+    const new1 = (document.getElementById('new_password1') as HTMLInputElement).value
+    const new2 = (document.getElementById('new_password2') as HTMLInputElement).value
+    if (new1 !== new2)
+      return setPasswordError('변경할 비밀번호가 일치하지 않습니다.');
+    if (!Check('^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[!@#$%^&*()-+={}~?:;`|/]).{6,24}$', new1))
+      return setPasswordError('비밀번호는 최소 6, 최대 24자로 대문자, 소문자, 숫자, 특수문자(!@#$%^&*()-+={}~?:;`)가 각각 한개씩 들어가 있어야합니다.')
+    updateUserPassword({ name: user?.name, email: user?.email, phoneNumber: user?.phoneNumber, nickname: user?.nickname, password: old, newPassword: new1, url: user?.url })
+      .then(r => {
+        setUser(r)
+        setIsModalOpen(false);
+      })
+      .catch(e => console.log(e))
   }
   return <Profile user={user}>
     <div className='flex items-end'>
@@ -65,9 +97,12 @@ export default function Home() {
       <label className='text-xs font-bold text-red-500'>{error}</label>
       <table className='text-left text-base'>
         <tbody>
-        <tr className='h-[40px]'>
+          <tr className='h-[40px]'>
             <th className='w-[159px]'>프로필 이미지</th>
-            <td><img src={user?.url ? user.url : '/white.png'} alt="프로필 이미지" className='w-[128px] h-128px]'/></td>
+            <td>
+              <img src={user?.url ? user.url : '/base_profile.png'} onClick={() => document.getElementById('file')?.click()} alt="프로필 이미지" className='w-[128px] h-128px]' />
+              <input id="file" type="file" hidden onChange={e => Change(e.target.files?.[0])} />
+            </td>
           </tr>
           <tr className='h-[40px]'>
             <th className='w-[159px]'>아이디</th>
@@ -75,7 +110,7 @@ export default function Home() {
           </tr>
           <tr className='h-[40px]'>
             <th>비밀번호</th>
-            <td><button className='btn border border-gray-300 btn-sm'>변경하기</button></td>
+            <td><button className='btn border border-gray-300 btn-sm' onClick={() => { setCanShow(false); setPasswordError(''); setIsModalOpen(true); }}>변경하기</button></td>
           </tr>
           <tr className='h-[40px]'>
             <th>이름</th>
@@ -101,5 +136,17 @@ export default function Home() {
       </table>
       <button id='submit' className='btn btn-error btn-sm text-white w-[400px] mx-0 mt-2' disabled={!IsDisabled()} onClick={() => Submit()}>변경하기</button>
     </div>
+    <Modal open={isModalOpen} onClose={() => setIsModalOpen(false)} className='flex flex-col w-[400px] h-[300px] items-center justify-center' escClose={true} outlineClose={true}>
+      <label className='text-red-500 text-sm w-[300px] mb-4'>{passwordError}</label>
+      <input id="old_password" type={canShow ? 'text' : 'password'} className='input input-bordered input-sm w-[200px] mb-1' placeholder='현재 비밀번호' onKeyDown={e => { if (e.key == 'Enter') document.getElementById('new_password1')?.focus() }} onFocus={() => setPasswordError('')} />
+      <input id="new_password1" type={canShow ? 'text' : 'password'} className='input input-bordered input-sm w-[200px] mb-1' placeholder='새비밀번호' onKeyDown={e => { if (e.key == 'Enter') document.getElementById('new_password2')?.focus() }} onFocus={e => checkInput(e, '^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[!@#$%^&*()-+={}~?:;`|/]).{6,24}$', () => setPasswordError(''), () => setPasswordError('비밀번호는 최소 6, 최대 24자로 대문자, 소문자, 숫자, 특수문자(!@#$%^&*()-+={}~?:;`)가 각각 한개씩 들어가 있어야합니다.'))} onKeyUp={e => checkInput(e, '^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[!@#$%^&*()-+={}~?:;`|/]).{6,24}$', () => setPasswordError(''), () => setPasswordError('비밀번호는 최소 6, 최대 24자로 대문자, 소문자, 숫자, 특수문자(!@#$%^&*()-+={}~?:;`)가 각각 한개씩 들어가 있어야합니다.'))} />
+      <input id="new_password2" type={canShow ? 'text' : 'password'} className='input input-bordered input-sm w-[200px] mb-1' placeholder='새비밀번호2' onKeyDown={e => { if (e.key == 'Enter') document.getElementById('password_submit')?.click() }} onFocus={e => { if ((e.target as HTMLInputElement).value !== (document.getElementById('new_password1') as HTMLInputElement).value) setPasswordError('변경할 비밀번호가 일치하지 않습니다.'); else setPasswordError('') }} onChange={e => { if ((e.target as HTMLInputElement).value !== (document.getElementById('new_password1') as HTMLInputElement).value) setPasswordError('변경할 비밀번호가 일치하지 않습니다.'); else setPasswordError('') }} />
+      <div className='flex justify-start w-[200px]'>
+        <input type='checkbox' onClick={() => setCanShow(!canShow)}/>
+        <label className='ml-1 text-sm'>비밀번호 보이기</label>
+      </div>
+      <button id="password_submit" className='btn btn-xs mb-1' onClick={() => ChangePassword()}>변경하기</button>
+      <button className='btn btn-xs' onClick={() => setIsModalOpen(false)}>취소</button>
+    </Modal>
   </Profile>;
 }
