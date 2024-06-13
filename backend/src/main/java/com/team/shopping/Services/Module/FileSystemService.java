@@ -5,6 +5,8 @@ import com.team.shopping.Repositories.FileSystemRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class FileSystemService {
@@ -17,17 +19,8 @@ public class FileSystemService {
         fileSystemRepository.save(fileSystem);
     }
 
-    public void updateFile(FileSystem fileSystem, String valueKey) {
-        fileSystem.setV(valueKey);
-        fileSystemRepository.save(fileSystem);
+    public Optional<FileSystem> get(String key) {
+        return fileSystemRepository.findById(key);
     }
 
-
-    public FileSystem get(String key) {
-        return fileSystemRepository.findByK(key);
-    }
-
-    public void delete(FileSystem fileSystem) {
-        fileSystemRepository.delete(fileSystem);
-    }
 }

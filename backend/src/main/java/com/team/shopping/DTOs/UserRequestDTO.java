@@ -6,7 +6,7 @@ import lombok.Getter;
 @Getter
 public class UserRequestDTO {
 
-    private String  name;
+    private String name;
 
     private String email;
 

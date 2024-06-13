@@ -22,15 +22,29 @@ public class QPaymentLog extends EntityPathBase<PaymentLog> {
 
     public static final QPaymentLog paymentLog = new QPaymentLog("paymentLog");
 
+    public final StringPath addressDetail = createString("addressDetail");
+
     public final DateTimePath<java.time.LocalDateTime> createDate = createDateTime("createDate", java.time.LocalDateTime.class);
+
+    public final StringPath deliveryMessage = createString("deliveryMessage");
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
     public final StringPath info = createString("info");
 
+    public final StringPath mainAddress = createString("mainAddress");
+
     public final QSiteUser order;
 
     public final EnumPath<com.team.shopping.Enums.PaymentStatus> paymentStatus = createEnum("paymentStatus", com.team.shopping.Enums.PaymentStatus.class);
+
+    public final StringPath phoneNumber = createString("phoneNumber");
+
+    public final NumberPath<Integer> postNumber = createNumber("postNumber", Integer.class);
+
+    public final StringPath recipient = createString("recipient");
+
+    public final NumberPath<Integer> trackingNumber = createNumber("trackingNumber", Integer.class);
 
     public QPaymentLog(String variable) {
         this(PaymentLog.class, forVariable(variable), INITS);

@@ -13,4 +13,6 @@ public class PaymentLogRequestDTO {
 
     private List<Long> cartItemIdList;
 
+    private Long addressId;
+
 }

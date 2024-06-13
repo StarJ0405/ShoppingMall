@@ -18,23 +18,41 @@ public class PaymentLogResponseDTO {
 
     private String paymentStatus;
 
-    private String order;
-
     private List<PaymentProductResponseDTO> paymentProductResponseDTOList;
 
     private int price;
 
     private LocalDateTime paymentDate;
 
+    private String recipient;
+
+    private String phoneNumber;
+
+    private String mainAddress;
+
+    private String addressDetail;
+
+    private int postNumber;
+
+    private String deliveryMessage;
+
+    private int  trackingNumber;
+
     @Builder
     public PaymentLogResponseDTO (int price, PaymentLog paymentLog,
                                   List<PaymentProductResponseDTO> paymentProductResponseDTOList) {
         this.paymentLogId = paymentLog.getId();
-        this.paymentStatus = paymentLog.getPaymentStatus().toString();
-        this.order = paymentLog.getOrder().getName();
+        this.paymentStatus = paymentLog.getPaymentStatus().getStatus();
+        this.recipient = paymentLog.getRecipient();
         this.price = price;
         this.paymentDate = paymentLog.getCreateDate();
         this.paymentProductResponseDTOList = paymentProductResponseDTOList;
+        this.phoneNumber = paymentLog.getPhoneNumber();
+        this.mainAddress = paymentLog.getMainAddress();
+        this.addressDetail = paymentLog.getAddressDetail();
+        this.postNumber = paymentLog.getPostNumber();
+        this.deliveryMessage = paymentLog.getDeliveryMessage();
+        this.trackingNumber = paymentLog.getTrackingNumber();
     }
 
 

@@ -22,10 +22,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -45,6 +42,7 @@ public class MultiService {
     private final PaymentLogService paymentLogService;
     private final PaymentProductService paymentProductService;
     private final PaymentProductDetailService paymentProductDetailService;
+    private final AddressService addressService;
     private final TagService tagService;
 
 
@@ -81,10 +79,10 @@ public class MultiService {
     public AuthResponseDTO login(AuthRequestDTO requestDto) {
         SiteUser user = this.userService.get(requestDto.getUsername());
         if (user == null) {
-            throw new IllegalArgumentException("아이디가 일치하지 않습니다.");
+            throw new IllegalArgumentException("username");
         }
         if (!this.userService.isMatch(requestDto.getPassword(), user.getPassword()))
-            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+            throw new IllegalArgumentException("password");
         String accessToken = this.jwtTokenProvider //
                 .generateAccessToken(new UsernamePasswordAuthenticationToken(new CustomUserDetails(user), user.getPassword()));
         String refreshToken = this.jwtTokenProvider //
@@ -121,30 +119,16 @@ public class MultiService {
     @Transactional
     public UserResponseDTO getProfile(String username) {
         SiteUser siteUser = this.userService.get(username);
-        return UserResponseDTO.builder().username(siteUser.getUsername()).gender(siteUser.getGender().toString()).role(siteUser.getRole().toString()).email(siteUser.getEmail()).point(siteUser.getPoint()).phoneNumber(siteUser.getPhoneNumber()).nickname(siteUser.getNickname()).birthday(siteUser.getBirthday()).createDate(siteUser.getCreateDate()).modifyDate(siteUser.getModifyDate()).name(siteUser.getName()).build();
-    }
+        Optional<FileSystem> _fileSystem = fileSystemService.get(ImageKey.USER.getKey(username));
+        String url = null;
 
-    @Transactional
-    public UserResponseDTO updateProfile(String username, UserRequestDTO newUserRequestDTO) {
-        SiteUser siteUser = userService.updateProfile(username, newUserRequestDTO);
-        FileSystem fileSystem = fileSystemService.get(ImageKey.User.getKey(username));
-        if (fileSystem != null && !newUserRequestDTO.getUrl().equals(fileSystem.getV())) {
-            String newFile = "/api/user" + "_" + siteUser.getUsername() + "/";
-            String newUrl = this.fileMove(newUserRequestDTO.getUrl(), newFile);
-            if (newUrl != null) {
-                String path = ShoppingApplication.getOsType().getLoc();
-                File file = new File(path + fileSystem.getV());
-                if (file.exists())
-                    file.delete();
-                FileSystem tempFile = fileSystemService.get(ImageKey.Temp.getKey(username));
-                fileSystemService.delete(tempFile);
-                FileSystem userFile = fileSystemService.get(ImageKey.User.getKey(username));
-                fileSystemService.updateFile(userFile, newUrl);
-            }
-        }
+        if (_fileSystem.isPresent())
+            url = _fileSystem.get().getV();
+
         return UserResponseDTO.builder()
                 .username(siteUser.getUsername())
                 .gender(siteUser.getGender().toString())
+                .role(siteUser.getRole().toString())
                 .email(siteUser.getEmail())
                 .point(siteUser.getPoint())
                 .phoneNumber(siteUser.getPhoneNumber())
@@ -153,7 +137,31 @@ public class MultiService {
                 .createDate(siteUser.getCreateDate())
                 .modifyDate(siteUser.getModifyDate())
                 .name(siteUser.getName())
+                .url(url)
                 .build();
+    }
+
+    @Transactional
+    public UserResponseDTO updateProfile(String username, UserRequestDTO newUserRequestDTO) {
+        SiteUser siteUser = userService.updateProfile(username, newUserRequestDTO);
+        Optional<FileSystem> _fileSystem = fileSystemService.get(ImageKey.USER.getKey(username));
+        String path = ShoppingApplication.getOsType().getLoc();
+        // 삭제 or 동일하지 않는 경우만 진행
+        if (_fileSystem.isPresent() && (newUserRequestDTO.getUrl() == null || !_fileSystem.get().getV().equals(newUserRequestDTO.getUrl()))) {
+            File old = new File(path + _fileSystem.get().getV());
+            if (old.exists())
+                old.delete();
+        }
+        String newUrl = null;
+        // 새로 생성
+        if (newUserRequestDTO.getUrl() != null && !newUserRequestDTO.getUrl().isBlank()) {
+            String newFile = "/api/user" + "_" + siteUser.getUsername() + "/";
+            newUrl = this.fileMove(newUserRequestDTO.getUrl(), newFile, ImageKey.TEMP.getKey(username));
+            if (newUrl != null)
+                fileSystemService.save(ImageKey.USER.getKey(username), newUrl);
+        }
+        return UserResponseDTO.builder().username(siteUser.getUsername()).gender(siteUser.getGender().toString()).email(siteUser.getEmail()).point(siteUser.getPoint()).phoneNumber(siteUser.getPhoneNumber()).nickname(siteUser.getNickname()).birthday(siteUser.getBirthday()).createDate(siteUser.getCreateDate()).modifyDate(siteUser.getModifyDate())
+                .url(newUrl).name(siteUser.getName()).build();
     }
 
 
@@ -161,21 +169,10 @@ public class MultiService {
     public UserResponseDTO updatePassword(String username, UserRequestDTO userRequestDTO) {
         SiteUser user = userService.get(username);
         if (!this.userService.isMatch(userRequestDTO.getPassword(), user.getPassword()))
-            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+            throw new IllegalArgumentException("not match");
         SiteUser siteUser = userService.updatePassword(user, userRequestDTO.getNewPassword());
 
-        return UserResponseDTO.builder()
-                .username(siteUser.getUsername())
-                .gender(siteUser.getGender().toString())
-                .email(siteUser.getEmail())
-                .point(siteUser.getPoint())
-                .phoneNumber(siteUser.getPhoneNumber())
-                .nickname(siteUser.getNickname())
-                .birthday(siteUser.getBirthday())
-                .createDate(siteUser.getCreateDate())
-                .modifyDate(siteUser.getModifyDate())
-                .name(siteUser.getName())
-                .build();
+        return UserResponseDTO.builder().username(siteUser.getUsername()).gender(siteUser.getGender().toString()).email(siteUser.getEmail()).point(siteUser.getPoint()).phoneNumber(siteUser.getPhoneNumber()).nickname(siteUser.getNickname()).birthday(siteUser.getBirthday()).createDate(siteUser.getCreateDate()).modifyDate(siteUser.getModifyDate()).name(siteUser.getName()).build();
     }
 
 
@@ -366,10 +363,12 @@ public class MultiService {
 
 
     @Transactional
-    public PaymentLogResponseDTO addPaymentLog(String username, PaymentLogRequestDTO paymentLogRequestDTO) {
+    public PaymentLogResponseDTO addPaymentLog(String username,
+                                               PaymentLogRequestDTO paymentLogRequestDTO) {
         SiteUser user = this.userService.get(username);
+        Address address = this.addressService.get(paymentLogRequestDTO.getAddressId());
         List<CartItem> cartItemList = this.cartItemService.getList(paymentLogRequestDTO.getCartItemIdList());
-        PaymentLog paymentLog = paymentLogService.save(user);
+        PaymentLog paymentLog = paymentLogService.save(user, address);
 
         for (CartItem cartItem : cartItemList) {
 
@@ -428,25 +427,48 @@ public class MultiService {
         }
         if (requestDTO.getUrl() != null && !requestDTO.getUrl().isBlank()) {
             String newFile = "/api/product" + "_" + product.getId() + "/";
-            String newUrl = this.fileMove(requestDTO.getUrl(), newFile);
+            String newUrl = this.fileMove(requestDTO.getUrl(), newFile, ImageKey.TEMP.getKey(username));
             if (newUrl != null) {
                 String path = ShoppingApplication.getOsType().getLoc();
                 File file = new File(path + requestDTO.getUrl());
                 if (file.exists()) {
                     file.delete();
-                    FileSystem fileSystem = fileSystemService.get(ImageKey.Temp.getKey(username));
-                    fileSystemService.delete(fileSystem);
-                    fileSystemService.save(ImageKey.Product.getKey(product.getId().toString()), newUrl);
                 }
+                fileSystemService.save(ImageKey.PRODUCT.getKey(product.getId().toString()), newUrl);
             }
         }
+    }
+
+    @Transactional
+    public ProductResponseDTO getProduct(Long productID) {
+        Product product = productService.getProduct(productID);
+        return getProduct(product);
+    }
+
+    private ProductResponseDTO getProduct(Product product) {
+        List<String> tagList = tagService.findByProduct(product);
+        Optional<FileSystem> _fileSystem = fileSystemService.get(ImageKey.PRODUCT.getKey(product.getId().toString()));
+        String url = _fileSystem.map(FileSystem::getV).orElse(null);
+
+        return ProductResponseDTO.builder().product(product).tagList(tagList).url(url).build();
+    }
+
+    @Transactional
+    public List<ProductResponseDTO> getProductList() {
+        List<Product> productList = productService.getProductList();
+        List<ProductResponseDTO> responseDTOList = new ArrayList<>();
+        for (Product product : productList) {
+            ProductResponseDTO productResponseDTO = getProduct(product);
+            responseDTOList.add(productResponseDTO);
+        }
+        return responseDTOList;
     }
 
     /**
      * Image
      */
     @Transactional
-    public String fileMove(String url, String newUrl) {
+    public String fileMove(String url, String newUrl, String k) {
         try {
             String path = ShoppingApplication.getOsType().getLoc();
             Path tempPath = Paths.get(path + url);
@@ -455,9 +477,8 @@ public class MultiService {
             Files.createDirectories(newPath.getParent());
             Files.move(tempPath, newPath);
             File file = tempPath.toFile();
-            if (file.exists()) {
+            if (file.exists())
                 file.delete();
-            }
             return newUrl + tempPath.getFileName();
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -466,29 +487,27 @@ public class MultiService {
 
     @Transactional
     public ImageResponseDTO tempUpload(ImageRequestDTO requestDTO, String username) {
-        if (!requestDTO.getFile().isEmpty())
-            try {
-                String path = ShoppingApplication.getOsType().getLoc();
-                FileSystem fileSystem = fileSystemService.get(ImageKey.Temp.getKey(username));
-                if (fileSystem != null) {
-                    File file = new File(path + fileSystem.getV());
-                    if (file.exists()) {
-                        file.delete();
-                        fileSystemService.delete(fileSystem);
-                    }
-                }
-                UUID uuid = UUID.randomUUID();
-                String fileLoc = "/api/user" + "_" + username + "/temp/" + uuid + "." + requestDTO.getFile().getContentType().split("/")[1];
-                File file = new File(path + fileLoc);
-                if (!file.getParentFile().exists()) file.getParentFile().mkdirs();
-                requestDTO.getFile().transferTo(file);
-                if (fileLoc != null) {
-                    fileSystemService.save(ImageKey.Temp.getKey(username), fileLoc);
-                }
-                return new ImageResponseDTO(fileLoc);
-            } catch (IOException e) {
-                e.printStackTrace();
+        if (!requestDTO.getFile().isEmpty()) try {
+            String path = ShoppingApplication.getOsType().getLoc();
+            Optional<FileSystem> _fileSystem = fileSystemService.get(ImageKey.TEMP.getKey(username));
+            if (_fileSystem.isPresent()) {
+                FileSystem fileSystem = _fileSystem.get();
+                File file = new File(path + fileSystem.getV());
+                if (file.exists())
+                    file.delete();
             }
+            UUID uuid = UUID.randomUUID();
+            String fileLoc = "/api/user" + "_" + username + "/temp/" + uuid + "." + requestDTO.getFile().getContentType().split("/")[1];
+            File file = new File(path + fileLoc);
+            if (!file.getParentFile().exists()) file.getParentFile().mkdirs();
+            requestDTO.getFile().transferTo(file);
+            if (fileLoc != null) {
+                fileSystemService.save(ImageKey.TEMP.getKey(username), fileLoc);
+            }
+            return new ImageResponseDTO(fileLoc);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return null;
     }
 
@@ -551,30 +570,6 @@ public class MultiService {
         return new CategoryResponseDTO(parentCategory.getId(), parentCategory.getName(), childrenDTOList);
     }
 
-    @Transactional
-    public ProductResponseDTO getProduct(Long productID) {
-        Product product = productService.getProduct(productID);
-        return getProduct(product);
-    }
-
-    private ProductResponseDTO getProduct(Product product) {
-        List<String> tagList = tagService.findByProduct(product);
-        return ProductResponseDTO.builder()
-                .product(product)
-                .tagList(tagList)
-                .build();
-    }
-
-    @Transactional
-    public List<ProductResponseDTO> getProductList() {
-        List<Product> productList = productService.getProductList();
-        List<ProductResponseDTO> responseDTOList = new ArrayList<>();
-        for (Product product : productList) {
-            ProductResponseDTO productResponseDTO = getProduct(product);
-            responseDTOList.add(productResponseDTO);
-        }
-        return responseDTOList;
-    }
 }
 
 

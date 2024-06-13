@@ -60,7 +60,15 @@ export default function Home() {
       return setError('전화번호 형식이 맞지 않습니다.(###-####-####)');
 
     updateUser({ name: name, email: email, phoneNumber: phoneNumber, nickname: nickname, password: "", newPassword: "", url: url })
-      .then(r => setUser(r))
+      .then(r => {
+        setUser(r)
+          setName(r.name);
+          setEmail(r.email);
+          setNickname(r.nickname);
+          setPhoneNumber(r.phoneNumber);
+          setBirthday(r.birthday);
+          setUrl(r.url);
+      })
       .catch(e => console.log(e));
   }
   function ChangePassword() {
