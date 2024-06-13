@@ -1,9 +1,6 @@
 package com.team.shopping.Controllers;
 
-import com.team.shopping.DTOs.OptionListRequestDTO;
-import com.team.shopping.DTOs.OptionRequestDTO;
-import com.team.shopping.DTOs.ProductCreateRequestDTO;
-import com.team.shopping.DTOs.ProductResponseDTO;
+import com.team.shopping.DTOs.*;
 import com.team.shopping.Records.TokenRecord;
 import com.team.shopping.Services.MultiService;
 import lombok.RequiredArgsConstructor;
@@ -55,6 +52,36 @@ public class ProductController {
         try {
             List<ProductResponseDTO> productResponseDTOList = multiService.getProductList();
             return ResponseEntity.status(HttpStatus.OK).body(productResponseDTOList);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/question")
+    public ResponseEntity<?> productQuestion(@RequestHeader("Authorization") String accessToken, @RequestBody ProductQARequestDTO requestDTO) {
+        try {
+            TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
+            if (tokenRecord.isOK()) {
+                String username = tokenRecord.username();
+                this.multiService.productQASave(username, requestDTO);
+                return tokenRecord.getResponseEntity("문제 없음");
+            }
+            return tokenRecord.getResponseEntity();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/answer")
+    public ResponseEntity<?> productAnswer(@RequestHeader("Authorization") String accessToken, @RequestBody ProductQARequestDTO requestDTO) {
+        TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
+        try {
+            if (tokenRecord.isOK()) {
+                String username = tokenRecord.username();
+                this.multiService.productQAUpdate(username, requestDTO);
+                return tokenRecord.getResponseEntity("문제 없음");
+            }
+            return tokenRecord.getResponseEntity();
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
