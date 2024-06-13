@@ -79,10 +79,10 @@ public class MultiService {
     public AuthResponseDTO login(AuthRequestDTO requestDto) {
         SiteUser user = this.userService.get(requestDto.getUsername());
         if (user == null) {
-            throw new IllegalArgumentException("아이디가 일치하지 않습니다.");
+            throw new IllegalArgumentException("username");
         }
         if (!this.userService.isMatch(requestDto.getPassword(), user.getPassword()))
-            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+            throw new IllegalArgumentException("password");
         String accessToken = this.jwtTokenProvider //
                 .generateAccessToken(new UsernamePasswordAuthenticationToken(new CustomUserDetails(user), user.getPassword()));
         String refreshToken = this.jwtTokenProvider //
@@ -169,7 +169,7 @@ public class MultiService {
     public UserResponseDTO updatePassword(String username, UserRequestDTO userRequestDTO) {
         SiteUser user = userService.get(username);
         if (!this.userService.isMatch(userRequestDTO.getPassword(), user.getPassword()))
-            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+            throw new IllegalArgumentException("not match");
         SiteUser siteUser = userService.updatePassword(user, userRequestDTO.getNewPassword());
 
         return UserResponseDTO.builder().username(siteUser.getUsername()).gender(siteUser.getGender().toString()).email(siteUser.getEmail()).point(siteUser.getPoint()).phoneNumber(siteUser.getPhoneNumber()).nickname(siteUser.getNickname()).birthday(siteUser.getBirthday()).createDate(siteUser.getCreateDate()).modifyDate(siteUser.getModifyDate()).name(siteUser.getName()).build();

@@ -58,16 +58,16 @@ public class UserController {
         }
         return tokenRecord.getResponseEntity();
     }
-    
+
 
     @PutMapping
-    public ResponseEntity<?> updateProfile(@RequestHeader("Authorization") String accessToken, 
+    public ResponseEntity<?> updateProfile(@RequestHeader("Authorization") String accessToken,
                                            @RequestBody UserRequestDTO userRequestDTO) {
 
         TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
         if (tokenRecord.isOK()) {
             String username = tokenRecord.username();
-            UserResponseDTO userResponseDTO = multiService.updateProfile(username,userRequestDTO);
+            UserResponseDTO userResponseDTO = multiService.updateProfile(username, userRequestDTO);
 
             return tokenRecord.getResponseEntity(userResponseDTO);
         }
@@ -76,15 +76,18 @@ public class UserController {
     }
 
     @PutMapping("/password")
-    public ResponseEntity<?> updatePassword(@RequestHeader("Authorization") String accessToken , @RequestBody UserRequestDTO userRequestDTO){
-
-        TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
-        if(tokenRecord.isOK()){
-            String username = tokenRecord.username();
-            UserResponseDTO userResponseDTO = multiService.updatePassword(username,userRequestDTO);
-            return tokenRecord.getResponseEntity(userResponseDTO);
+    public ResponseEntity<?> updatePassword(@RequestHeader("Authorization") String accessToken, @RequestBody UserRequestDTO userRequestDTO) {
+        try {
+            TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
+            if (tokenRecord.isOK()) {
+                String username = tokenRecord.username();
+                UserResponseDTO userResponseDTO = multiService.updatePassword(username, userRequestDTO);
+                return tokenRecord.getResponseEntity(userResponseDTO);
+            }
+            return tokenRecord.getResponseEntity();
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
         }
-        return tokenRecord.getResponseEntity();
-    }
 
+    }
 }
