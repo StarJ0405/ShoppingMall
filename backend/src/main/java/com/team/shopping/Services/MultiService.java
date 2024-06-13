@@ -22,10 +22,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -121,30 +118,16 @@ public class MultiService {
     @Transactional
     public UserResponseDTO getProfile(String username) {
         SiteUser siteUser = this.userService.get(username);
-        return UserResponseDTO.builder().username(siteUser.getUsername()).gender(siteUser.getGender().toString()).role(siteUser.getRole().toString()).email(siteUser.getEmail()).point(siteUser.getPoint()).phoneNumber(siteUser.getPhoneNumber()).nickname(siteUser.getNickname()).birthday(siteUser.getBirthday()).createDate(siteUser.getCreateDate()).modifyDate(siteUser.getModifyDate()).name(siteUser.getName()).build();
-    }
+        Optional<FileSystem> _fileSystem = fileSystemService.getOptional(ImageKey.USER.getKey(username));
+        String url = null;
 
-    @Transactional
-    public UserResponseDTO updateProfile(String username, UserRequestDTO newUserRequestDTO) {
-        SiteUser siteUser = userService.updateProfile(username, newUserRequestDTO);
-        FileSystem fileSystem = fileSystemService.get(ImageKey.User.getKey(username));
-        if (fileSystem != null && !newUserRequestDTO.getUrl().equals(fileSystem.getV())) {
-            String newFile = "/api/user" + "_" + siteUser.getUsername() + "/";
-            String newUrl = this.fileMove(newUserRequestDTO.getUrl(), newFile);
-            if (newUrl != null) {
-                String path = ShoppingApplication.getOsType().getLoc();
-                File file = new File(path + fileSystem.getV());
-                if (file.exists())
-                    file.delete();
-                FileSystem tempFile = fileSystemService.get(ImageKey.Temp.getKey(username));
-                fileSystemService.delete(tempFile);
-                FileSystem userFile = fileSystemService.get(ImageKey.User.getKey(username));
-                fileSystemService.updateFile(userFile, newUrl);
-            }
-        }
+        if (_fileSystem.isPresent())
+            url = _fileSystem.get().getV();
+
         return UserResponseDTO.builder()
                 .username(siteUser.getUsername())
                 .gender(siteUser.getGender().toString())
+                .role(siteUser.getRole().toString())
                 .email(siteUser.getEmail())
                 .point(siteUser.getPoint())
                 .phoneNumber(siteUser.getPhoneNumber())
@@ -153,7 +136,38 @@ public class MultiService {
                 .createDate(siteUser.getCreateDate())
                 .modifyDate(siteUser.getModifyDate())
                 .name(siteUser.getName())
+                .url(url)
                 .build();
+    }
+
+    @Transactional
+    public UserResponseDTO updateProfile(String username, UserRequestDTO newUserRequestDTO) {
+        SiteUser siteUser = userService.updateProfile(username, newUserRequestDTO);
+        Optional<FileSystem> _fileSystem = fileSystemService.getOptional(ImageKey.USER.getKey(username));
+        String path = ShoppingApplication.getOsType().getLoc();
+        // 삭제 or 동일하지 않는 경우만 진행
+        if (_fileSystem.isPresent() && (newUserRequestDTO.getUrl() == null || !_fileSystem.get().getV().equals(newUserRequestDTO.getUrl()))) {
+            File old = new File(path + _fileSystem.get().getV());
+            if (old.exists())
+                old.delete();
+            Optional<FileSystem> _tempFile = fileSystemService.getOptional(ImageKey.TEMP.getKey(username));
+            _tempFile.ifPresent(fileSystemService::delete);
+        }
+        String newUrl = null;
+        // 새로 생성
+        if (newUserRequestDTO.getUrl() != null && !newUserRequestDTO.getUrl().isBlank()) {
+            String newFile = "/api/user" + "_" + siteUser.getUsername() + "/";
+            newUrl = this.fileMove(newUserRequestDTO.getUrl(), newFile);
+            if (newUrl != null) {
+                Optional<FileSystem> _userFile = fileSystemService.getOptional(ImageKey.USER.getKey(username));
+                if (_userFile.isPresent())
+                    fileSystemService.updateFile(_userFile.get(), newUrl);
+                else
+                    fileSystemService.save(ImageKey.USER.getKey(username), newUrl);
+            }
+        }
+        return UserResponseDTO.builder().username(siteUser.getUsername()).gender(siteUser.getGender().toString()).email(siteUser.getEmail()).point(siteUser.getPoint()).phoneNumber(siteUser.getPhoneNumber()).nickname(siteUser.getNickname()).birthday(siteUser.getBirthday()).createDate(siteUser.getCreateDate()).modifyDate(siteUser.getModifyDate())
+                .url(newUrl).name(siteUser.getName()).build();
     }
 
 
@@ -164,18 +178,7 @@ public class MultiService {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         SiteUser siteUser = userService.updatePassword(user, userRequestDTO.getNewPassword());
 
-        return UserResponseDTO.builder()
-                .username(siteUser.getUsername())
-                .gender(siteUser.getGender().toString())
-                .email(siteUser.getEmail())
-                .point(siteUser.getPoint())
-                .phoneNumber(siteUser.getPhoneNumber())
-                .nickname(siteUser.getNickname())
-                .birthday(siteUser.getBirthday())
-                .createDate(siteUser.getCreateDate())
-                .modifyDate(siteUser.getModifyDate())
-                .name(siteUser.getName())
-                .build();
+        return UserResponseDTO.builder().username(siteUser.getUsername()).gender(siteUser.getGender().toString()).email(siteUser.getEmail()).point(siteUser.getPoint()).phoneNumber(siteUser.getPhoneNumber()).nickname(siteUser.getNickname()).birthday(siteUser.getBirthday()).createDate(siteUser.getCreateDate()).modifyDate(siteUser.getModifyDate()).name(siteUser.getName()).build();
     }
 
 
@@ -434,9 +437,9 @@ public class MultiService {
                 File file = new File(path + requestDTO.getUrl());
                 if (file.exists()) {
                     file.delete();
-                    FileSystem fileSystem = fileSystemService.get(ImageKey.Temp.getKey(username));
+                    FileSystem fileSystem = fileSystemService.get(ImageKey.TEMP.getKey(username));
                     fileSystemService.delete(fileSystem);
-                    fileSystemService.save(ImageKey.Product.getKey(product.getId().toString()), newUrl);
+                    fileSystemService.save(ImageKey.PRODUCT.getKey(product.getId().toString()), newUrl);
                 }
             }
         }
@@ -466,29 +469,28 @@ public class MultiService {
 
     @Transactional
     public ImageResponseDTO tempUpload(ImageRequestDTO requestDTO, String username) {
-        if (!requestDTO.getFile().isEmpty())
-            try {
-                String path = ShoppingApplication.getOsType().getLoc();
-                FileSystem fileSystem = fileSystemService.get(ImageKey.Temp.getKey(username));
-                if (fileSystem != null) {
-                    File file = new File(path + fileSystem.getV());
-                    if (file.exists()) {
-                        file.delete();
-                        fileSystemService.delete(fileSystem);
-                    }
+        if (!requestDTO.getFile().isEmpty()) try {
+            String path = ShoppingApplication.getOsType().getLoc();
+            FileSystem fileSystem = fileSystemService.get(ImageKey.TEMP.getKey(username));
+            if (fileSystem != null) {
+                File file = new File(path + fileSystem.getV());
+                if (file.exists()) {
+                    file.delete();
+                    fileSystemService.delete(fileSystem);
                 }
-                UUID uuid = UUID.randomUUID();
-                String fileLoc = "/api/user" + "_" + username + "/temp/" + uuid + "." + requestDTO.getFile().getContentType().split("/")[1];
-                File file = new File(path + fileLoc);
-                if (!file.getParentFile().exists()) file.getParentFile().mkdirs();
-                requestDTO.getFile().transferTo(file);
-                if (fileLoc != null) {
-                    fileSystemService.save(ImageKey.Temp.getKey(username), fileLoc);
-                }
-                return new ImageResponseDTO(fileLoc);
-            } catch (IOException e) {
-                e.printStackTrace();
             }
+            UUID uuid = UUID.randomUUID();
+            String fileLoc = "/api/user" + "_" + username + "/temp/" + uuid + "." + requestDTO.getFile().getContentType().split("/")[1];
+            File file = new File(path + fileLoc);
+            if (!file.getParentFile().exists()) file.getParentFile().mkdirs();
+            requestDTO.getFile().transferTo(file);
+            if (fileLoc != null) {
+                fileSystemService.save(ImageKey.TEMP.getKey(username), fileLoc);
+            }
+            return new ImageResponseDTO(fileLoc);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return null;
     }
 
@@ -559,10 +561,7 @@ public class MultiService {
 
     private ProductResponseDTO getProduct(Product product) {
         List<String> tagList = tagService.findByProduct(product);
-        return ProductResponseDTO.builder()
-                .product(product)
-                .tagList(tagList)
-                .build();
+        return ProductResponseDTO.builder().product(product).tagList(tagList).build();
     }
 
     @Transactional

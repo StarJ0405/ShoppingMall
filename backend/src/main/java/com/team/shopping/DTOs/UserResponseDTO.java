@@ -36,13 +36,14 @@ public class UserResponseDTO {
     private LocalDateTime modifyDate;
 
     private String address;
+    private String url;
 
 
 
     @Builder
     public UserResponseDTO (String username, String name, String email, String nickname,
                             String phoneNumber, LocalDate birthday, String gender, String role, int point,
-                            LocalDateTime createDate, LocalDateTime modifyDate ) {
+                            LocalDateTime createDate, LocalDateTime modifyDate, String url ) {
         this.username = username;
         this.name = name;
         this.email = email;
@@ -54,7 +55,7 @@ public class UserResponseDTO {
         this.point = point;
         this.createDate = createDate;
         this.modifyDate = modifyDate;
-
+        this.url = url;
 
     }
 }
