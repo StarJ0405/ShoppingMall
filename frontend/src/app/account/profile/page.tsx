@@ -60,7 +60,15 @@ export default function Home() {
       return setError('전화번호 형식이 맞지 않습니다.(###-####-####)');
 
     updateUser({ name: name, email: email, phoneNumber: phoneNumber, nickname: nickname, password: "", newPassword: "", url: url })
-      .then(r => setUser(r))
+      .then(r => {
+        setUser(r)
+          setName(r.name);
+          setEmail(r.email);
+          setNickname(r.nickname);
+          setPhoneNumber(r.phoneNumber);
+          setBirthday(r.birthday);
+          setUrl(r.url);
+      })
       .catch(e => console.log(e));
   }
   function ChangePassword() {
@@ -100,7 +108,7 @@ export default function Home() {
           <tr className='h-[40px]'>
             <th className='w-[159px]'>프로필 이미지</th>
             <td>
-              <img src={user?.url ? user.url : '/base_profile.png'} onClick={() => document.getElementById('file')?.click()} alt="프로필 이미지" className='w-[128px] h-128px]' />
+              <img src={url ?   url : '/base_profile.png'} onClick={() => document.getElementById('file')?.click()} alt="프로필 이미지" className='w-[128px] h-128px]' />
               <input id="file" type="file" hidden onChange={e => Change(e.target.files?.[0])} />
             </td>
           </tr>
