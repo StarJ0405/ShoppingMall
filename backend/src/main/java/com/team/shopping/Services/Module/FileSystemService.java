@@ -19,21 +19,8 @@ public class FileSystemService {
         fileSystemRepository.save(fileSystem);
     }
 
-    public void updateFile(FileSystem fileSystem, String valueKey) {
-        fileSystem.setV(valueKey);
-        fileSystemRepository.save(fileSystem);
+    public Optional<FileSystem> get(String key) {
+        return fileSystemRepository.findById(key);
     }
 
-
-    public FileSystem get(String key) {
-        return fileSystemRepository.findByK(key).orElse(null);
-    }
-
-    public Optional<FileSystem> getOptional(String key) {
-        return fileSystemRepository.findByK(key);
-    }
-
-    public void delete(FileSystem fileSystem) {
-        fileSystemRepository.delete(fileSystem);
-    }
 }
