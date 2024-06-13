@@ -1,4 +1,4 @@
-import { getProductList } from "./API/NonUserAPI";
+import { getProductList } from "@/app/API/NonUserAPI";
 import Page from "./page_csr";
 
 export default async function Home() {
