@@ -31,9 +31,10 @@ public class ProductResponseDTO {
     private List<String> tagList;
     private LocalDateTime createDate;
     private LocalDateTime modifyDate;
+    private String url;
 
     @Builder
-    public ProductResponseDTO(Product product, List<String> tagList) {
+    public ProductResponseDTO(Product product, List<String> tagList, String url) {
         this.id = product.getId();
         this.authorUsername = product.getSeller().getUsername();
         this.categoryName = product.getCategory().getName();
@@ -51,5 +52,6 @@ public class ProductResponseDTO {
         this.createDate = product.getCreateDate();
         this.modifyDate = product.getModifyDate();
         this.tagList = tagList;
+        this.url = url;
     }
 }

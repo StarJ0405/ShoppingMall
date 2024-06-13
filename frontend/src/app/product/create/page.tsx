@@ -219,7 +219,7 @@ export default function Page() {
                     </tr>
                     <tr>
                         <th className='border border-black'>상세설명</th>
-                        <td className='px-2 flex pb-[50px]'>
+                        <td className='px-2 flex pb-[50px] min-h-[350px]'>
                             <ReactQuill className='min-h-[300px] w-full' placeholder='상세 설명 작성..' onChange={e => setDetail(e)} />
                         </td>
                     </tr>

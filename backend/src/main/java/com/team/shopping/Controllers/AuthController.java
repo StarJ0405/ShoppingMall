@@ -3,8 +3,6 @@ package com.team.shopping.Controllers;
 
 import com.team.shopping.DTOs.AuthRequestDTO;
 import com.team.shopping.DTOs.AuthResponseDTO;
-import com.team.shopping.Domains.FileSystem;
-import com.team.shopping.Enums.ImageKey;
 import com.team.shopping.Services.MultiService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -23,7 +21,7 @@ public class AuthController {
             AuthResponseDTO responseDto = this.multiService.login(requestDto);
             return ResponseEntity.status(HttpStatus.OK).body(responseDto);
         } catch (IllegalArgumentException e) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
 

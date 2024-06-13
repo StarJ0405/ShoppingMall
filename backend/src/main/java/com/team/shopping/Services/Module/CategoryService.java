@@ -27,7 +27,7 @@ public class CategoryService {
     }
 
     public Category get(Long id) {
-        return categoryRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("카테고리 아이디가 일치하지 않습니다."));
+        return categoryRepository.findById(id).orElse(null);
     }
 
     public void check(CategoryRequestDTO categoryRequestDTO) {

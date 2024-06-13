@@ -30,10 +30,6 @@ UserApi.interceptors.response.use((response) => {
             localStorage.clear();
             window.location.href = '/account/login';
             return;
-        } else if (error.response.status === 500) {
-            localStorage.clear();
-            window.location.href = '/account/login';
-            return;
         }
     return Promise.reject(error);
 });
