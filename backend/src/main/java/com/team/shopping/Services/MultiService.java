@@ -433,8 +433,8 @@ public class MultiService {
                 File file = new File(path + requestDTO.getUrl());
                 if (file.exists()) {
                     file.delete();
-                    fileSystemService.save(ImageKey.PRODUCT.getKey(product.getId().toString()), newUrl);
                 }
+                fileSystemService.save(ImageKey.PRODUCT.getKey(product.getId().toString()), newUrl);
             }
         }
     }
@@ -448,9 +448,8 @@ public class MultiService {
     private ProductResponseDTO getProduct(Product product) {
         List<String> tagList = tagService.findByProduct(product);
         Optional<FileSystem> _fileSystem = fileSystemService.get(ImageKey.PRODUCT.getKey(product.getId().toString()));
-        String url = null;
-        if (_fileSystem.isPresent())
-            url = _fileSystem.get().getV();
+        String url = _fileSystem.map(FileSystem::getV).orElse(null);
+
         return ProductResponseDTO.builder().product(product).tagList(tagList).url(url).build();
     }
 
