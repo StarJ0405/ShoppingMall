@@ -50,9 +50,21 @@ export const getUser = async () => {
     const response = await UserApi.get('/api/user');
     return response.data;
 }
-
-export const updateUser = async (data: any) => {
+interface UpdateProps{
+    name:string,
+    email:string,
+    phoneNumber:string,
+    nickname:string,
+    password:string,
+    newPassword:string,
+    url:string
+}
+export const updateUser = async (data: UpdateProps) => {
     const response = await UserApi.put('/api/user', data);
+    return response.data;
+}
+export const updateUserPassword = async (data: UpdateProps) => {
+    const response = await UserApi.put('/api/user/password', data);
     return response.data;
 }
 export const deleteUser = async () => {
