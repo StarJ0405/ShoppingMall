@@ -1,6 +1,7 @@
 package com.team.shopping.Domains;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -20,7 +21,7 @@ public class Address {
 
     private String title;
 
-    private String orderedName;
+    private String recipient;
 
     private String phoneNumber;
 
@@ -31,4 +32,18 @@ public class Address {
     private int postNumber;
 
     private String deliveryMessage;
+
+    @Builder
+    public Address (SiteUser user, String title, String recipient,
+                    String phoneNumber, String mainAddress, String addressDetail,
+                    int postNumber, String deliveryMessage) {
+        this.user = user;
+        this.title = title;
+        this.recipient = recipient;
+        this.phoneNumber = phoneNumber;
+        this.mainAddress = mainAddress;
+        this.addressDetail = addressDetail;
+        this.postNumber = postNumber;
+        this.deliveryMessage = deliveryMessage;
+    }
 }

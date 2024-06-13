@@ -4,16 +4,16 @@ import lombok.Getter;
 
 @Getter
 public enum PaymentStatus {
-    AwaitingDeposit ("입금대기중"),
-    PaymentCompleted ("결제완료"),
-    PreparingProduct ("상품준비중"),
-    ProductDispatched ("상품발송"),
-    InTransit ("배송중"),
-    Delivered ("배송완료"),
-    AwaitingPurchaseConfirmation ("구매확정대기중"),
-    PurchaseConfirmed ("구매확정"),
-    AwaitingCancellation ("취소대기중"),
-    CancellationConfirmed ("취소확정")
+    WAITING_DEPOSIT ("입금대기중"),
+    PAYMENT_COMPLETED ("결제완료"),
+    PREPARING_PRODUCT ("상품준비중"),
+    PRODUCT_DISPATCHED ("상품발송"),
+    IN_TRANSIT ("배송중"),
+    DELIVERED ("배송완료"),
+    WAITING_PURCHASE_CONFIRMATION ("구매확정대기중"),
+    PURCHASE_CONFIRMED ("구매확정"),
+    WAITING_CANCELLATION ("취소대기중"),
+    CANCELLATION_CONFIRMED ("취소확정")
     //
     ;
     private final String status;

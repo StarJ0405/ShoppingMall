@@ -24,7 +24,7 @@ public class PaymentLogResponseDTO {
 
     private LocalDateTime paymentDate;
 
-    private String orderedName;
+    private String recipient;
 
     private String phoneNumber;
 
@@ -43,11 +43,10 @@ public class PaymentLogResponseDTO {
                                   List<PaymentProductResponseDTO> paymentProductResponseDTOList) {
         this.paymentLogId = paymentLog.getId();
         this.paymentStatus = paymentLog.getPaymentStatus().getStatus();
-        this.orderedName = paymentLog.getOrderedName();
+        this.recipient = paymentLog.getRecipient();
         this.price = price;
         this.paymentDate = paymentLog.getCreateDate();
         this.paymentProductResponseDTOList = paymentProductResponseDTOList;
-        this.orderedName = paymentLog.getOrderedName();
         this.phoneNumber = paymentLog.getPhoneNumber();
         this.mainAddress = paymentLog.getMainAddress();
         this.addressDetail = paymentLog.getAddressDetail();
