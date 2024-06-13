@@ -34,6 +34,8 @@ public class QProductQA extends EntityPathBase<ProductQA> {
 
     public final QProduct product;
 
+    public final QSiteUser seller;
+
     public final StringPath title = createString("title");
 
     public QProductQA(String variable) {
@@ -56,6 +58,7 @@ public class QProductQA extends EntityPathBase<ProductQA> {
         super(type, metadata, inits);
         this.author = inits.isInitialized("author") ? new QSiteUser(forProperty("author"), inits.get("author")) : null;
         this.product = inits.isInitialized("product") ? new QProduct(forProperty("product"), inits.get("product")) : null;
+        this.seller = inits.isInitialized("seller") ? new QSiteUser(forProperty("seller"), inits.get("seller")) : null;
     }
 
 }

@@ -38,7 +38,7 @@ public class MultiService {
     private final OptionListService optionListService;
     private final JwtTokenProvider jwtTokenProvider;
     private final FileSystemService fileSystemService;
-
+    private final ProductQAService productQAService;
     private final PaymentLogService paymentLogService;
     private final PaymentProductService paymentProductService;
     private final PaymentProductDetailService paymentProductDetailService;
@@ -464,6 +464,37 @@ public class MultiService {
         return responseDTOList;
     }
 
+    @Transactional
+    public void productQASave(String username, ProductQARequestDTO requestDTO) {
+        SiteUser user = this.userService.get(username);
+        Product product = productService.getProduct(requestDTO.getProductId());
+        if (user == null)
+            throw new NoSuchElementException("not user");
+
+        if (user.getRole() != UserRole.USER)
+            throw new NoSuchElementException("not role");
+
+        this.productQAService.save(requestDTO.getTitle(), user, product);
+    }
+
+    @Transactional
+    public void productQAUpdate(String username, ProductQARequestDTO requestDTO) {
+        SiteUser user = this.userService.get(username);
+        Optional<ProductQA> _productQA = productQAService.getProductQA(requestDTO.getProductQAId());
+        Product product = productService.getProduct(requestDTO.getProductId());
+        if (product.getSeller() != user)
+            throw new NoSuchElementException("not seller");
+
+        if (user == null)
+            throw new NoSuchElementException("not user");
+
+        if (user.getRole() != UserRole.SELLER)
+            throw new NoSuchElementException("not role");
+
+        this.productQAService.update(requestDTO.getContent(), user, _productQA.get());
+
+    }
+
     /**
      * Image
      */
@@ -569,6 +600,7 @@ public class MultiService {
         }
         return new CategoryResponseDTO(parentCategory.getId(), parentCategory.getName(), childrenDTOList);
     }
+
 
 }
 
