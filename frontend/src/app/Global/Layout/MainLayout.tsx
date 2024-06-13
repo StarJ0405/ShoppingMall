@@ -33,8 +33,8 @@ export default function Main(props: Readonly<pageInterface>) {
       <header className='flex w-[1240px] items-center h-[120px]'>
         <button onClick={() => setIsSideOpen(true)}><img src='/expand_button.png' className='w-[36px] h-[36px]' /></button>
         <a className='ml-10' href='/'><img src='/logo.png' className='w-[94px] h-[40px]' /></a>
-        <div className='flex items-center border-2 border-gray-300 rounded-full px-5'>
-          <input type='text' className='text-xl bg-transparent w-[580px] mr-[20px] outline-none' placeholder='검색' onKeyDown={e => { if (e.key == 'Enter') document.getElementById('search')?.click() }}></input>
+        <div className='flex items-center border-2 border-gray-300 rounded-full px-5 ml-4'>
+          <input type='text' className='text-xl bg-transparent w-[480px] mr-[20px] outline-none' placeholder='검색' onKeyDown={e => { if (e.key == 'Enter') document.getElementById('search')?.click() }}></input>
           <button id='search' onClick={() => alert('검색시도')}><img src='/search.png' className='w-[50px] h-[50px]' /></button>
         </div>
         <div className='justify-self-end flex ml-[150px] justify-between w-[300px]' >

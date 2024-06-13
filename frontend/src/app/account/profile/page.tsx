@@ -100,7 +100,7 @@ export default function Home() {
           <tr className='h-[40px]'>
             <th className='w-[159px]'>프로필 이미지</th>
             <td>
-              <img src={user?.url ? user.url : '/base_profile.png'} onClick={() => document.getElementById('file')?.click()} alt="프로필 이미지" className='w-[128px] h-128px]' />
+              <img src={url ? url : '/base_profile.png'} onClick={() => document.getElementById('file')?.click()} alt="프로필 이미지" className='w-[128px] h-128px]' />
               <input id="file" type="file" hidden onChange={e => Change(e.target.files?.[0])} />
             </td>
           </tr>
