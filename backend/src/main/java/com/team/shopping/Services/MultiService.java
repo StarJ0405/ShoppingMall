@@ -45,6 +45,7 @@ public class MultiService {
     private final PaymentLogService paymentLogService;
     private final PaymentProductService paymentProductService;
     private final PaymentProductDetailService paymentProductDetailService;
+    private final AddressService addressService;
     private final TagService tagService;
 
 
@@ -366,10 +367,12 @@ public class MultiService {
 
 
     @Transactional
-    public PaymentLogResponseDTO addPaymentLog(String username, PaymentLogRequestDTO paymentLogRequestDTO) {
+    public PaymentLogResponseDTO addPaymentLog(String username,
+                                               PaymentLogRequestDTO paymentLogRequestDTO) {
         SiteUser user = this.userService.get(username);
+        Address address = this.addressService.get(paymentLogRequestDTO.getAddressId());
         List<CartItem> cartItemList = this.cartItemService.getList(paymentLogRequestDTO.getCartItemIdList());
-        PaymentLog paymentLog = paymentLogService.save(user);
+        PaymentLog paymentLog = paymentLogService.save(user, address);
 
         for (CartItem cartItem : cartItemList) {
 
