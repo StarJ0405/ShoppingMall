@@ -38,3 +38,6 @@ export function PhoneNumberCheck(e: any) {
         input.value = input.value.slice(0, input.value.length - 1);
 
 }
+export function Check(pattern: string, test: string) {
+    return new RegExp(pattern).test(test);
+}

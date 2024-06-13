@@ -48,7 +48,7 @@ export default function Page(props: pageProps) {
                                     <div className='rating rating-xs rating-half'>
                                         <input type='radio' readOnly className='rating-hidden' defaultChecked={!product?.score || (product?.score == 0 && product?.score < 0.25)} />
                                         <input type='radio' readOnly className='bg-orange-500 mask mask-star-2 mask-half-1' defaultChecked={product?.score > 0.25 && product?.score <= 0.75} />
-                                        <input type='radio' readO-nly className='bg-orange-500 mask mask-star-2 mask-half-2' defaultChecked={product?.score > 0.75 && product?.score <= 1.25} />
+                                        <input type='radio' readOnly className='bg-orange-500 mask mask-star-2 mask-half-2' defaultChecked={product?.score > 0.75 && product?.score <= 1.25} />
                                         <input type='radio' readOnly className='bg-orange-500 mask mask-star-2 mask-half-1' defaultChecked={product?.score > 1.25 && product?.score <= 1.75} />
                                         <input type='radio' readOnly className='bg-orange-500 mask mask-star-2 mask-half-2' defaultChecked={product?.score > 1.75 && product?.score <= 2.25} />
                                         <input type='radio' readOnly className='bg-orange-500 mask mask-star-2 mask-half-1' defaultChecked={product?.score > 2.25 && product?.score <= 2.75} />

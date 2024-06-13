@@ -1,6 +1,6 @@
 'use client'
 import { getUser, saveImage, updateUser, updateUserPassword } from '@/app/API/UserAPI';
-import { PhoneNumberCheck, PhoneString, checkInput } from '@/app/Global/Method';
+import { Check, PhoneNumberCheck, PhoneString, checkInput } from '@/app/Global/Method';
 import { redirect } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Profile from '@/app/Global/Layout/ProfileLayout';
@@ -45,9 +45,6 @@ export default function Home() {
   }, [ACCESS_TOKEN]);
   function IsDisabled() {
     return name != user?.name || email != user?.email || nickname != user?.nickname || phoneNumber != user?.phoneNumber || birthday != user?.birthday || url != user?.url;
-  }
-  function Check(pattern: string, test: string) {
-    return new RegExp(pattern).test(test);
   }
   function Submit() {
     if (!Check('^([가-힣]){2,}$', name))
