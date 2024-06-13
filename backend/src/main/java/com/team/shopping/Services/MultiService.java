@@ -4,6 +4,7 @@ package com.team.shopping.Services;
 import com.team.shopping.DTOs.*;
 import com.team.shopping.Domains.*;
 import com.team.shopping.Enums.ImageKey;
+import com.team.shopping.Enums.Type;
 import com.team.shopping.Enums.UserRole;
 import com.team.shopping.Exceptions.DataDuplicateException;
 import com.team.shopping.Records.TokenRecord;
@@ -44,6 +45,7 @@ public class MultiService {
     private final PaymentProductDetailService paymentProductDetailService;
     private final AddressService addressService;
     private final TagService tagService;
+    private final ArticleService articleService;
 
 
     /**
@@ -577,6 +579,52 @@ public class MultiService {
         }
         return responseDTOList;
     }
+    @Transactional
+    public ArticleResponseDTO saveArticle(String username, ArticleRequestDTO articleRequestDTO) {
+        SiteUser siteUser = this.userService.get(username);
+        Article article = this.articleService.save(articleRequestDTO, siteUser);
+
+        return ArticleResponseDTO.builder()
+                .article(article)
+                .siteUser(siteUser)
+                .build();
+    }
+    @Transactional
+    public ArticleResponseDTO updateArticle(String username, ArticleRequestDTO articleRequestDTO) {
+        SiteUser siteUser = this.userService.get(username);
+        Article article = this.articleService.update(articleRequestDTO );
+
+        return ArticleResponseDTO.builder()
+                .article(article)
+                .siteUser(siteUser)
+                .build();
+
+    }
+    @Transactional
+    public void deleteArticle(String username, Long articleId) {
+        SiteUser user = this.userService.get(username);
+        Article article = this.articleService.get(articleId);
+        if (!user.getUsername().equals(article.getAuthor().getUsername()) || !user.getRole().equals(UserRole.ADMIN)) {
+            throw new IllegalArgumentException("not role");
+        }
+        this.articleService.delete(articleId);
+    }
+    @Transactional
+    public List<ArticleResponseDTO> getArticleList(int type){ // Long 을 Type 형식으로 바꿔야함
+        List<ArticleResponseDTO> articleResponseDTOList = new ArrayList<>();
+
+        List<Article> articleList = this.articleService.getArticleList(Type.values()[type]); // 예를들어 Type 인데 값이 1인거 ->결국 int 가아닌 Type이다
+        for (Article article : articleList) {
+            ArticleResponseDTO articleResponseDTO = ArticleResponseDTO.builder()
+                    .article(article)
+                    .siteUser(article.getAuthor())
+                    .build();
+            articleResponseDTOList.add(articleResponseDTO);
+        }
+
+        return articleResponseDTOList;
+    }
+    //
 }
 
 
