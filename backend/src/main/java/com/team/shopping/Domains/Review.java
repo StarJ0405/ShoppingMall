@@ -1,6 +1,7 @@
 package com.team.shopping.Domains;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -33,4 +34,14 @@ public class Review {
     private LocalDateTime createDate;
 
     private LocalDateTime modifyDate;
+
+    @Builder
+    public Review (SiteUser author, Product product, String title, String content, Double grade) {
+        this.author = author;
+        this.product = product;
+        this.title = title;
+        this.content = content;
+        this.grade = grade;
+        this.createDate = LocalDateTime.now();
+    }
 }

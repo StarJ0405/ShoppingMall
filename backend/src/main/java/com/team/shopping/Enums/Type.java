@@ -4,5 +4,5 @@ import lombok.Getter;
 
 @Getter
 public enum Type {
-    REPORT, REVIEW, NOTICE
+    REPORT, FAQ, NOTICE
 }

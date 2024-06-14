@@ -35,7 +35,6 @@ public class PaymentController {
         TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
         if (tokenRecord.isOK()) {
             String username = tokenRecord.username();
-            // 기능
             PaymentLogResponseDTO paymentLogResponseDTO = this.multiService.addPaymentLog(username, paymentLogRequestDTO);
             return tokenRecord.getResponseEntity(paymentLogResponseDTO);
         }

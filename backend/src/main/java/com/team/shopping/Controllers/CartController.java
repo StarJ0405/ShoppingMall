@@ -5,6 +5,7 @@ import com.team.shopping.DTOs.CartResponseDTO;
 import com.team.shopping.Records.TokenRecord;
 import com.team.shopping.Services.MultiService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -60,12 +61,16 @@ public class CartController {
     @DeleteMapping("/cartList")
     public ResponseEntity<?> deleteToCartList (@RequestHeader("Authorization") String accessToken,
                                                @RequestHeader("productId") Long productId) {
+
         TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
-        if (tokenRecord.isOK()) {
-            String username = tokenRecord.username();
-            // 기능
-            List<CartResponseDTO> cartResponseDTOList = this.multiService.deleteToCart(username, productId);
-            return tokenRecord.getResponseEntity(cartResponseDTOList);
+        try {
+            if (tokenRecord.isOK()) {
+                String username = tokenRecord.username();
+                // 기능
+                List<CartResponseDTO> cartResponseDTOList = this.multiService.deleteToCart(username, productId);
+            }
+        }catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("이미 지워지거나 없는 상품입니다.");
         }
         return tokenRecord.getResponseEntity();
     }
@@ -74,12 +79,18 @@ public class CartController {
     public ResponseEntity<?> deleteMultiToCartList (@RequestHeader("Authorization") String accessToken,
                                                     @RequestHeader("productIdList") List<Long> productIdList) {
         TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
-        if (tokenRecord.isOK()) {
-            String username = tokenRecord.username();
-            // 기능
-            List<CartResponseDTO> cartResponseDTOList = this.multiService.deleteMultipleToCart(username, productIdList);          return tokenRecord.getResponseEntity(cartResponseDTOList);
+        try {
+            if (tokenRecord.isOK()) {
+                String username = tokenRecord.username();
+                // 기능
+                List<CartResponseDTO> cartResponseDTOList = this.multiService.deleteMultipleToCart(username, productIdList);
+                return tokenRecord.getResponseEntity(cartResponseDTOList);
+            }
+        }catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("이미 지워지거나 없는 상품입니다.");
         }
         return tokenRecord.getResponseEntity();
     }
+
 
 }

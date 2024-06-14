@@ -26,8 +26,8 @@ public class CartItemDetailService {
                 .build());
     }
 
-    public void delete (CartItem cartItem) {
-        this.cartItemDetailRepository.deleteByCartItem(cartItem);
+    public void delete (CartItemDetail cartItemDetail) {
+        this.cartItemDetailRepository.delete(cartItemDetail);
     }
 
     public void deleteByCartItem(CartItem cartItem) {

@@ -44,7 +44,7 @@ public class MultiService {
     private final PaymentProductDetailService paymentProductDetailService;
     private final AddressService addressService;
     private final TagService tagService;
-
+    private final ReviewService reviewService;
 
     /**
      * Auth
@@ -297,10 +297,10 @@ public class MultiService {
         Product product = this.productService.getProduct(productId);
         CartItem cartItem = this.cartItemService.getCartItem(user, product);
         if (cartItem != null) {
-            this.cartItemDetailService.delete(cartItem);
+            this.cartItemDetailService.deleteByCartItem(cartItem);
             this.cartItemService.delete(cartItem);
         } else {
-            System.out.println("CartItem not found for user: " + username + " and product: " + productId);
+            throw new IllegalArgumentException("CartItem not found for user: " + username + " and product: " + productId);
         }
 
         List<CartResponseDTO> responseDTOList = new ArrayList<>();
@@ -319,10 +319,10 @@ public class MultiService {
             Product product = this.productService.getProduct(productId);
             CartItem cartItem = this.cartItemService.getCartItem(user, product);
             if (cartItem != null) {
-                this.cartItemDetailService.delete(cartItem);
+                this.cartItemDetailService.deleteByCartItem(cartItem);
                 this.cartItemService.delete(cartItem);
             } else {
-                System.out.println("CartItem not found for user: " + username + " and product: " + productId);
+                throw new IllegalArgumentException("CartItem not found for user: " + username + " and product: " + productId);
             }
         }
 
@@ -387,7 +387,9 @@ public class MultiService {
 
                 Options option = cartItemDetail.getOptions();
                 this.paymentProductDetailService.save(paymentProduct, option);
+                this.cartItemDetailService.delete(cartItemDetail);
             }
+            this.cartItemService.delete(cartItem);
         }
 
         // 새로 추가된 결제 로그 정보를 이용하여 PaymentLogResponseDTO 객체를 만들어서 반환
@@ -511,6 +513,7 @@ public class MultiService {
         }
     }
 
+
     @Transactional
     public void deleteCategory(String username, Long id) {
         SiteUser siteUser = userService.get(username);
@@ -577,6 +580,69 @@ public class MultiService {
         }
         return responseDTOList;
     }
+
+    /**
+     * Review
+     * */
+
+    public List<ReviewResponseDTO> getReviewList (Long productId) {
+        List<ReviewResponseDTO> reviewResponseDTOList = new ArrayList<>();
+
+        Product product = this.productService.getProduct(productId);
+        List<Review> reviewList = this.reviewService.getList(product);
+
+            for (Review review : reviewList) {
+                ReviewResponseDTO reviewResponseDTO = ReviewResponseDTO.builder()
+                        .user(review.getAuthor())
+                        .review(review)
+                        .build();
+                reviewResponseDTOList.add(reviewResponseDTO);
+            }
+            return reviewResponseDTOList;
+    }
+
+    public List<ReviewResponseDTO> addToReview(String username, ReviewRequestDTO reviewRequestDTO) {
+        List<ReviewResponseDTO> reviewResponseDTOList = new ArrayList<>();
+        SiteUser user = this.userService.get(username);
+        Product product = this.productService.getProduct(reviewRequestDTO.getProductId());
+
+        // 사용자의 구매 기록을 가져옴
+        List<PaymentLog> paymentLogList = this.paymentLogService.get(user);
+        boolean hasPurchased = false;
+
+        for (PaymentLog paymentLog : paymentLogList) {
+            List<PaymentProduct> paymentProductList = this.paymentProductService.getList(paymentLog);
+            for (PaymentProduct paymentProduct : paymentProductList) {
+                if (Objects.equals(paymentProduct.getProductId(), product.getId())) {
+                    hasPurchased = true;
+                    break;
+                }
+            }
+            if (hasPurchased) {
+                break;
+            }
+        }
+
+        // 구매 기록이 없는 경우 IllegalArgumentException 발생
+        if (!hasPurchased) {
+            throw new IllegalArgumentException("your paymentLogs have not this product");
+        }
+
+        // 구매 기록이 있는 경우에만 리뷰를 저장
+        this.reviewService.save(user, reviewRequestDTO, product);
+
+        // 리뷰 리스트를 가져와서 DTO로 변환하여 반환
+        List<Review> reviewList = this.reviewService.getList(product);
+        for (Review review : reviewList) {
+            ReviewResponseDTO reviewResponseDTO = ReviewResponseDTO.builder()
+                    .review(review)
+                    .user(user)
+                    .build();
+            reviewResponseDTOList.add(reviewResponseDTO);
+        }
+        return reviewResponseDTOList;
+    }
+
 }
 
 
