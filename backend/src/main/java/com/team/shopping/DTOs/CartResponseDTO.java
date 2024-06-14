@@ -28,18 +28,21 @@ public class CartResponseDTO {
 
     private int productPrice;
 
+    private int totalPrice;
+
     private LocalDateTime createDate;
 
     @Builder
-    public CartResponseDTO (CartItem cartItem, List<OptionResponseDTO> optionResponseDTOList) {
+    public CartResponseDTO (CartItem cartItem, List<OptionResponseDTO> optionResponseDTOList, int totalPrice) {
         this.cartItemId = cartItem.getId();
         this.authorName = cartItem.getProduct().getSeller().getName();
         this.productId = cartItem.getProduct().getId();
         this.productTitle = cartItem.getProduct().getTitle();
         this.count = cartItem.getCount();
         this.optionResponseDTOList = optionResponseDTOList;
-        this.productPrice = cartItem.getProduct().getPrice();
         this.createDate = cartItem.getCreateDate();
+        this.productPrice = cartItem.getProduct().getPrice();
+        this.totalPrice = totalPrice;
     }
 
 }

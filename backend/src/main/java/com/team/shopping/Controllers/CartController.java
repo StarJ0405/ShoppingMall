@@ -23,8 +23,19 @@ public class CartController {
         TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
         if (tokenRecord.isOK()) {
             String username = tokenRecord.username();
-            // 기능
             List<CartResponseDTO> cartResponseDTOList = this.multiService.getCart(username);
+            return tokenRecord.getResponseEntity(cartResponseDTOList);
+        }
+        return tokenRecord.getResponseEntity();
+    }
+
+    @GetMapping("/select")
+    public ResponseEntity<?> selectCart(@RequestHeader("Authorization") String accessToken,
+                                        @RequestHeader("cartItemList") List<Long> cartItemIdList) {
+        TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
+        if (tokenRecord.isOK()) {
+            String username = tokenRecord.username();
+            List<CartResponseDTO> cartResponseDTOList = this.multiService.selectCart(username, cartItemIdList);
             return tokenRecord.getResponseEntity(cartResponseDTOList);
         }
         return tokenRecord.getResponseEntity();
@@ -34,12 +45,16 @@ public class CartController {
     public ResponseEntity<?> addToCartList (@RequestHeader("Authorization") String accessToken,
                                             @RequestBody CartRequestDTO cartRequestDTO) {
         TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
-        if (tokenRecord.isOK()) {
-            String username = tokenRecord.username();
-            // 기능
-            List<CartResponseDTO> cartResponseDTOList = this.multiService.addToCart(username, cartRequestDTO);
-            return tokenRecord.getResponseEntity(cartResponseDTOList);
+        try {
+            if (tokenRecord.isOK()) {
+                String username = tokenRecord.username();
+                List<CartResponseDTO> cartResponseDTOList = this.multiService.addToCart(username, cartRequestDTO);
+                return tokenRecord.getResponseEntity(cartResponseDTOList);
+            }
+        }catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("남은 재고보다 많은 수량을 담을 수 없음");
         }
+
         return tokenRecord.getResponseEntity();
     }
 
@@ -47,11 +62,14 @@ public class CartController {
     public ResponseEntity<?> updateToCart (@RequestHeader("Authorization") String accessToken,
                                            @RequestBody CartRequestDTO cartRequestDTO) {
         TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
-        if (tokenRecord.isOK()) {
-            String username = tokenRecord.username();
-            // 기능
-            List<CartResponseDTO> cartResponseDTOList = this.multiService.updateToCart(username, cartRequestDTO);
-            return tokenRecord.getResponseEntity(cartResponseDTOList);
+        try {
+            if (tokenRecord.isOK()) {
+                String username = tokenRecord.username();
+                List<CartResponseDTO> cartResponseDTOList = this.multiService.updateToCart(username, cartRequestDTO);
+                return tokenRecord.getResponseEntity(cartResponseDTOList);
+            }
+        }catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("남은 재고보다 많은 수량을 담을 수 없음");
         }
         return tokenRecord.getResponseEntity();
 

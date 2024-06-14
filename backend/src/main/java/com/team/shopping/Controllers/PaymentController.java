@@ -5,10 +5,12 @@ import com.team.shopping.DTOs.PaymentLogResponseDTO;
 import com.team.shopping.Records.TokenRecord;
 import com.team.shopping.Services.MultiService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @RequiredArgsConstructor
 @RestController
@@ -22,7 +24,6 @@ public class PaymentController {
         TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
         if (tokenRecord.isOK()) {
             String username = tokenRecord.username();
-            // 기능
             List<PaymentLogResponseDTO> paymentLogResponseDTOList = this.multiService.getPaymentLogList(username);
             return tokenRecord.getResponseEntity(paymentLogResponseDTOList);
         }
@@ -30,13 +31,21 @@ public class PaymentController {
     }
 
     @PostMapping("/logList")
-    public ResponseEntity<?> logList (@RequestHeader("Authorization") String accessToken,
-                                      @RequestBody PaymentLogRequestDTO paymentLogRequestDTO) {
+    public ResponseEntity<?> addLogList(@RequestHeader("Authorization") String accessToken,
+                                        @RequestBody PaymentLogRequestDTO paymentLogRequestDTO) {
         TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
-        if (tokenRecord.isOK()) {
-            String username = tokenRecord.username();
-            PaymentLogResponseDTO paymentLogResponseDTO = this.multiService.addPaymentLog(username, paymentLogRequestDTO);
-            return tokenRecord.getResponseEntity(paymentLogResponseDTO);
+        try {
+            if (tokenRecord.isOK()) {
+                String username = tokenRecord.username();
+                PaymentLogResponseDTO paymentLogResponseDTO = this.multiService.addPaymentLog(username, paymentLogRequestDTO);
+                return tokenRecord.getResponseEntity(paymentLogResponseDTO);
+            }
+        }catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("남은재고 부족");
+        }catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("장바구니 비었음");
+        }catch (NullPointerException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("선택수량 확인해야함");
         }
         return tokenRecord.getResponseEntity();
     }

@@ -17,7 +17,7 @@ public class PaymentProductResponseDTO {
 
     private String seller;
 
-    private int price;
+    private int productPrice;
 
     private String description;
 
@@ -29,12 +29,16 @@ public class PaymentProductResponseDTO {
 
     private List<PaymentProductDetailResponseDTO> paymentProductDetailResponseDTOList;
 
+    private int withOptionPrice;
+
     @Builder
     public PaymentProductResponseDTO (PaymentProduct paymentProduct,
-                                      List<PaymentProductDetailResponseDTO> paymentProductDetailResponseDTOList) {
+                                      List<PaymentProductDetailResponseDTO> paymentProductDetailResponseDTOList,
+                                      int withOptionPrice) {
         this.productId = paymentProduct.getProductId();
         this.seller = paymentProduct.getSeller();
-        this.price = paymentProduct.getPrice();
+        this.productPrice = paymentProduct.getPrice();
+        this.withOptionPrice = withOptionPrice;
         this.description = paymentProduct.getDescription();
         this.title = paymentProduct.getTitle();
         this.brand = paymentProduct.getBrand();

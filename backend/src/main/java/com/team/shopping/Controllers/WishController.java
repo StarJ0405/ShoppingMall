@@ -5,6 +5,7 @@ import com.team.shopping.DTOs.ProductResponseDTO;
 import com.team.shopping.Records.TokenRecord;
 import com.team.shopping.Services.MultiService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,7 +22,6 @@ public class WishController {
         TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
         if (tokenRecord.isOK()) {
             String username = tokenRecord.username();
-            // 기능
             List<ProductResponseDTO> wishListResponseDTO = this.multiService.getWishList(username);
             return tokenRecord.getResponseEntity(wishListResponseDTO);
         }
@@ -32,11 +32,14 @@ public class WishController {
     public ResponseEntity<?> addWishList(@RequestHeader("Authorization") String accessToken,
                                          @RequestBody ProductRequestDTO productRequestDTO) {
         TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
-        if (tokenRecord.isOK()) {
-            String username = tokenRecord.username();
-            // 기능
-            List<ProductResponseDTO> wishListResponseDTO = this.multiService.addToWishList(username, productRequestDTO);
-            return tokenRecord.getResponseEntity(wishListResponseDTO);
+        try {
+            if (tokenRecord.isOK()) {
+                String username = tokenRecord.username();
+                List<ProductResponseDTO> wishListResponseDTO = this.multiService.addToWishList(username, productRequestDTO);
+                return tokenRecord.getResponseEntity(wishListResponseDTO);
+            }
+        }catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("이미 추가한 상품");
         }
         return tokenRecord.getResponseEntity();
     }
@@ -45,11 +48,14 @@ public class WishController {
     public ResponseEntity<?> deleteToWishList(@RequestHeader("Authorization") String accessToken,
                                               @RequestHeader("productId") Long productId) {
         TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
-        if (tokenRecord.isOK()) {
-            String username = tokenRecord.username();
-            // 기능
-            List<ProductResponseDTO> wishListResponseDTO = this.multiService.deleteToWishList(username, productId);
-            return tokenRecord.getResponseEntity(wishListResponseDTO);
+        try {
+            if (tokenRecord.isOK()) {
+                String username = tokenRecord.username();
+                List<ProductResponseDTO> wishListResponseDTO = this.multiService.deleteToWishList(username, productId);
+                return tokenRecord.getResponseEntity(wishListResponseDTO);
+            }
+        }catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("이미 지워졌거나 없는 상품");
         }
         return tokenRecord.getResponseEntity();
     }
@@ -58,12 +64,15 @@ public class WishController {
     public ResponseEntity<?> deleteMultipleToWishList (@RequestHeader("Authorization") String accessToken,
                                                        @RequestHeader("productIdList") List<Long> productIdList) {
         TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
-        if (tokenRecord.isOK()) {
-            String username = tokenRecord.username();
-            // 기능
-            List<ProductResponseDTO> wishListResponseDTO = this.multiService.deleteMultipleToWishList(username, productIdList);
-            return tokenRecord.getResponseEntity(wishListResponseDTO);
-        }
+        try {
+            if (tokenRecord.isOK()) {
+                String username = tokenRecord.username();
+                List<ProductResponseDTO> wishListResponseDTO = this.multiService.deleteMultipleToWishList(username, productIdList);
+                return tokenRecord.getResponseEntity(wishListResponseDTO);
+            }
+        }catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("이미 지워졌거나 없는 상품");
+            }
         return tokenRecord.getResponseEntity();
     }
 }

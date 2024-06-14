@@ -32,7 +32,7 @@ public class QPaymentProduct extends EntityPathBase<PaymentProduct> {
 
     public final QPaymentLog paymentLog;
 
-    public final NumberPath<Integer> price = createNumber("price", Integer.class);
+    public final NumberPath<Integer> price = createNumber("productPrice", Integer.class);
 
     public final NumberPath<Long> productId = createNumber("productId", Long.class);
 

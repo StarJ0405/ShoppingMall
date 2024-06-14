@@ -8,6 +8,7 @@ import com.team.shopping.Repositories.ReviewRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -30,5 +31,21 @@ public class ReviewService {
         return this.reviewRepository.findByProductOrderByCreateDateDesc(product);
     }
 
+    public Review get (Long reviewId) {
+        return this.reviewRepository.findById(reviewId).orElseThrow();
+    }
 
+
+    public void delete(Review review) {
+        this.reviewRepository.delete(review);
+    }
+
+    public Review update (Review review, ReviewRequestDTO reviewRequestDTO) {
+        review.setGrade(reviewRequestDTO.getGrade());
+        review.setTitle(reviewRequestDTO.getTitle());
+        review.setContent(reviewRequestDTO.getContent());
+        review.setModifyDate(LocalDateTime.now());
+
+        return this.reviewRepository.save(review);
+    }
 }

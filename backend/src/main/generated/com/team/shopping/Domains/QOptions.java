@@ -30,7 +30,7 @@ public class QOptions extends EntityPathBase<Options> {
 
     public final QOptionList optionList;
 
-    public final NumberPath<Integer> price = createNumber("price", Integer.class);
+    public final NumberPath<Integer> price = createNumber("productPrice", Integer.class);
 
     public QOptions(String variable) {
         this(Options.class, forVariable(variable), INITS);

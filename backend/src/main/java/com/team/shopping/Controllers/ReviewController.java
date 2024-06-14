@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @RequiredArgsConstructor
 @RestController
@@ -25,12 +26,44 @@ public class ReviewController {
         try {
             if (tokenRecord.isOK()) {
                 String username = tokenRecord.username();
-                // 기능
                 List<ReviewResponseDTO> reviewResponseDTOList = this.multiService.addToReview(username, reviewRequestDTO);
                 return tokenRecord.getResponseEntity(reviewResponseDTOList);
             }
         }catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("구매기록에 해당상품 없음");
+        }
+        return tokenRecord.getResponseEntity();
+    }
+
+    @DeleteMapping
+    public ResponseEntity<?> deleteReview (@RequestHeader("Authorization") String accessToken,
+                                        @RequestHeader("ReviewId") Long reviewId) {
+        TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
+        try {
+            if (tokenRecord.isOK()) {
+                String username = tokenRecord.username();
+                this.multiService.deleteReview(username, reviewId);
+                return tokenRecord.getResponseEntity("정상적으로 삭제 완료");
+            }
+        }catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("권한 없음.");
+        }
+        return tokenRecord.getResponseEntity();
+    }
+    @PutMapping
+    public ResponseEntity<?> updateReview(@RequestHeader("Authorization") String accessToken,
+                                          @RequestBody ReviewRequestDTO reviewRequestDTO) {
+        TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
+        try {
+            if (tokenRecord.isOK()) {
+                String username = tokenRecord.username();
+                List<ReviewResponseDTO> reviewResponseDTOList = this.multiService.updateReview(username, reviewRequestDTO);
+                return tokenRecord.getResponseEntity(reviewResponseDTOList);
+            }
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("권한이 없습니다.");
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("해당 리뷰를 찾을 수 없습니다.");
         }
         return tokenRecord.getResponseEntity();
     }
