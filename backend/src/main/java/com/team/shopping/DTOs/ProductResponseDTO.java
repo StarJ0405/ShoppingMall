@@ -16,6 +16,8 @@ public class ProductResponseDTO {
 
     private Long id;
     private String authorUsername;
+    private String topCategoryName;
+    private String middleCategoryName;
     private String categoryName;
     private int price;
     private String description;
@@ -37,6 +39,8 @@ public class ProductResponseDTO {
     public ProductResponseDTO(Product product, List<String> tagList, String url) {
         this.id = product.getId();
         this.authorUsername = product.getSeller().getUsername();
+        this.topCategoryName = product.getCategory().getParent() != null && product.getCategory().getParent().getParent() != null ? product.getCategory().getParent().getParent().getName() : null;
+        this.middleCategoryName = product.getCategory().getParent() != null ? product.getCategory().getParent().getName() : null;
         this.categoryName = product.getCategory().getName();
         this.price = product.getPrice();
         this.description = product.getDescription();

@@ -15,7 +15,17 @@ import java.util.List;
 public class WishController {
 
     private final MultiService multiService;
-
+    @GetMapping("/wishList/check")
+    public ResponseEntity<?> wishCheck(@RequestHeader("Authorization") String accessToken,@RequestHeader("ProductId") Long product_id) {
+        TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
+        if (tokenRecord.isOK()) {
+            String username = tokenRecord.username();
+            // 기능
+            boolean check = this.multiService.checkWishList(username,product_id);
+            return tokenRecord.getResponseEntity(check);
+        }
+        return tokenRecord.getResponseEntity();
+    }
     @GetMapping("/wishList")
     public ResponseEntity<?> wishList(@RequestHeader("Authorization") String accessToken) {
         TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
