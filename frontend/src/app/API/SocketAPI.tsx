@@ -5,7 +5,7 @@ import SockJS from 'sockjs-client';
 export function getSocket(username: string) {
     const Socket = new Client({
         webSocketFactory: () => {
-            return new SockJS("http://localhost/ws-stomp");
+            return new SockJS("http://localhost:8080/ws-stomp");
         },
         beforeConnect: () => {
             console.log("beforeConnect");
