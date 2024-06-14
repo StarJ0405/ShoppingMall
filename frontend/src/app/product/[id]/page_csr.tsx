@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react';
 import Main from '@/app/Global/Layout/MainLayout';
-import { checkWish, getUser } from '@/app/API/UserAPI';
+import { checkWish, deleteWish, getUser, postWish } from '@/app/API/UserAPI';
 import DropDown, { Direcion } from '@/app/Global/DropDown';
 import { MonthDate } from '@/app/Global/Method';
 
@@ -18,6 +18,7 @@ export default function Page(props: pageProps) {
     const [middleCategoryDropdown, setMiddleCategoryDropdown] = useState(false);
     const [bottomCategoryDropdownm, setBottomCategoryDropdown] = useState(false);
     const [love, setLove] = useState(false);
+    const [focus, setFocus] = useState(0);
     //const [product,setProduct] = useState(props.product);
     const product = props.product;
     const seller = props.seller;
@@ -35,6 +36,17 @@ export default function Page(props: pageProps) {
                 })
                 .catch(e => console.log(e));
     }, [ACCESS_TOKEN]);
+    function Move(data: number) {
+        setFocus(data);
+
+    }
+    function Wish() {
+        if (love)
+            deleteWish(product.id);
+        else
+            postWish(product.id);
+        setLove(!love);
+    }
     return <Main user={user} >
         <div className='flex flex-col w-[1240px] min-h-[670px]'>
             <div className='text-sm flex'>
@@ -82,7 +94,7 @@ export default function Page(props: pageProps) {
                             </div>
                             <div className='mt-4 flex justify-between w-full'>
                                 <label className='text-3xl'>{product?.title}</label>
-                                <button className='min-w-[44px] min-h-[44px] w-[44px] h-[44px] border border-gray-500 rounded-full flex items-center justify-center'><img src={love ? '/heart_on.png' : '/heart_off.png'} className='w-[24px] h-[24px]' /></button>
+                                <button className='min-w-[44px] min-h-[44px] w-[44px] h-[44px] border border-gray-500 rounded-full flex items-center justify-center' onClick={() => Wish()}><img src={love ? '/heart_on.png' : '/heart_off.png'} className='w-[24px] h-[24px]' /></button>
                             </div>
                             <label className='text-gray-500 text-lg'>원산지:상세설명 참조</label>
                             <label className='text-xl mt-2'><label className='text-2xl font-bold'>{product?.price.toLocaleString('ko-kr')}</label>원</label>
@@ -95,9 +107,19 @@ export default function Page(props: pageProps) {
                             <label className=''><label className='text-blue-400'>{MonthDate()}</label> 이내 도착 예정</label>
                         </div>
                     </div>
+                    <div className='flex text-xl font-bold mt-4'>
+                        <button className={'w-[220px] h-[60px]' + (focus == 0 ? ' text-white bg-red-500' : '')} onClick={() => Move(0)}>상품정보</button>
+                        <button className={'w-[220px] h-[60px]' + (focus == 1 ? ' text-white bg-red-500' : '')} onClick={() => Move(1)}>리뷰</button>
+                        <button className={'w-[220px] h-[60px]' + (focus == 2 ? ' text-white bg-red-500' : '')} onClick={() => Move(2)}>Q&A</button>
+                        <button className={'w-[220px] h-[60px]' + (focus == 3 ? ' text-white bg-red-500' : '')} onClick={() => Move(3)}>판매자정보<label className={'text-base font-normal' + (focus == 3 ? ' text-white' : ' text-gray-600')}>(반품/교환)</label></button>
+                    </div>
                 </div>
                 <div className='w-[300px] h-full ml-[60px] relative'>
-                    <div className='fixed'>1</div>
+                    <div className='fixed'>
+                        {
+
+                        }
+                    </div>
                 </div>
             </div>
         </div>

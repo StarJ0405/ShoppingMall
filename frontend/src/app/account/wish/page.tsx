@@ -1,5 +1,5 @@
 "use client"
-import { deleteWishList, deleteWishListMultiple, getUser, getWishList } from "@/app/API/UserAPI";
+import { deleteWish, deleteWishList, getUser, getWishList } from "@/app/API/UserAPI";
 import Profile from "@/app/Global/Layout/ProfileLayout";
 import { redirect } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -25,7 +25,7 @@ export default function Page() {
   }, [ACCESS_TOKEN]);
   function Delete(id: number) {
     if (confirm("선택하신 찜한 상품을 삭제 하시겠습니까?"))
-      deleteWishList(id)
+      deleteWish(id)
         .then(r => {
           setWishList(r);
           document.getElementsByName('check').forEach((check: any) => check.checked =false);
@@ -37,7 +37,7 @@ export default function Page() {
       const numbers = [] as unknown as number[];
       const checks = document.getElementsByName('check');
       checks.forEach((check: any) => check.checked ? numbers.push(check.value) : null);
-      deleteWishListMultiple(numbers)
+      deleteWishList(numbers)
         .then(r => {
           setWishList(r);
           checks.forEach((check: any) => check.checked =false);
