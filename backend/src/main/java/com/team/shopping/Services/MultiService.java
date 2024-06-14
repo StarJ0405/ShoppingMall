@@ -7,6 +7,7 @@ import com.team.shopping.Enums.ImageKey;
 import com.team.shopping.Enums.Type;
 import com.team.shopping.Enums.UserRole;
 import com.team.shopping.Exceptions.DataDuplicateException;
+import com.team.shopping.Exceptions.DataNotFoundException;
 import com.team.shopping.Records.TokenRecord;
 import com.team.shopping.Securities.CustomUserDetails;
 import com.team.shopping.Securities.JWT.JwtTokenProvider;
@@ -122,6 +123,8 @@ public class MultiService {
     @Transactional
     public UserResponseDTO getProfile(String username) {
         SiteUser siteUser = this.userService.get(username);
+        if (siteUser == null)
+            throw new DataNotFoundException("유저가 없습니다.");
         Optional<FileSystem> _fileSystem = fileSystemService.get(ImageKey.USER.getKey(username));
         String url = null;
 
@@ -184,6 +187,14 @@ public class MultiService {
     /**
      * List
      */
+    public boolean checkWishList(String username, Long product_id) {
+        SiteUser user = userService.get(username);
+        Product product = productService.getProduct(product_id);
+        if (user == null || product == null)
+            return false;
+        else
+            return this.wishListService.get(user, product).isPresent();
+    }
 
     @Transactional
     public List<ProductResponseDTO> getWishList(String username) throws NoSuchElementException {
@@ -590,21 +601,9 @@ public class MultiService {
         for (Category child : parentCategory.getChildren()) {
             childrenDTOList.add(getCategoryWithChildren(child));
         }
-        return new CategoryResponseDTO(parentCategory.getId(), parentCategory.getName(), childrenDTOList);
+        return CategoryResponseDTO.builder().id(parentCategory.getId()).parent_name(parentCategory.getParent() != null ? parentCategory.getParent().getName() : null).name(parentCategory.getName()).categoryResponseDTOList(childrenDTOList).build();
     }
 
-
-
-    @Transactional
-    public List<ProductResponseDTO> getProductList() {
-        List<Product> productList = productService.getProductList();
-        List<ProductResponseDTO> responseDTOList = new ArrayList<>();
-        for (Product product : productList) {
-            ProductResponseDTO productResponseDTO = getProduct(product);
-            responseDTOList.add(productResponseDTO);
-        }
-        return responseDTOList;
-    }
     @Transactional
     public ArticleResponseDTO saveArticle(String username, ArticleRequestDTO articleRequestDTO) {
         SiteUser siteUser = this.userService.get(username);
@@ -615,14 +614,14 @@ public class MultiService {
                 .siteUser(siteUser)
                 .build();
     }
+
     @Transactional
-    public ArticleResponseDTO updateArticle(String username ,ArticleRequestDTO articleRequestDTO) {
+    public ArticleResponseDTO updateArticle(String username, ArticleRequestDTO articleRequestDTO) {
         SiteUser user = userService.get(username);
         Article _article = this.articleService.get(articleRequestDTO.getArticleId());
         if (!user.getUsername().equals(_article.getAuthor().getUsername()) || !user.getRole().equals(UserRole.ADMIN)) {
             throw new IllegalArgumentException("not role");
-        }
-        else {
+        } else {
             Article article = this.articleService.update(_article, articleRequestDTO);
             return ArticleResponseDTO.builder()
                     .article(article)
@@ -630,20 +629,21 @@ public class MultiService {
                     .build();
         }
     }
+
     @Transactional
     public void deleteArticle(String username, Long articleId) {
         SiteUser user = this.userService.get(username);
         Article article = this.articleService.get(articleId);
         if (!user.getUsername().equals(article.getAuthor().getUsername()) || !user.getRole().equals(UserRole.ADMIN)) {
             throw new IllegalArgumentException("not role");
-        }
-        else{
+        } else {
             this.articleService.delete(articleId);
         }
 
     }
+
     @Transactional
-    public List<ArticleResponseDTO> getArticleList(int type){ // Long 을 Type 형식으로 바꿔야함
+    public List<ArticleResponseDTO> getArticleList(int type) { // Long 을 Type 형식으로 바꿔야함
         List<ArticleResponseDTO> articleResponseDTOList = new ArrayList<>();
 
         List<Article> articleList = this.articleService.getArticleList(Type.values()[type]); // 예를들어 Type 인데 값이 1인거 ->결국 int 가아닌 Type이다

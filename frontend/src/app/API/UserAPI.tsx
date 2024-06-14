@@ -66,6 +66,11 @@ export const updateUserPassword = async (data: UpdateProps) => {
 export const deleteUser = async () => {
     await UserApi.delete('/api/user');
 }
+
+export const checkWish = async (data: number) => {
+    const response = await UserApi.get('/api/user/wishList/check',{ headers: { 'ProductId': data } });
+    return response.data;
+}
 export const getWishList = async () => {
     const response = await UserApi.get('/api/user/wishList');
     return response.data;

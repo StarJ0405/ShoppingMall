@@ -3,9 +3,5 @@ import Page from "./page_csr";
 
 export default async function Home() {
   const productList = await getProductList();
-  return (
-    <>
-      <Page productList={productList}/>
-    </>
-  );
+  return <Page productList={productList} />;
 }
