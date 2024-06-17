@@ -32,12 +32,8 @@ public class ProductController {
 
     @GetMapping
     public ResponseEntity<?> getProduct(@RequestHeader("ProductId") Long productId) {
-        try {
-            ProductResponseDTO productResponseDTO = multiService.getProduct(productId);
-            return ResponseEntity.status(HttpStatus.OK).body(productResponseDTO);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
+        ProductResponseDTO productResponseDTO = multiService.getProduct(productId);
+        return ResponseEntity.status(HttpStatus.OK).body(productResponseDTO);
     }
 
     @GetMapping("/list")

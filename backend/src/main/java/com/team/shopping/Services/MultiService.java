@@ -48,6 +48,7 @@ public class MultiService {
     private final TagService tagService;
     private final ReviewService reviewService;
     private final ArticleService articleService;
+    private final RecentService recentService;
 
 
     /**
@@ -241,8 +242,7 @@ public class MultiService {
             Product product = this.productService.getProduct(productId);
             if (product == null) {
                 throw new IllegalArgumentException("already deleted or not found product");
-            }
-            else {
+            } else {
                 this.wishListService.deleteToWishList(user, product);
             }
         }
@@ -314,7 +314,6 @@ public class MultiService {
     }
 
 
-
     @Transactional
     public List<CartResponseDTO> updateToCart(String username, CartRequestDTO cartRequestDTO) {
         SiteUser user = this.userService.get(username);
@@ -323,8 +322,7 @@ public class MultiService {
         cartItem.updateCount(cartRequestDTO.getCount());
         if (cartItem.getCount() > product.getRemain()) {
             throw new IllegalArgumentException("a lot your item count more than product remain");
-        }
-        else {
+        } else {
             this.cartItemService.save(cartItem);
 
             List<CartItem> cartItems = this.cartItemService.getCartItemList(user);
@@ -684,24 +682,25 @@ public class MultiService {
 
     /**
      * Review
-     * */
+     */
 
     @Transactional
-    public List<ReviewResponseDTO> getReviewList (Long productId) {
+    public List<ReviewResponseDTO> getReviewList(Long productId) {
         List<ReviewResponseDTO> reviewResponseDTOList = new ArrayList<>();
 
         Product product = this.productService.getProduct(productId);
         List<Review> reviewList = this.reviewService.getList(product);
 
-            for (Review review : reviewList) {
-                ReviewResponseDTO reviewResponseDTO = ReviewResponseDTO.builder()
-                        .user(review.getAuthor())
-                        .review(review)
-                        .build();
-                reviewResponseDTOList.add(reviewResponseDTO);
-            }
-            return reviewResponseDTOList;
+        for (Review review : reviewList) {
+            ReviewResponseDTO reviewResponseDTO = ReviewResponseDTO.builder()
+                    .user(review.getAuthor())
+                    .review(review)
+                    .build();
+            reviewResponseDTOList.add(reviewResponseDTO);
+        }
+        return reviewResponseDTOList;
     }
+
     @Transactional
     public List<ReviewResponseDTO> addToReview(String username, ReviewRequestDTO reviewRequestDTO) {
         List<ReviewResponseDTO> reviewResponseDTOList = new ArrayList<>();
@@ -754,8 +753,7 @@ public class MultiService {
         }
         if (!review.getAuthor().equals(user) && !user.getRole().equals(UserRole.ADMIN)) {
             throw new IllegalArgumentException("you have not auth");
-        }
-        else {
+        } else {
             this.reviewService.delete(review);
         }
     }
@@ -769,8 +767,7 @@ public class MultiService {
 
         if (review.getAuthor() != user && !user.getRole().equals(UserRole.ADMIN)) {
             throw new IllegalArgumentException("not yours");
-        }
-        else {
+        } else {
             this.reviewService.update(review, reviewRequestDTO);
             List<Review> reviewList = this.reviewService.getList(review.getProduct());
             for (Review _review : reviewList) {
@@ -786,7 +783,7 @@ public class MultiService {
 
     /**
      * article
-     * */
+     */
 
     @Transactional
     public void deleteArticle(String username, Long articleId) {
@@ -840,6 +837,39 @@ public class MultiService {
                     .siteUser(article.getAuthor())
                     .build();
         }
+    }
+
+
+    /**
+     * Recent
+     */
+    @Transactional
+    public void saveRecent(Long productId, String username) {
+        SiteUser user = userService.get(username);
+        Product product = productService.getProduct(productId);
+        if (user != null && product != null) {
+            Optional<Recent> _recent = recentService.checkRecent(product, user);
+            if (_recent.isPresent())
+                this.recentService.delete(_recent.get());
+            List<Recent> recentList = recentService.getRecent(user);
+            if(recentList.size() >= 10){
+                Recent recent = recentList.get(9);
+                this.recentService.delete(recent);
+            }
+            recentService.save(product, user);
+        }
+    }
+
+    @Transactional
+    public List<ProductResponseDTO> getReentList(String username) {
+        SiteUser user = userService.get(username);
+        List<Recent> recentList = recentService.getRecent(user);
+        List<ProductResponseDTO> responseDTOList = new ArrayList<>();
+        for (Recent recent : recentList) {
+            ProductResponseDTO productResponseDTO = getProduct(recent.getProduct().getId());
+            responseDTOList.add(productResponseDTO);
+        }
+        return responseDTOList;
     }
 }
 
