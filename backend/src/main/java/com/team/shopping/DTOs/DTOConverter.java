@@ -53,7 +53,7 @@ public class DTOConverter {
             totalPrice += paymentProductResponseDTO.getWithOptionPrice();
         }
         return PaymentLogResponseDTO.builder()
-                .price(totalPrice)
+                .totalPrice(totalPrice)
                 .paymentLog(paymentLog)
                 .paymentProductResponseDTOList(paymentProductResponseDTOList)
                 .build();

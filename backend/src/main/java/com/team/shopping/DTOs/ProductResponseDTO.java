@@ -24,7 +24,7 @@ public class ProductResponseDTO {
     private String description;
     private String detail;
     private LocalDateTime dateLimit;
-    private int count;
+    private int remain;
     private String title;
     private String delivery;
     private String address;
@@ -50,9 +50,9 @@ public class ProductResponseDTO {
         this.description = product.getDescription();
         this.detail = product.getDetail();
         this.dateLimit = product.getDateLimit();
-        this.count = product.getRemain();
+        this.remain = product.getRemain();
         this.title = product.getTitle();
-        this.delivery = product.getTitle();
+        this.delivery = product.getDelivery();
         this.address = product.getAddress();
         this.receipt = product.getReceipt();
         this.a_s = product.getA_s();
