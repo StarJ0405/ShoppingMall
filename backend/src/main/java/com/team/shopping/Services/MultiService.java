@@ -441,7 +441,7 @@ public class MultiService {
             }
 
             if (cartItem.getCount() == 0) {
-                throw new NullPointerException("Please set this product count");
+                throw new NoSuchElementException("Please set this product count");
             }
         }
 
@@ -545,9 +545,16 @@ public class MultiService {
     private ProductResponseDTO getProduct(Product product) {
         List<String> tagList = tagService.findByProduct(product);
         Optional<FileSystem> _fileSystem = fileSystemService.get(ImageKey.PRODUCT.getKey(product.getId().toString()));
+        List<Review> reviewList = this.reviewService.getList(product);
         String url = _fileSystem.map(FileSystem::getV).orElse(null);
 
-        return ProductResponseDTO.builder().product(product).tagList(tagList).url(url).build();
+        return ProductResponseDTO
+                .builder()
+                .product(product)
+                .tagList(tagList)
+                .url(url)
+                .reviewList(reviewList)
+                .build();
     }
 
     @Transactional
@@ -555,11 +562,54 @@ public class MultiService {
         List<Product> productList = productService.getProductList();
         List<ProductResponseDTO> responseDTOList = new ArrayList<>();
         for (Product product : productList) {
-            ProductResponseDTO productResponseDTO = getProduct(product);
+            ProductResponseDTO productResponseDTO = this.getProduct(product);
             responseDTOList.add(productResponseDTO);
         }
         return responseDTOList;
     }
+
+    public List<ProductResponseDTO> getBestList() {
+        List<Product> bestList = new ArrayList<>();
+        List<Product> productList = this.productService.getProductList();
+        Map<Product, Double> productAverageGrades = new HashMap<>();
+
+        // 제품별 평균 평점 계산하여 맵에 담기
+        for (Product product : productList) {
+            List<Review> reviewList = this.reviewService.getList(product);
+            double averageGrade = 0.0;
+            if (!reviewList.isEmpty()) {
+                double totalGrade = 0.0;
+                for (Review review : reviewList) {
+                    totalGrade += review.getGrade();
+                }
+                averageGrade = totalGrade / reviewList.size();
+            }
+            productAverageGrades.put(product, averageGrade);
+        }
+
+        // 평균 평점으로 정렬하여 상위 20개의 제품을 선택
+        List<Map.Entry<Product, Double>> sortedEntries = new ArrayList<>(productAverageGrades.entrySet());
+        sortedEntries.sort((entry1, entry2) -> Double.compare(entry2.getValue(), entry1.getValue())); // 내림차순 정렬
+
+        int count = 0;
+        for (Map.Entry<Product, Double> entry : sortedEntries) {
+            if (count >= 20) {
+                break;
+            }
+            bestList.add(entry.getKey());
+            count++;
+        }
+
+        // ProductResponseDTO로 변환하여 반환
+        List<ProductResponseDTO> responseDTOList = new ArrayList<>();
+        for (Product product : bestList) {
+
+            ProductResponseDTO productResponseDTO = this.getProduct(product);
+            responseDTOList.add(productResponseDTO);
+        }
+        return responseDTOList;
+    }
+
 
     @Transactional
     public void productQASave(String username, ProductQARequestDTO requestDTO) {
@@ -702,6 +752,7 @@ public class MultiService {
             }
             return reviewResponseDTOList;
     }
+
     @Transactional
     public List<ReviewResponseDTO> addToReview(String username, ReviewRequestDTO reviewRequestDTO) {
         List<ReviewResponseDTO> reviewResponseDTOList = new ArrayList<>();
@@ -727,7 +778,7 @@ public class MultiService {
 
         // 구매 기록이 없는 경우 IllegalArgumentException 발생
         if (!hasPurchased) {
-            throw new IllegalArgumentException("your paymentLogs have not this product");
+            throw new NoSuchElementException("your paymentLogs have not this product");
         }
 
         // 구매 기록이 있는 경우에만 리뷰를 저장
@@ -841,6 +892,8 @@ public class MultiService {
                     .build();
         }
     }
+
+
 }
 
 

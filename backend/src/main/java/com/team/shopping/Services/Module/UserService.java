@@ -23,7 +23,17 @@ public class UserService {
 
     @Transactional
     public void save(SignupRequestDTO signupRequestDTO) {
-        userRepository.save(SiteUser.builder().username(signupRequestDTO.getUsername()).name(signupRequestDTO.getName()).password(passwordEncoder.encode(signupRequestDTO.getPassword())).nickname(signupRequestDTO.getNickname()).email(signupRequestDTO.getEmail()).gender(Gender.values()[signupRequestDTO.getGender()]).role(UserRole.values()[signupRequestDTO.getRole()]).birthday(signupRequestDTO.getBirthday()).phoneNumber(signupRequestDTO.getPhoneNumber()).build());
+        userRepository.save(SiteUser.builder()
+                .username(signupRequestDTO.getUsername())
+                .name(signupRequestDTO.getName())
+                .password(passwordEncoder.encode(signupRequestDTO.getPassword()))
+                .nickname(signupRequestDTO.getNickname())
+                .email(signupRequestDTO.getEmail())
+                .gender(Gender.values()[signupRequestDTO.getGender()])
+                .role(UserRole.values()[signupRequestDTO.getRole()])
+                .birthday(signupRequestDTO.getBirthday())
+                .phoneNumber(signupRequestDTO.getPhoneNumber())
+                .build());
     }
 
     @Transactional

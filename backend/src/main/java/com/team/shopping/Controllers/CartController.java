@@ -83,8 +83,8 @@ public class CartController {
         try {
             if (tokenRecord.isOK()) {
                 String username = tokenRecord.username();
-                // 기능
                 List<CartResponseDTO> cartResponseDTOList = this.multiService.deleteToCart(username, productId);
+                return tokenRecord.getResponseEntity(cartResponseDTOList);
             }
         }catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("이미 지워지거나 없는 상품입니다.");
@@ -99,7 +99,6 @@ public class CartController {
         try {
             if (tokenRecord.isOK()) {
                 String username = tokenRecord.username();
-                // 기능
                 List<CartResponseDTO> cartResponseDTOList = this.multiService.deleteMultipleToCart(username, productIdList);
                 return tokenRecord.getResponseEntity(cartResponseDTOList);
             }

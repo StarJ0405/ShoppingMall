@@ -29,8 +29,10 @@ public class ReviewController {
                 List<ReviewResponseDTO> reviewResponseDTOList = this.multiService.addToReview(username, reviewRequestDTO);
                 return tokenRecord.getResponseEntity(reviewResponseDTOList);
             }
+        }catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("구매기록에 해당상품 없음");
         }catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("구매기록에 해당상품 없음");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("별점은 0.5 단위로만 등록가능");
         }
         return tokenRecord.getResponseEntity();
     }
