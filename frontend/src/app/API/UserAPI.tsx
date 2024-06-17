@@ -118,3 +118,11 @@ export const saveImage = async (data: any) => {
     });
     return response.data;
 }
+export const getRecent = async () => {
+    const response = await UserApi.get('/api/recent');
+    return response.data;
+}
+export const postRecent = async (data: number) => {
+    const response = await UserApi.post('/api/recent', { productId: data });
+    return response.data;
+}

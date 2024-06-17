@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react';
 import Main from './Global/Layout/MainLayout';
-import { getUser } from './API/UserAPI';
+import { getRecent, getUser } from './API/UserAPI';
 import { MonthDate } from './Global/Method';
 
 interface pageProps {
@@ -11,16 +11,20 @@ export default function Page(props: pageProps) {
     const [user, setUser] = useState(null as any);
     const [productList, setProductList] = useState(props.productList);
     const ACCESS_TOKEN = typeof window === 'undefined' ? null : localStorage.getItem('accessToken');
+    const [recentList, setRecentList] = useState(null as unknown as any[]);
     useEffect(() => {
         if (ACCESS_TOKEN)
             getUser()
                 .then(r => {
                     setUser(r);
+                    getRecent()
+                        .then(r => setRecentList(r))
+                        .catch(e => console.log(e));
                 })
                 .catch(e => console.log(e));
     }, [ACCESS_TOKEN]);
 
-    return <Main user={user} >
+    return <Main user={user} recentList={recentList}>
         <div className='w-full h-full flex justify-center'>
             <div className='flex flex-wrap w-[1240px]'>
                 {productList.map((product, index) =>

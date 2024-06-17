@@ -1,5 +1,5 @@
 "use client"
-import { deleteWish, deleteWishList, getUser, getWishList } from "@/app/API/UserAPI";
+import { deleteWish, deleteWishList, getRecent, getUser, getWishList } from "@/app/API/UserAPI";
 import Profile from "@/app/Global/Layout/ProfileLayout";
 import { redirect } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -8,6 +8,7 @@ export default function Page() {
   const [user, setUser] = useState(null as any);
   const ACCESS_TOKEN = typeof window == 'undefined' ? null : localStorage.getItem('accessToken');
   const [widhList, setWishList] = useState(null as unknown as any[]);
+  const [recentList, setRecentList] = useState(null as unknown as any[]);
   useEffect(() => {
     if (ACCESS_TOKEN)
       getUser()
@@ -17,6 +18,9 @@ export default function Page() {
             .then(r => {
               setWishList(r);
             })
+            .catch(e => console.log(e));
+          getRecent()
+            .then(r => setRecentList(r))
             .catch(e => console.log(e));
         })
         .catch(e => console.log(e));
@@ -28,7 +32,7 @@ export default function Page() {
       deleteWish(id)
         .then(r => {
           setWishList(r);
-          document.getElementsByName('check').forEach((check: any) => check.checked =false);
+          document.getElementsByName('check').forEach((check: any) => check.checked = false);
         })
         .catch(e => console.log(e));
   }
@@ -40,14 +44,14 @@ export default function Page() {
       deleteWishList(numbers)
         .then(r => {
           setWishList(r);
-          checks.forEach((check: any) => check.checked =false);
+          checks.forEach((check: any) => check.checked = false);
         }).catch(e => console.log(e))
     }
   }
   function SelectAll(e: any) {
     document.getElementsByName('check').forEach((check: any) => check.checked = e.target.checked);
   }
-  return <Profile user={user}>
+  return <Profile user={user} recentList={recentList}>
     <label className="font-bold text-xl"><label className="text-red-500">찜한</label> 상품</label>
     <li className="list-disc text-xs">찜한 상품은 등록일로부터 <label className="font-bold">최대 1년간</label> 저장됩니다.</li>
     <table>

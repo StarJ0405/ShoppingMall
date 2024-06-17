@@ -5,16 +5,20 @@ import Side from '../Side';
 import DropDown, { Direcion } from '../DropDown';
 
 
+
 interface pageInterface {
   children: React.ReactNode,
   className?: string
   user: any
+  recentList: any[];
 }
 
 export default function Main(props: Readonly<pageInterface>) {
   const className = props.className;
   const user = props.user;
-
+  const recentList = props.recentList;
+  const [isRecentOpen, setIsRecentOpen] = useState(false);
+  const [hover, setHover] = useState(-1);
   const [isSideOpen, setIsSideOpen] = useState(false);
   const [userHover, setUserHover] = useState(false);
   const [userHoverInterval, setUserHoverInterval] = useState(null as any);
@@ -41,7 +45,7 @@ export default function Main(props: Readonly<pageInterface>) {
           <a href='/account/profile'><img id='user' alt='user' src='/user.png' className='w-[48px] h-[48px]' onMouseEnter={e => { (e.target as any).src = '/user_red.png'; openUserHover(); }} onMouseLeave={e => { (e.target as any).src = '/user.png'; closeUserHover(); }}></img></a>
           <a href=''><img alt='delivery' src='/delivery.png' className='w-[60px] h-[48px]' onMouseEnter={e => (e.target as any).src = '/delivery_red.png'} onMouseLeave={e => (e.target as any).src = '/delivery.png'}></img></a>
           <a href=''><img alt='cart' src='/cart.png' className='w-[48px] h-[48px]' onMouseEnter={e => (e.target as any).src = '/cart_red.png'} onMouseLeave={e => (e.target as any).src = '/cart.png'}></img></a>
-          <a href=''><img alt='recent' src='/recent.png' className='w-[48px] h-[48px]' onMouseEnter={e => (e.target as any).src = '/recent_red.png'} onMouseLeave={e => (e.target as any).src = '/recent.png'}></img></a>
+          <a className='cursor-pointer' onClick={() => setIsRecentOpen(true)}><img alt='recent' src='/recent.png' className='w-[48px] h-[48px]' onMouseEnter={e => (e.target as any).src = '/recent_red.png'} onMouseLeave={e => (e.target as any).src = '/recent.png'}></img></a>
         </div>
       </header>
       <DropDown open={userHover} onClose={() => closeUserHover()} className='bg-white' background='main' button='user' defaultDriection={Direcion.DOWN} height={205} width={170}>
@@ -61,7 +65,7 @@ export default function Main(props: Readonly<pageInterface>) {
             :
             <a href='/account/login' className='hover:underline'>로그인</a>
           }
-          <button onClick={()=>setIsSideOpen(false)}><img alt='x' src='/x.png' className='w-[24px] h-[24px]' /></button>
+          <button onClick={() => setIsSideOpen(false)}><img alt='x' src='/x.png' className='w-[24px] h-[24px]' /></button>
         </div>
         <div className='overflow-y-scroll h-full'>
           <div className='mt-[20px] flex flex-col'>
@@ -76,6 +80,28 @@ export default function Main(props: Readonly<pageInterface>) {
             <label className='text-xl font-bold'>주요서비스</label>
           </div>
         </div>
+      </Side>
+      <Side open={isRecentOpen} onClose={() => setIsRecentOpen(false)} className='px-4 py-4 w-[400px] right-0 top-0 h-full' outlineClassName='bg-opacity-5' escClose={true} outlineClose={true}>
+        <div className='flex justify-between items-center text-2xl font-bold'>
+          <div className='flex justify-between w-full items-center'>
+            <div>
+              <label className='text-xl font-bold'>최근 본 상품</label>
+              <a className='text-sm text-gray-500 ml-4 hover:underline'>{'찜 목록 보기 >'}</a>
+            </div>
+            <button className='text-2xl cursor-pointer' onClick={() => setIsRecentOpen(false)}>X</button>
+          </div>
+        </div>
+        <div className='divider'></div>
+        <ul>
+          {recentList?.map((recent, index) => <li className='list-disc ml-4' key={index}>
+            <label>{recent?.createDate}</label>
+            <div className='relative w-[104px]'>
+              <img onClick={() => window.location.href = '/product/' + recent.id} src={recent?.url ? recent.url : '/empty_product.png'} className={'w-[104px] h-[104px] cursor-pointer ' + (hover == index ? ' border-2 border-black' : '')} onMouseEnter={() => setHover(index)} onMouseLeave={() => setHover(-1)} />
+              <button className={'text-sm absolute font-bold right-0 top-0 text-white bg-black w-[14px] text-center' + (hover != index ? ' hidden' : '')} onClick={() => { }} onMouseEnter={() => setHover(index)} onMouseLeave={() => setHover(-1)} >X</button>
+            </div>
+
+          </li>)}
+        </ul>
       </Side>
       <nav className='flex w-[1240px] h-[66px] items-center justify-between'>
         <div className='flex items-center'>
