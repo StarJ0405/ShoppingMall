@@ -113,12 +113,11 @@ export default function Page(props: pageProps) {
                         <button className={'w-[220px] h-[60px]' + (focus == 2 ? ' text-white bg-red-500' : '')} onClick={() => Move(2)}>Q&A</button>
                         <button className={'w-[220px] h-[60px]' + (focus == 3 ? ' text-white bg-red-500' : '')} onClick={() => Move(3)}>판매자정보<label className={'text-base font-normal' + (focus == 3 ? ' text-white' : ' text-gray-600')}>(반품/교환)</label></button>
                     </div>
+                    <div>{product.detail}</div>
                 </div>
                 <div className='w-[300px] h-full ml-[60px] relative'>
                     <div className='fixed'>
-                        {
 
-                        }
                     </div>
                 </div>
             </div>

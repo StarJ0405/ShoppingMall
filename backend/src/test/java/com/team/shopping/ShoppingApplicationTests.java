@@ -45,7 +45,7 @@ class ShoppingApplicationTests {
         List<SiteUser> sellers = new ArrayList<>();
         for (int i = 0; i < 50; i++) {
             userRepository.save(SiteUser.builder().username("user" + i).email("user" + i + "@naver.com").birthday(LocalDate.now().minusDays(r.nextInt(31)).minusMonths(r.nextInt(12)).minusYears(r.nextInt(70))).role(UserRole.USER).name("사용자" + i).gender(Gender.values()[r.nextInt(Gender.values().length)]).nickname("구매자" + i).password(passwordEncoder.encode("1")).phoneNumber("010000000" + (i < 10 ? "0" + i : i)).build());
-            sellers.add(userRepository.save(SiteUser.builder().username("seller" + i).email("seller" + i + "@naver.com").birthday(LocalDate.now().minusDays(r.nextInt(31)).minusMonths(r.nextInt(12)).minusYears(r.nextInt(70))).role(UserRole.USER).name("이용자" + i).gender(Gender.values()[r.nextInt(Gender.values().length)]).nickname("판매자" + i).password(passwordEncoder.encode("1")).phoneNumber("010000001" + (i < 10 ? "0" + i : i)).build()));
+            sellers.add(userRepository.save(SiteUser.builder().username("seller" + i).email("seller" + i + "@naver.com").birthday(LocalDate.now().minusDays(r.nextInt(31)).minusMonths(r.nextInt(12)).minusYears(r.nextInt(70))).role(UserRole.SELLER).name("이용자" + i).gender(Gender.values()[r.nextInt(Gender.values().length)]).nickname("판매자" + i).password(passwordEncoder.encode("1")).phoneNumber("010000001" + (i < 10 ? "0" + i : i)).build()));
         }
         List<Category> categories = new ArrayList<>();
         for (int i = 0; i < 5; i++) {

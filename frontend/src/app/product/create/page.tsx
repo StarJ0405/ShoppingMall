@@ -3,12 +3,13 @@ import { getCategories } from '@/app/API/NonUserAPI';
 import { getUser, productRegist, saveImage } from '@/app/API/UserAPI';
 import Main from '@/app/Global/Layout/MainLayout';
 import Modal from '@/app/Global/Modal';
-import dynamic from 'next/dynamic';
 import { redirect } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import 'react-quill/dist/quill.snow.css';
+import QuillNoSSRWrapper from '@/app/Global/QuillNoSSRWrapper';
+import ReactQuill from 'react-quill';
+// const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
 
-const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
 
 export default function Page() {
     const [user, setUser] = useState(null as any);
@@ -35,7 +36,67 @@ export default function Page() {
     const [selectedOptionList, setSelectedOptionList] = useState([] as any[]);
     const [selectedOption, setSelectedOption] = useState(null as any);
     const [isModalOpen, setISModalOpen] = useState(-1);
+
+    const quillInstance = useRef<ReactQuill>(null);
+
     const ACCESS_TOKEN = typeof window == 'undefined' ? null : localStorage.getItem('accessToken');
+
+    const imageHandler = () => {
+        const input = document.createElement('input') as HTMLInputElement;
+        input.setAttribute('type', 'file');
+        input.setAttribute('accept', 'image/*');
+        input.click();
+
+
+        input.addEventListener('change', async () => {
+            const file = input.files?.[0];
+
+            try {
+                const formData = new FormData();
+                formData.append('file', file as any);
+                const imgUrl = (await saveImage(formData)).url;
+                const editor = (quillInstance?.current as any).getEditor();
+                const range = editor.getSelection();
+                editor.insertEmbed(range.index, 'image', imgUrl);
+                editor.setSelection(range.index + 1);
+            } catch (error) {
+                console.log(error);
+            }
+        });
+    };
+    const modules = useMemo(
+        () => ({
+            toolbar: {
+                container: [
+                    [{ header: '1' }, { header: '2' }],
+                    [{ size: [] }],
+                    ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+                    [{ list: 'ordered' }, { list: 'bullet' }, { align: [] }],
+                    ['image'],
+                ],
+                handlers: { image: imageHandler },
+            },
+            clipboard: {
+                matchVisual: false,
+            },
+        }),
+        [],
+    );
+
+    const formats = [
+        'header',
+        'font',
+        'size',
+        'bold',
+        'italic',
+        'underline',
+        'strike',
+        'blockquote',
+        'list',
+        'bullet',
+        'align',
+        'image',
+    ];
 
     useEffect(() => {
         getCategories()
@@ -219,8 +280,16 @@ export default function Page() {
                     </tr>
                     <tr>
                         <th className='border border-black'>상세설명</th>
-                        <td className='px-2 flex pb-[50px] min-h-[350px]'>
-                            <ReactQuill className='min-h-[300px] w-full' placeholder='상세 설명 작성..' onChange={e => setDetail(e)} />
+                        <td className='px-2 flex pb-[50px] min-h-[350px]' >
+                            {/* <ReactQuill modules={modules} formats={formats} className='min-h-[300px] w-full' placeholder='상세 설명 작성..' onChange={(e: any) => setDetail(e)} value={detail} /> */}
+                            <QuillNoSSRWrapper
+                                forwardedRef={quillInstance}
+                                value={detail}
+                                onChange={(e: any) => setDetail(e)}
+                                modules={modules}
+                                theme="snow"
+                                placeholder="내용을 입력해주세요."
+                            />
                         </td>
                     </tr>
                 </tbody>
@@ -236,7 +305,6 @@ export default function Page() {
                         document.getElementById("add_button")?.click();
                     else
                         document.getElementById("price")?.focus();
-
             }} />
             {isModalOpen == 1 ? <>
                 <input type="number" id="price" min={0} placeholder='옵션 추가 비용' onKeyDown={e => { if (e.key == "Enter") document.getElementById('remain')?.focus() }} />
