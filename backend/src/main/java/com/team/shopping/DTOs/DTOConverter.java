@@ -13,11 +13,17 @@ public class DTOConverter {
 
     public static CartResponseDTO toCartResponseDTO(CartItem cartItem, List<CartItemDetail> cartItemDetails) {
         List<OptionResponseDTO> optionResponseDTOList = new ArrayList<>();
+        int totalPrice = cartItem.getProduct().getPrice() * cartItem.getCount();
         for (CartItemDetail cartItemDetail : cartItemDetails) {
             optionResponseDTOList.add(DTOConverter.toOptionResponseDTO(cartItemDetail.getOptions()));
+            totalPrice += cartItemDetail.getOptions().getPrice() * cartItemDetail.getOptions().getCount();
         }
 
-        return new CartResponseDTO(cartItem, optionResponseDTOList);
+        return CartResponseDTO.builder()
+                .optionResponseDTOList(optionResponseDTOList)
+                .cartItem(cartItem)
+                .totalPrice(totalPrice)
+                .build();
     }
 
     public static PaymentProductDetailResponseDTO toPaymentProductDetailResponseDTO (PaymentProductDetail paymentProductDetail) {
@@ -26,20 +32,22 @@ public class DTOConverter {
 
     public static PaymentProductResponseDTO toPaymentProductResponseDTO (PaymentProduct paymentProduct, List<PaymentProductDetail> paymentProductDetailList) {
         List<PaymentProductDetailResponseDTO> paymentProductDetailResponseDTOList = new ArrayList<>();
+        int withOptionPrice = paymentProduct.getPrice() * paymentProduct.getCount();
         for (PaymentProductDetail paymentProductDetail : paymentProductDetailList) {
             paymentProductDetailResponseDTOList.add(DTOConverter.toPaymentProductDetailResponseDTO(paymentProductDetail));
+            withOptionPrice += paymentProductDetail.getOptionPrice() * paymentProductDetail.getOptionCount() * paymentProduct.getCount();
         }
-        return new PaymentProductResponseDTO(paymentProduct, paymentProductDetailResponseDTOList);
+        return PaymentProductResponseDTO.builder()
+                .paymentProduct(paymentProduct)
+                .withOptionPrice(withOptionPrice)
+                .paymentProductDetailResponseDTOList(paymentProductDetailResponseDTOList)
+                .build();
     }
 
     public static PaymentLogResponseDTO toPaymentLogResponseDTO(PaymentLog paymentLog, List<PaymentProductResponseDTO> paymentProductResponseDTOList) {
         int totalPrice = 0;
         for (PaymentProductResponseDTO paymentProductResponseDTO : paymentProductResponseDTOList) {
-            totalPrice += paymentProductResponseDTO.getPrice() * paymentProductResponseDTO.getCount();
-
-            for (PaymentProductDetailResponseDTO paymentProductDetailResponseDTO : paymentProductResponseDTO.getPaymentProductDetailResponseDTOList()) {
-                totalPrice += paymentProductDetailResponseDTO.getOptionPrice() * paymentProductDetailResponseDTO.getOptionCount();
-            }
+            totalPrice += paymentProductResponseDTO.getWithOptionPrice();
         }
         return PaymentLogResponseDTO.builder()
                 .price(totalPrice)

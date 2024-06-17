@@ -10,6 +10,7 @@ import java.util.List;
 
 @Repository
 public interface WishListRepository extends JpaRepository<Wish, Long> {
-    List<Wish> findByUser (SiteUser user);
+    List<Wish> findByUserOrderByCreateDateDesc(SiteUser user);
     Wish findByUserAndProduct(SiteUser user, Product product);
+    void deleteByProduct(Product product);
 }

@@ -1,7 +1,7 @@
 package com.team.shopping.Enums;
 
 public enum UserRole {
-    USER,SELLER, ADMIN
+    USER, SELLER, ADMIN
     //
     ;
     public String getValue(){

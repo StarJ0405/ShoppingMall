@@ -22,6 +22,8 @@ public class QWish extends EntityPathBase<Wish> {
 
     public static final QWish wish = new QWish("wish");
 
+    public final DateTimePath<java.time.LocalDateTime> createDate = createDateTime("createDate", java.time.LocalDateTime.class);
+
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
     public final QProduct product;

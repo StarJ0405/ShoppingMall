@@ -16,12 +16,16 @@ public class ProductService {
 
     private final ProductRepository productRepository;
 
-    public Product getProduct (Long productId) {
-        return this.productRepository.findById(productId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 상품을 찾을 수 없습니다"));
+    public Product save (Product product) {
+        return this.productRepository.save(product);
     }
 
-    public Product save(ProductCreateRequestDTO requestDTO, SiteUser user, Category category) {
+    public Product getProduct (Long productId) {
+        return this.productRepository.findById(productId)
+                .orElseThrow(() -> new IllegalArgumentException("not found product"));
+    }
+
+    public Product saveProduct(ProductCreateRequestDTO requestDTO, SiteUser user, Category category) {
         return this.productRepository.save(Product.builder()
                 .seller(user)
                 .category(category)
@@ -41,5 +45,9 @@ public class ProductService {
 
     public List<Product> getProductList() {
         return productRepository.findAll();
+    }
+
+    public void deleteProduct (Product product) {
+        this.productRepository.delete(product);
     }
 }

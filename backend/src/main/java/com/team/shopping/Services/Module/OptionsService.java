@@ -22,12 +22,18 @@ public class OptionsService {
         return this.optionsRepository.findById(optionId).orElseThrow();
     }
 
-    public void save(int count, String name, int price, OptionList optionList) {
+    public void saveOption(int count, String name, int price, OptionList optionList) {
+        if (count <= 0) {
+            count = 1;
+        }
         optionsRepository.save(Options.builder()
                         .count(count)
                         .name(name)
                         .price(price)
                         .optionList(optionList)
                 .build());
+    }
+    public Options save (Options options) {
+        return this.optionsRepository.save(options);
     }
 }
