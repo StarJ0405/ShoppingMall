@@ -4,6 +4,7 @@ import Main from '@/app/Global/Layout/MainLayout';
 import { checkWish, deleteWish, getUser, postWish } from '@/app/API/UserAPI';
 import DropDown, { Direcion } from '@/app/Global/DropDown';
 import { MonthDate } from '@/app/Global/Method';
+import { getReviews } from '@/app/API/NonUserAPI';
 
 interface pageProps {
     product: any;
@@ -19,6 +20,7 @@ export default function Page(props: pageProps) {
     const [bottomCategoryDropdownm, setBottomCategoryDropdown] = useState(false);
     const [love, setLove] = useState(false);
     const [focus, setFocus] = useState(0);
+    const [reviews, setReviews] = useState(null as unknown as any[]);
     //const [product,setProduct] = useState(props.product);
     const product = props.product;
     const seller = props.seller;
@@ -32,13 +34,22 @@ export default function Page(props: pageProps) {
                     checkWish(product.id)
                         .then(r => setLove(r))
                         .catch(e => console.log(e));
-                    console.log(product, seller);
                 })
                 .catch(e => console.log(e));
     }, [ACCESS_TOKEN]);
+    useEffect(() => {
+        getReviews(product.id)
+            // .then(r=>setReviews(r))
+            .then(r => { setReviews(r); console.log(product, r) })
+            .catch(e => console.log(e));
+    }, []);
     function Move(data: number) {
         setFocus(data);
-
+        document.getElementById(String(data))?.scrollIntoView();
+    }
+    function getDate() {
+        const date = new Date();
+        return date.getFullYear() + '.' + date.getMonth() + '.' + date.getDate();
     }
     function Wish() {
         if (love)
@@ -53,15 +64,15 @@ export default function Page(props: pageProps) {
                 <label className='text-2xl font-bold'>{props.seller.nickname}</label>
                 <label className='ml-2 text-gray-500'>긍정 리뷰</label>
                 <label className='ml-2'>93.1%</label>
-                <div className="divider divider-horizontal h-[20px] mx-0"></div>
+                <div className='divider divider-horizontal h-[20px] mx-0'></div>
                 <label className='text-gray-500'>응답률 </label>
                 <label className='ml-2'>100%</label>
             </div>
             <div className='mt-10 flex'>
                 <div className='w-[880px] h-full'>
                     <div className='flex'>
-                        <button id="middle" className='flex' onClick={() => setMiddleCategoryDropdown(!middleCategoryDropdown)}>{product.middleCategoryName}<img src={middleCategoryDropdown ? '/up.png' : '/down.png'} className='ml-1 w-[24px] h-[24px]' alt="dropdown" /></button>
-                        <button id="bottom" className='flex ml-4' onClick={() => setBottomCategoryDropdown(!bottomCategoryDropdownm)}>{product.categoryName}<img src={bottomCategoryDropdownm ? '/up.png' : '/down.png'} className='ml-1 w-[24px] h-[24px]' alt="dropdown" /></button>
+                        <button id='middle' className='flex' onClick={() => setMiddleCategoryDropdown(!middleCategoryDropdown)}>{product.middleCategoryName}<img src={middleCategoryDropdown ? '/up.png' : '/down.png'} className='ml-1 w-[24px] h-[24px]' alt='dropdown' /></button>
+                        <button id='bottom' className='flex ml-4' onClick={() => setBottomCategoryDropdown(!bottomCategoryDropdownm)}>{product.categoryName}<img src={bottomCategoryDropdownm ? '/up.png' : '/down.png'} className='ml-1 w-[24px] h-[24px]' alt='dropdown' /></button>
                         <DropDown open={middleCategoryDropdown} onClose={() => setMiddleCategoryDropdown(false)} background='main' button='middle' className='overflow-y-scroll bg-white' defaultDriection={Direcion.DOWN} width={140} height={180}>
                             <div className='max-w-[120px] max-h-[180px] flex flex-col'>
                                 {(topCategory?.categoryResponseDTOList as any[])?.map((middle, index) => <a key={index} href={'/'} className={'' + (middle.name == product.middleCategoryName ? ' text-red-500' : '')}>{middle.name}</a>)}
@@ -74,23 +85,23 @@ export default function Page(props: pageProps) {
                         </DropDown>
                     </div>
                     <div className='flex mt-2'>
-                        <div className='min-w-[410px] min-h-[410px] w-[410px] h-[410px] flex items-center justify-center'><img src={product?.url ? product.url : "/empty_product.png"} className='w-[300px] h-[300px]' /></div>
+                        <div className='min-w-[410px] min-h-[410px] w-[410px] h-[410px] flex items-center justify-center'><img src={product?.url ? product.url : '/empty_product.png'} className='w-[300px] h-[300px]' /></div>
                         <div className='flex flex-col ml-2 w-full'>
                             <div>
                                 <div className='rating rating-sm rating-half'>
-                                    <input type='radio' readOnly className='rating-hidden' defaultChecked={!product?.score || (product?.score == 0 && product?.score < 0.25)} />
-                                    <input type='radio' readOnly className='bg-orange-500 mask mask-star-2 mask-half-1' defaultChecked={product?.score > 0.25 && product?.score <= 0.75} />
-                                    <input type='radio' readOnly className='bg-orange-500 mask mask-star-2 mask-half-2' defaultChecked={product?.score > 0.75 && product?.score <= 1.25} />
-                                    <input type='radio' readOnly className='bg-orange-500 mask mask-star-2 mask-half-1' defaultChecked={product?.score > 1.25 && product?.score <= 1.75} />
-                                    <input type='radio' readOnly className='bg-orange-500 mask mask-star-2 mask-half-2' defaultChecked={product?.score > 1.75 && product?.score <= 2.25} />
-                                    <input type='radio' readOnly className='bg-orange-500 mask mask-star-2 mask-half-1' defaultChecked={product?.score > 2.25 && product?.score <= 2.75} />
-                                    <input type='radio' readOnly className='bg-orange-500 mask mask-star-2 mask-half-2' defaultChecked={product?.score > 2.75 && product?.score <= 3.25} />
-                                    <input type='radio' readOnly className='bg-orange-500 mask mask-star-2 mask-half-1' defaultChecked={product?.score > 3.25 && product?.score <= 3.75} />
-                                    <input type='radio' readOnly className='bg-orange-500 mask mask-star-2 mask-half-2' defaultChecked={product?.score > 3.75 && product?.score <= 4.25} />
-                                    <input type='radio' readOnly className='bg-orange-500 mask mask-star-2 mask-half-1' defaultChecked={product?.score > 4.25 && product?.score <= 4.75} />
-                                    <input type='radio' readOnly className='bg-orange-500 mask mask-star-2 mask-half-2' defaultChecked={product?.score > 4.75} />
+                                    <input type='radio' className='rating-hidden' defaultChecked={!product?.grade || (product?.grade == 0 && product?.grade < 0.25)} onClick={e => e.preventDefault()} />
+                                    <input type='radio' className='bg-orange-500 mask mask-star-2 mask-half-1' defaultChecked={product?.grade > 0.25 && product?.grade <= 0.75} onClick={e => e.preventDefault()} />
+                                    <input type='radio' className='bg-orange-500 mask mask-star-2 mask-half-2' defaultChecked={product?.grade > 0.75 && product?.grade <= 1.25} onClick={e => e.preventDefault()} />
+                                    <input type='radio' className='bg-orange-500 mask mask-star-2 mask-half-1' defaultChecked={product?.grade > 1.25 && product?.grade <= 1.75} onClick={e => e.preventDefault()} />
+                                    <input type='radio' className='bg-orange-500 mask mask-star-2 mask-half-2' defaultChecked={product?.grade > 1.75 && product?.grade <= 2.25} onClick={e => e.preventDefault()} />
+                                    <input type='radio' className='bg-orange-500 mask mask-star-2 mask-half-1' defaultChecked={product?.grade > 2.25 && product?.grade <= 2.75} onClick={e => e.preventDefault()} />
+                                    <input type='radio' className='bg-orange-500 mask mask-star-2 mask-half-2' defaultChecked={product?.grade > 2.75 && product?.grade <= 3.25} onClick={e => e.preventDefault()} />
+                                    <input type='radio' className='bg-orange-500 mask mask-star-2 mask-half-1' defaultChecked={product?.grade > 3.25 && product?.grade <= 3.75} onClick={e => e.preventDefault()} />
+                                    <input type='radio' className='bg-orange-500 mask mask-star-2 mask-half-2' defaultChecked={product?.grade > 3.75 && product?.grade <= 4.25} onClick={e => e.preventDefault()} />
+                                    <input type='radio' className='bg-orange-500 mask mask-star-2 mask-half-1' defaultChecked={product?.grade > 4.25 && product?.grade <= 4.75} onClick={e => e.preventDefault()} />
+                                    <input type='radio' className='bg-orange-500 mask mask-star-2 mask-half-2' defaultChecked={product?.grade > 4.75} onClick={e => e.preventDefault()} />
                                 </div>
-                                <a href="/" className='ml-2'> {'37 리뷰보기 >'}</a>
+                                <a href='/' className='ml-2'> {'37 리뷰보기 >'}</a>
                             </div>
                             <div className='mt-4 flex justify-between w-full'>
                                 <label className='text-3xl'>{product?.title}</label>
@@ -100,7 +111,7 @@ export default function Page(props: pageProps) {
                             <label className='text-xl mt-2'><label className='text-2xl font-bold'>{product?.price.toLocaleString('ko-kr')}</label>원</label>
                             <div className='flex justify-between mt-auto'>
                                 <label className='flex items-center'><div className='border border-black rounded-full w-[20px] h-[20px] flex items-center justify-center mr-2'>p</div>최대 적립 포인트</label>
-                                <label className='font-bold'>{(product?.price / 100).toLocaleString("ko-kr", { maximumFractionDigits: 0 })}P</label>
+                                <label className='font-bold'>{(product?.price / 100).toLocaleString('ko-kr', { maximumFractionDigits: 0 })}P</label>
                             </div>
                             <label className='mt-auto flex items-center'><div className='border border-black rounded-full w-[20px] h-[20px] flex items-center justify-center mr-2'>%</div>최대 22개월 무이자 할부</label>
                             <label className='mt-auto'>무료배송 | CJ대한통운</label>
@@ -113,7 +124,108 @@ export default function Page(props: pageProps) {
                         <button className={'w-[220px] h-[60px]' + (focus == 2 ? ' text-white bg-red-500' : '')} onClick={() => Move(2)}>Q&A</button>
                         <button className={'w-[220px] h-[60px]' + (focus == 3 ? ' text-white bg-red-500' : '')} onClick={() => Move(3)}>판매자정보<label className={'text-base font-normal' + (focus == 3 ? ' text-white' : ' text-gray-600')}>(반품/교환)</label></button>
                     </div>
-                    <div>{product.detail}</div>
+                    <div>
+                        <table>
+                            <tbody>
+                                <tr className='h-[47px]'>
+                                    <th className='w-[158px]'>상품상태</th><td className='w-[281px]'>새상품</td>
+                                    <th>상품번호</th><td>{product?.id}</td>
+                                </tr>
+                                <tr className='h-[47px]'>
+                                    <th>배송방법</th><td>{product?.delivery}</td>
+                                    <th>배송가능지역</th><td>{product?.address}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <table>
+                            <tbody>
+                                <tr className='h-[47px]'>
+                                    <th className='w-[158px]'>영수증발행</th>
+                                    <td className='w-[701px]'>{product?.receipt}</td>
+                                </tr>
+                                <tr className='h-[47px]'>
+                                    <th>A/S안내</th>
+                                    <td>{product?.a_s}</td>
+                                </tr>
+                                <tr className='h-[47px]'>
+                                    <th>브랜드</th>
+                                    <td>{product?.brand}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div className='w-[860px] h-[100px] flex justify-center items-center text-gray-600 text-xl bg-gray-200 font-bold'>
+                            <img src={'/exclamation.png'} className='w-[30px] h-[30px] mr-2' />
+                            판매자가<label className='text-black ml-2'>현금결제를 요구하면 거부</label>하시고 즉시 <a href='?' className='underline'>11번가로 신고</a>해 주세요.
+                        </div>
+                        <div id='0' className='p-4'>
+                            <div dangerouslySetInnerHTML={{ __html: product.detail }} />
+                        </div>
+                        <label id='1' className='font-bold text-2xl'>상품리뷰</label>
+                        <div className='divider'></div>
+                        <div className='flex'>
+                            <div className='flex flex-col items-center justify-center w-[400px] h-[196px]'>
+                                <label className='font-bold text-lg mb-1'>구매만족도</label>
+                                <label className='font-bold text-3xl mb-3'>4.6</label>
+                                <div className='rating rating-lg rating-half'>
+                                    <input type='radio' className='rating-hidden' defaultChecked={!product?.grade || (product?.grade == 0 && product?.grade < 0.25)} onClick={e => e.preventDefault()} />
+                                    <input type='radio' className='bg-orange-500 mask mask-star-2 mask-half-1' defaultChecked={product?.grade > 0.25 && product?.grade <= 0.75} onClick={e => e.preventDefault()} />
+                                    <input type='radio' className='bg-orange-500 mask mask-star-2 mask-half-2' defaultChecked={product?.grade > 0.75 && product?.grade <= 1.25} onClick={e => e.preventDefault()} />
+                                    <input type='radio' className='bg-orange-500 mask mask-star-2 mask-half-1' defaultChecked={product?.grade > 1.25 && product?.grade <= 1.75} onClick={e => e.preventDefault()} />
+                                    <input type='radio' className='bg-orange-500 mask mask-star-2 mask-half-2' defaultChecked={product?.grade > 1.75 && product?.grade <= 2.25} onClick={e => e.preventDefault()} />
+                                    <input type='radio' className='bg-orange-500 mask mask-star-2 mask-half-1' defaultChecked={product?.grade > 2.25 && product?.grade <= 2.75} onClick={e => e.preventDefault()} />
+                                    <input type='radio' className='bg-orange-500 mask mask-star-2 mask-half-2' defaultChecked={product?.grade > 2.75 && product?.grade <= 3.25} onClick={e => e.preventDefault()} />
+                                    <input type='radio' className='bg-orange-500 mask mask-star-2 mask-half-1' defaultChecked={product?.grade > 3.25 && product?.grade <= 3.75} onClick={e => e.preventDefault()} />
+                                    <input type='radio' className='bg-orange-500 mask mask-star-2 mask-half-2' defaultChecked={product?.grade > 3.75 && product?.grade <= 4.25} onClick={e => e.preventDefault()} />
+                                    <input type='radio' className='bg-orange-500 mask mask-star-2 mask-half-1' defaultChecked={product?.grade > 4.25 && product?.grade <= 4.75} onClick={e => e.preventDefault()} />
+                                    <input type='radio' className='bg-orange-500 mask mask-star-2 mask-half-2' defaultChecked={product?.grade > 4.75} onClick={e => e.preventDefault()} />
+                                </div>
+                                <label className='mt-3'>16,922건</label>
+                            </div>
+                            <div className='divider divider-horizontal'></div>
+                            <div className='flex items-center flex-col justify-center'>
+                                <label className='flex items-center text-gray-500'>5점<progress className='progress progress-info w-[300px] h-[18px] mx-3' value='73' max='100' /><label className='text-blue-400 w-[32px]'>73%</label></label>
+                                <label className='flex items-center text-gray-500'>4점<progress className='progress progress-info w-[300px] h-[18px] mx-3' value='9' max='100' /><label className='text-blue-400 w-[32px]'>19%</label></label>
+                                <label className='flex items-center text-gray-500'>3점<progress className='progress progress-info w-[300px] h-[18px] mx-3' value='6' max='100' /><label className='text-blue-400 w-[32px]'>6%</label></label>
+                                <label className='flex items-center text-gray-500'>2점<progress className='progress progress-info w-[300px] h-[18px] mx-3' value='1' max='100' /><label className='text-blue-400 w-[32px]'>1%</label></label>
+                                <label className='flex items-center text-gray-500'>1점<progress className='progress progress-info w-[300px] h-[18px] mx-3' value='1' max='100' /><label className='text-blue-400 w-[32px]'>1%</label></label>
+                                <label className='flex items-center text-gray-500'>0점<progress className='progress progress-info w-[300px] h-[18px] mx-3' value='0' max='100' /><label className='text-blue-400 w-[32px]'>0%</label></label>
+                            </div>
+                        </div>
+                        <div className='divider'></div>
+                        <label className='font-bold text-2xl'>전체리뷰<label className='font-normal text-sm ml-2'>16,392건</label></label>
+
+                        {reviews?.map((review, index) => <>
+                            <div className='flex' key={index}>
+                                <img className='min-w-[52px] w-[52px] min-h-[52px] h-[52px]' src={review?.url ? review.url : '/base_profile.png'} />
+                                <div className='flex flex-col p-2 w-full'>
+                                    <div className='flex justify-between w-full items-center'>
+                                        <label className='font-bold text-lg'>{review?.authorName}</label>
+                                        <a href='/' className='text-gray-500 text-sm'>{getDate()} 신고</a>
+                                    </div>
+                                    <div>
+                                        <div className='rating rating-sm rating-half'>
+                                            <input type='radio' className='rating-hidden' defaultChecked={!review?.grade || (review?.grade == 0 && review?.grade < 0.25)} onClick={e => e.preventDefault()} />
+                                            <input type='radio' className='bg-orange-500 mask mask-star-2 mask-half-1' defaultChecked={review?.grade > 0.25 && review?.grade <= 0.75} onClick={e => e.preventDefault()} />
+                                            <input type='radio' className='bg-orange-500 mask mask-star-2 mask-half-2' defaultChecked={review?.grade > 0.75 && review?.grade <= 1.25} onClick={e => e.preventDefault()} />
+                                            <input type='radio' className='bg-orange-500 mask mask-star-2 mask-half-1' defaultChecked={review?.grade > 1.25 && review?.grade <= 1.75} onClick={e => e.preventDefault()} />
+                                            <input type='radio' className='bg-orange-500 mask mask-star-2 mask-half-2' defaultChecked={review?.grade > 1.75 && review?.grade <= 2.25} onClick={e => e.preventDefault()} />
+                                            <input type='radio' className='bg-orange-500 mask mask-star-2 mask-half-1' defaultChecked={review?.grade > 2.25 && review?.grade <= 2.75} onClick={e => e.preventDefault()} />
+                                            <input type='radio' className='bg-orange-500 mask mask-star-2 mask-half-2' defaultChecked={review?.grade > 2.75 && review?.grade <= 3.25} onClick={e => e.preventDefault()} />
+                                            <input type='radio' className='bg-orange-500 mask mask-star-2 mask-half-1' defaultChecked={review?.grade > 3.25 && review?.grade <= 3.75} onClick={e => e.preventDefault()} />
+                                            <input type='radio' className='bg-orange-500 mask mask-star-2 mask-half-2' defaultChecked={review?.grade > 3.75 && review?.grade <= 4.25} onClick={e => e.preventDefault()} />
+                                            <input type='radio' className='bg-orange-500 mask mask-star-2 mask-half-1' defaultChecked={review?.grade > 4.25 && review?.grade <= 4.75} onClick={e => e.preventDefault()} />
+                                            <input type='radio' className='bg-orange-500 mask mask-star-2 mask-half-2' defaultChecked={review?.grade > 4.75} onClick={e => e.preventDefault()} />
+                                        </div>
+                                        <label className='ml-2'>{review?.grade}</label>
+                                        <div><div dangerouslySetInnerHTML={{ __html: review.content }} /></div>
+                                        <button className='btn btn-info btn-sm'>추천</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className='divider'></div>
+                        </>)}
+
+                    </div>
                 </div>
                 <div className='w-[300px] h-full ml-[60px] relative'>
                     <div className='fixed'>
