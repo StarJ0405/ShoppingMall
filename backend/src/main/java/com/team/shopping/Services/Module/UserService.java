@@ -23,6 +23,7 @@ public class UserService {
 
     @Transactional
     public void save(SignupRequestDTO signupRequestDTO) {
+
         userRepository.save(SiteUser.builder()
                 .username(signupRequestDTO.getUsername())
                 .name(signupRequestDTO.getName())
