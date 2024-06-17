@@ -20,7 +20,7 @@ public class PaymentLogResponseDTO {
 
     private List<PaymentProductResponseDTO> paymentProductResponseDTOList;
 
-    private int price;
+    private int totalPrice;
 
     private LocalDateTime paymentDate;
 
@@ -39,12 +39,12 @@ public class PaymentLogResponseDTO {
     private int  trackingNumber;
 
     @Builder
-    public PaymentLogResponseDTO (int price, PaymentLog paymentLog,
+    public PaymentLogResponseDTO (int totalPrice, PaymentLog paymentLog,
                                   List<PaymentProductResponseDTO> paymentProductResponseDTOList) {
         this.paymentLogId = paymentLog.getId();
         this.paymentStatus = paymentLog.getPaymentStatus().getStatus();
         this.recipient = paymentLog.getRecipient();
-        this.price = price;
+        this.totalPrice = totalPrice;
         this.paymentDate = paymentLog.getCreateDate();
         this.paymentProductResponseDTOList = paymentProductResponseDTOList;
         this.phoneNumber = paymentLog.getPhoneNumber();
