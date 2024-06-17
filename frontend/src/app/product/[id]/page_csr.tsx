@@ -224,8 +224,21 @@ export default function Page(props: pageProps) {
                             </div>
                             <div className='divider'></div>
                         </>)}
-
                     </div>
+                    {/* <table>
+                        <thead>
+                            <tr>
+                                <th>문의/답변</th>
+                                <th>작성자</th>
+                                <th>작성일</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td></td>
+                            </tr>
+                        </tbody>
+                    </table> */}
                 </div>
                 <div className='w-[300px] h-full ml-[60px] relative'>
                     <div className='fixed'>
