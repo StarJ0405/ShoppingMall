@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react';
 import Main from '@/app/Global/Layout/MainLayout';
-import { checkWish, deleteWish, getUser, postWish } from '@/app/API/UserAPI';
+import { checkWish, deleteWish, getRecent, getUser, postRecent, postWish } from '@/app/API/UserAPI';
 import DropDown, { Direcion } from '@/app/Global/DropDown';
 import { MonthDate } from '@/app/Global/Method';
 import { getReviews } from '@/app/API/NonUserAPI';
@@ -21,11 +21,15 @@ export default function Page(props: pageProps) {
     const [love, setLove] = useState(false);
     const [focus, setFocus] = useState(0);
     const [reviews, setReviews] = useState(null as unknown as any[]);
+    const [recentList, setRecentList] = useState(null as unknown as any[]);
     //const [product,setProduct] = useState(props.product);
     const product = props.product;
     const seller = props.seller;
     const topCategory = props.topCategory;
     const middleCategory = props.middleCategory;
+    useEffect(() => {
+
+    }, []);
     useEffect(() => {
         if (ACCESS_TOKEN)
             getUser()
@@ -34,12 +38,17 @@ export default function Page(props: pageProps) {
                     checkWish(product.id)
                         .then(r => setLove(r))
                         .catch(e => console.log(e));
+                    postRecent(product.id)
+                        .then(() => {
+                            getRecent()
+                                .then(r => setRecentList(r))
+                                .catch(e => console.log(e));
+                        }).catch(e=>console.log(e));
                 })
                 .catch(e => console.log(e));
     }, [ACCESS_TOKEN]);
     useEffect(() => {
         getReviews(product.id)
-            // .then(r=>setReviews(r))
             .then(r => setReviews(r))
             .catch(e => console.log(e));
     }, []);
@@ -47,10 +56,10 @@ export default function Page(props: pageProps) {
         setFocus(data);
         document.getElementById(String(data))?.scrollIntoView();
     }
-    function getDate(d:any) {
-        console.log(d);
+    function getDate(d: any) {
+        // console.log(d);
         const date = new Date();
-        return date.getFullYear() + '.' + (date.getMonth()+1) + '.' + date.getDate();
+        return date.getFullYear() + '.' + (date.getMonth() + 1) + '.' + date.getDate();
     }
     function Wish() {
         if (love)
@@ -59,7 +68,7 @@ export default function Page(props: pageProps) {
             postWish(product.id);
         setLove(!love);
     }
-    return <Main user={user} >
+    return <Main user={user} recentList={recentList}>
         <div className='flex flex-col w-[1240px] min-h-[670px]'>
             <div className='text-sm flex'>
                 <label className='text-2xl font-bold'>{props.seller.nickname}</label>
@@ -102,7 +111,7 @@ export default function Page(props: pageProps) {
                                     <input type='radio' className='bg-orange-500 mask mask-star-2 mask-half-1' defaultChecked={product?.grade > 4.25 && product?.grade <= 4.75} onClick={e => e.preventDefault()} />
                                     <input type='radio' className='bg-orange-500 mask mask-star-2 mask-half-2' defaultChecked={product?.grade > 4.75} onClick={e => e.preventDefault()} />
                                 </div>
-                                <a onClick={e=>Move(1)} className='ml-2 cursor-pointer'>{product?.reviewSize.toLocaleString("ko-kr")+' 리뷰보기 >'}</a>
+                                <a onClick={e => Move(1)} className='ml-2 cursor-pointer'>{product?.reviewSize.toLocaleString("ko-kr") + ' 리뷰보기 >'}</a>
                             </div>
                             <div className='mt-4 flex justify-between w-full'>
                                 <label className='text-3xl'>{product?.title}</label>

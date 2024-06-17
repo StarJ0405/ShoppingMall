@@ -1,6 +1,6 @@
 'use client'
 import { getCategories } from '@/app/API/NonUserAPI';
-import { getUser, productRegist, saveImage } from '@/app/API/UserAPI';
+import { getRecent, getUser, productRegist, saveImage } from '@/app/API/UserAPI';
 import Main from '@/app/Global/Layout/MainLayout';
 import Modal from '@/app/Global/Modal';
 import { redirect } from 'next/navigation';
@@ -36,7 +36,7 @@ export default function Page() {
     const [selectedOptionList, setSelectedOptionList] = useState([] as any[]);
     const [selectedOption, setSelectedOption] = useState(null as any);
     const [isModalOpen, setISModalOpen] = useState(-1);
-
+    const [recentList, setRecentList] = useState(null as unknown as any[]);
     const quillInstance = useRef<ReactQuill>(null);
 
     const ACCESS_TOKEN = typeof window == 'undefined' ? null : localStorage.getItem('accessToken');
@@ -110,6 +110,9 @@ export default function Page() {
                     setUser(r);
                     setAS(r.phoneNumber);
                     setBrand(r.nickname);
+                    getRecent()
+                        .then(r => setRecentList(r))
+                        .catch(e => console.log(e));
                 })
                 .catch(e => console.log(e));
         else
@@ -144,7 +147,7 @@ export default function Page() {
     function openModal(type: number) {
         setISModalOpen(type);
     }
-    return <Main className='flex justify-center' user={user}>
+    return <Main className='flex justify-center' user={user} recentList={recentList}>
         <div className='w-[1240px] min-h-[750px]'>
             <table>
                 <tbody className='border border-black'>
