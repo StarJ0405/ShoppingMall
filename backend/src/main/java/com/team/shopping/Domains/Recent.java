@@ -1,6 +1,7 @@
 package com.team.shopping.Domains;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -24,4 +25,11 @@ public class Recent {
     private Product product;
 
     private LocalDateTime createDate;
+
+    @Builder
+    public Recent(SiteUser user, Product product) {
+        this.user = user;
+        this.product = product;
+        this.createDate = LocalDateTime.now();
+    }
 }
