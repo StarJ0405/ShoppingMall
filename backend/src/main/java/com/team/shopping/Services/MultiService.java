@@ -46,7 +46,9 @@ public class MultiService {
     private final PaymentProductDetailService paymentProductDetailService;
     private final AddressService addressService;
     private final TagService tagService;
+    private final ReviewService reviewService;
     private final ArticleService articleService;
+    private final RecentService recentService;
 
 
     /**
@@ -187,6 +189,7 @@ public class MultiService {
     /**
      * List
      */
+
     public boolean checkWishList(String username, Long product_id) {
         SiteUser user = userService.get(username);
         Product product = productService.getProduct(product_id);
@@ -206,7 +209,13 @@ public class MultiService {
     @Transactional
     public List<ProductResponseDTO> addToWishList(String username, ProductRequestDTO productRequestDTO) {
         SiteUser user = this.userService.get(username);
+        List<Wish> _wishList = this.wishListService.get(user);
         Product product = this.productService.getProduct(productRequestDTO.getProductId());
+        for (Wish wish : _wishList) {
+            if (wish.getProduct().equals(product)) {
+                throw new IllegalArgumentException("already have to wishList");
+            }
+        }
         this.wishListService.addToWishList(user, product);
         List<Wish> wishList = this.wishListService.get(user);
 
@@ -217,6 +226,9 @@ public class MultiService {
     public List<ProductResponseDTO> deleteToWishList(String username, Long productId) {
         SiteUser user = this.userService.get(username);
         Product product = this.productService.getProduct(productId);
+        if (product == null) {
+            throw new IllegalArgumentException("already deleted or not found product");
+        }
         this.wishListService.deleteToWishList(user, product);
         List<Wish> wishList = this.wishListService.get(user);
         return wishList.stream().map(wish -> getProduct(wish.getProduct())).toList();
@@ -228,7 +240,11 @@ public class MultiService {
         SiteUser user = this.userService.get(username);
         for (Long productId : productIdList) {
             Product product = this.productService.getProduct(productId);
-            this.wishListService.deleteToWishList(user, product);
+            if (product == null) {
+                throw new IllegalArgumentException("already deleted or not found product");
+            } else {
+                this.wishListService.deleteToWishList(user, product);
+            }
         }
         List<Wish> wishList = this.wishListService.get(user);
         return wishList.stream().map(wish -> getProduct(wish.getProduct())).toList();
@@ -246,10 +262,30 @@ public class MultiService {
         List<CartItem> cartItems = this.cartItemService.getCartItemList(user);
 
         for (CartItem item : cartItems) {
+            if (item.getCount() == 0) {
+                this.cartItemDetailService.deleteByCartItem(item);
+                this.cartItemService.delete(item);
+            }
             List<CartItemDetail> cartItemDetails = this.cartItemDetailService.getList(item);
             responseDTOList.add(DTOConverter.toCartResponseDTO(item, cartItemDetails));
         }
         return responseDTOList;
+    }
+
+    @Transactional
+    public List<CartResponseDTO> selectCart(String username, List<Long> cartItemIdList) {
+        SiteUser user = this.userService.get(username);
+        List<CartItem> cartItemList = this.cartItemService.getCartItemList(user);
+        List<CartResponseDTO> cartResponseDTOList = new ArrayList<>();
+
+        // cartItemIdList에 포함된 카트 아이템 ID와 일치하는 카트 아이템들만 선택하여 처리
+        for (CartItem cartItem : cartItemList) {
+            if (cartItemIdList.contains(cartItem.getId())) {
+                List<CartItemDetail> cartItemDetails = this.cartItemDetailService.getList(cartItem);
+                cartResponseDTOList.add(DTOConverter.toCartResponseDTO(cartItem, cartItemDetails));
+            }
+        }
+        return cartResponseDTOList;
     }
 
     @Transactional
@@ -257,17 +293,36 @@ public class MultiService {
         SiteUser user = this.userService.get(username);
         Product product = this.productService.getProduct(cartRequestDTO.getProductId());
         CartItem cartItem = this.cartItemService.getCartItem(user, product);
-        if (product != null)
-            if (cartItem != null) {
-                cartItem.updateCount(cartItem.getCount() + cartRequestDTO.getCount());
-            } else {
-                cartItem = this.cartItemService.addToCart(user, product, cartRequestDTO.getCount());
-                List<Options> options = this.optionsService.getOptionsList(cartRequestDTO.getOptionIdList());
 
-                for (Options option : options) {
-                    this.cartItemDetailService.save(cartItem, option);
+        if (cartItem != null) {
+            cartItem.updateCount(cartItem.getCount() + cartRequestDTO.getCount());
+            this.cartItemService.save(cartItem);
+        } else {
+            cartItem = this.cartItemService.addToCart(user, product, cartRequestDTO.getCount());
+        }
+
+        List<Options> options = this.optionsService.getOptionsList(cartRequestDTO.getOptionIdList());
+        List<CartItemDetail> cartItemDetailList = this.cartItemDetailService.getList(cartItem);
+
+        for (Options option : options) {
+            if (option.getCount() <= 0) {
+                throw new NoSuchElementException("option count 0");
+            }
+
+            boolean found = false;
+            for (CartItemDetail cartItemDetail : cartItemDetailList) {
+                if (cartItemDetail.getOptions().getId().equals(option.getId())) {
+                    cartItemDetail.getOptions().setCount(cartItemDetail.getOptions().getCount());
+                    this.cartItemDetailService.save(cartItemDetail);
+                    found = true;
+                    break;
                 }
             }
+
+            if (!found) {
+                this.cartItemDetailService.saveCartItemDetail(cartItem, option);
+            }
+        }
 
         List<CartResponseDTO> responseDTOList = new ArrayList<>();
         List<CartItem> cartItems = this.cartItemService.getCartItemList(user);
@@ -276,30 +331,31 @@ public class MultiService {
             List<CartItemDetail> cartItemDetails = this.cartItemDetailService.getList(item);
             responseDTOList.add(DTOConverter.toCartResponseDTO(item, cartItemDetails));
         }
+
         return responseDTOList;
     }
-
 
     @Transactional
     public List<CartResponseDTO> updateToCart(String username, CartRequestDTO cartRequestDTO) {
         SiteUser user = this.userService.get(username);
         Product product = this.productService.getProduct(cartRequestDTO.getProductId());
-        if (product != null) {
-            CartItem cartItem = this.cartItemService.getCartItem(user, product);
-            if (cartItem != null) {
-                cartItem.updateCount(cartRequestDTO.getCount());
-                this.cartItemService.save(cartItem);
+        CartItem cartItem = this.cartItemService.getCartItem(user, product);
+        cartItem.updateCount(cartRequestDTO.getCount());
+        if (cartItem.getCount() > product.getRemain()) {
+            throw new IllegalArgumentException("a lot your item count more than product remain");
+        } else {
+            this.cartItemService.save(cartItem);
+
+            List<CartItem> cartItems = this.cartItemService.getCartItemList(user);
+            List<CartResponseDTO> responseDTOList = new ArrayList<>();
+
+            for (CartItem item : cartItems) {
+                List<CartItemDetail> cartItemDetails = this.cartItemDetailService.getList(item);
+                responseDTOList.add(DTOConverter.toCartResponseDTO(item, cartItemDetails));
             }
-        }
-        List<CartItem> cartItems = this.cartItemService.getCartItemList(user);
-        List<CartResponseDTO> responseDTOList = new ArrayList<>();
 
-        for (CartItem item : cartItems) {
-            List<CartItemDetail> cartItemDetails = this.cartItemDetailService.getList(item);
-            responseDTOList.add(DTOConverter.toCartResponseDTO(item, cartItemDetails));
+            return responseDTOList;
         }
-
-        return responseDTOList;
     }
 
 
@@ -308,12 +364,12 @@ public class MultiService {
         SiteUser user = this.userService.get(username);
         Product product = this.productService.getProduct(productId);
         CartItem cartItem = this.cartItemService.getCartItem(user, product);
-        if (product != null)
-            if (cartItem != null) {
-                this.cartItemDetailService.delete(cartItem);
-                this.cartItemService.delete(cartItem);
-            }
-
+        if (cartItem != null) {
+            this.cartItemDetailService.deleteByCartItem(cartItem);
+            this.cartItemService.delete(cartItem);
+        } else {
+            throw new IllegalArgumentException("CartItem not found for user: " + username + " and product: " + productId);
+        }
 
         List<CartResponseDTO> responseDTOList = new ArrayList<>();
         List<CartItem> cartItems = this.cartItemService.getCartItemList(user);
@@ -330,11 +386,12 @@ public class MultiService {
         for (Long productId : productIdList) {
             Product product = this.productService.getProduct(productId);
             CartItem cartItem = this.cartItemService.getCartItem(user, product);
-            if (product != null)
-                if (cartItem != null) {
-                    this.cartItemDetailService.delete(cartItem);
-                    this.cartItemService.delete(cartItem);
-                }
+            if (cartItem != null) {
+                this.cartItemDetailService.deleteByCartItem(cartItem);
+                this.cartItemService.delete(cartItem);
+            } else {
+                throw new IllegalArgumentException("CartItem not found for user: " + username + " and product: " + productId);
+            }
         }
 
         List<CartResponseDTO> responseDTOList = new ArrayList<>();
@@ -386,22 +443,61 @@ public class MultiService {
         SiteUser user = this.userService.get(username);
         Address address = this.addressService.get(paymentLogRequestDTO.getAddressId());
         List<CartItem> cartItemList = this.cartItemService.getList(paymentLogRequestDTO.getCartItemIdList());
-        PaymentLog paymentLog = paymentLogService.save(user, address);
 
+        // 장바구니 항목이 없는 경우 예외 처리
+        if (cartItemList.isEmpty()) {
+            throw new NoSuchElementException("Cart is empty, cannot proceed with payment.");
+        }
+
+        // 상품 재고 및 장바구니 항목 수량 검증
         for (CartItem cartItem : cartItemList) {
-
             Product product = cartItem.getProduct();
-            PaymentProduct paymentProduct = this.paymentProductService.save(paymentLog, product, cartItem);
-            List<CartItemDetail> cartItemDetails = this.cartItemDetailService.getList(cartItem);
 
-            for (CartItemDetail cartItemDetail : cartItemDetails) {
+            if (product.getRemain() <= 0 || product.getRemain() - cartItem.getCount() < 0) {
+                cartItem.setCount(product.getRemain());
+                this.cartItemService.save(cartItem);
+                throw new IllegalArgumentException("This product remain is empty");
+            }
 
-                Options option = cartItemDetail.getOptions();
-                this.paymentProductDetailService.save(paymentProduct, option);
+            if (cartItem.getCount() == 0) {
+                throw new NoSuchElementException("Please set this product count");
             }
         }
 
-        // 새로 추가된 결제 로그 정보를 이용하여 PaymentLogResponseDTO 객체를 만들어서 반환
+        // 결제 로그 생성
+        PaymentLog paymentLog = this.paymentLogService.save(user, address);
+
+        for (CartItem cartItem : cartItemList) {
+            Product product = cartItem.getProduct();
+
+            // 결제 상품 생성 및 저장
+            PaymentProduct paymentProduct = this.paymentProductService.save(paymentLog, product, cartItem);
+
+            // 상품 재고 감소
+            product.setRemain(product.getRemain() - paymentProduct.getCount());
+            this.productService.save(product);
+
+            // 장바구니 상세 항목 처리
+            List<CartItemDetail> cartItemDetails = this.cartItemDetailService.getList(cartItem);
+            for (CartItemDetail cartItemDetail : cartItemDetails) {
+                Options option = cartItemDetail.getOptions();
+
+                // 결제 상품 상세 항목 생성 및 저장
+                PaymentProductDetail paymentProductDetail = this.paymentProductDetailService.save(paymentProduct, option);
+
+                // 옵션 재고 감소
+                option.setCount(option.getCount() - paymentProductDetail.getOptionCount());
+                this.optionsService.save(option);
+
+                // 장바구니 상세 항목 삭제
+                this.cartItemDetailService.delete(cartItemDetail);
+            }
+
+            // 장바구니 항목 삭제
+            this.cartItemService.delete(cartItem);
+        }
+
+        // 결제 상품 리스트 가져오기
         List<PaymentProduct> paymentProductList = this.paymentProductService.getList(paymentLog);
         List<PaymentProductResponseDTO> paymentProductResponseDTOList = new ArrayList<>();
         for (PaymentProduct paymentProduct : paymentProductList) {
@@ -409,9 +505,8 @@ public class MultiService {
             PaymentProductResponseDTO paymentProductResponseDTO = DTOConverter.toPaymentProductResponseDTO(paymentProduct, paymentProductDetailList);
             paymentProductResponseDTOList.add(paymentProductResponseDTO);
         }
-        PaymentLogResponseDTO paymentLogResponseDTO = DTOConverter.toPaymentLogResponseDTO(paymentLog, paymentProductResponseDTOList);
 
-        return paymentLogResponseDTO;
+        return DTOConverter.toPaymentLogResponseDTO(paymentLog, paymentProductResponseDTOList);
     }
 
 
@@ -429,7 +524,7 @@ public class MultiService {
             throw new IllegalArgumentException("user 권한은 상품을 저장할 수 없습니다.");
         }
         Category category = this.categoryService.get(requestDTO.getCategoryId());
-        Product product = this.productService.save(requestDTO, user, category);
+        Product product = this.productService.saveProduct(requestDTO, user, category);
         if (requestDTO.getTagList() != null) {
             for (String tagName : requestDTO.getTagList()) {
                 tagService.save(tagName, product);
@@ -439,7 +534,7 @@ public class MultiService {
             for (OptionListRequestDTO optionListRequestDTO : requestDTO.getOptionLists()) {
                 OptionList optionList = optionListService.save(optionListRequestDTO.getName(), product);
                 for (OptionRequestDTO optionRequestDTO : optionListRequestDTO.getChild()) {
-                    optionsService.save(optionRequestDTO.getCount(), optionRequestDTO.getName(), optionRequestDTO.getPrice(), optionList);
+                    optionsService.saveOption(optionRequestDTO.getCount(), optionRequestDTO.getName(), optionRequestDTO.getPrice(), optionList);
                 }
             }
         }
@@ -469,9 +564,29 @@ public class MultiService {
     private ProductResponseDTO getProduct(Product product) {
         List<String> tagList = tagService.findByProduct(product);
         Optional<FileSystem> _fileSystem = fileSystemService.get(ImageKey.PRODUCT.getKey(product.getId().toString()));
+        List<Review> reviewList = this.reviewService.getList(product);
         String url = _fileSystem.map(FileSystem::getV).orElse(null);
 
-        return ProductResponseDTO.builder().product(product).tagList(tagList).url(url).build();
+        Double totalGrade = 0.0;
+        for (Review review : reviewList) {
+            totalGrade += review.getGrade();
+        }
+        Double averageGrade = totalGrade / reviewList.size();
+
+        if (averageGrade <= 0) {
+            averageGrade = 0.0;
+        } else {
+            averageGrade = Math.round(averageGrade * 10) / 10.0;
+        }
+
+        return ProductResponseDTO
+                .builder()
+                .product(product)
+                .tagList(tagList)
+                .url(url)
+                .reviewList(reviewList)
+                .averageGrade(averageGrade)
+                .build();
     }
 
     @Transactional
@@ -479,11 +594,54 @@ public class MultiService {
         List<Product> productList = productService.getProductList();
         List<ProductResponseDTO> responseDTOList = new ArrayList<>();
         for (Product product : productList) {
-            ProductResponseDTO productResponseDTO = getProduct(product);
+            ProductResponseDTO productResponseDTO = this.getProduct(product);
             responseDTOList.add(productResponseDTO);
         }
         return responseDTOList;
     }
+
+    public List<ProductResponseDTO> getBestList() {
+        List<Product> bestList = new ArrayList<>();
+        List<Product> productList = this.productService.getProductList();
+        Map<Product, Double> productAverageGrades = new HashMap<>();
+
+        // 제품별 평균 평점 계산하여 맵에 담기
+        for (Product product : productList) {
+            List<Review> reviewList = this.reviewService.getList(product);
+            double averageGrade = 0.0;
+            if (!reviewList.isEmpty()) {
+                double totalGrade = 0.0;
+                for (Review review : reviewList) {
+                    totalGrade += review.getGrade();
+                }
+                averageGrade = totalGrade / reviewList.size();
+            }
+            productAverageGrades.put(product, averageGrade);
+        }
+
+        // 평균 평점으로 정렬하여 상위 20개의 제품을 선택
+        List<Map.Entry<Product, Double>> sortedEntries = new ArrayList<>(productAverageGrades.entrySet());
+        sortedEntries.sort((entry1, entry2) -> Double.compare(entry2.getValue(), entry1.getValue())); // 내림차순 정렬
+
+        int count = 0;
+        for (Map.Entry<Product, Double> entry : sortedEntries) {
+            if (count >= 15) {
+                break;
+            }
+            bestList.add(entry.getKey());
+            count++;
+        }
+
+        // ProductResponseDTO로 변환하여 반환
+        List<ProductResponseDTO> responseDTOList = new ArrayList<>();
+        for (Product product : bestList) {
+
+            ProductResponseDTO productResponseDTO = this.getProduct(product);
+            responseDTOList.add(productResponseDTO);
+        }
+        return responseDTOList;
+    }
+
 
     @Transactional
     public void productQASave(String username, ProductQARequestDTO requestDTO) {
@@ -505,6 +663,7 @@ public class MultiService {
     /**
      * Image
      */
+
     @Transactional
     public String fileMove(String url, String newUrl, String k) {
         try {
@@ -561,6 +720,7 @@ public class MultiService {
         }
     }
 
+
     @Transactional
     public void deleteCategory(String username, Long id) {
         SiteUser siteUser = userService.get(username);
@@ -604,31 +764,110 @@ public class MultiService {
         return CategoryResponseDTO.builder().id(parentCategory.getId()).parent_name(parentCategory.getParent() != null ? parentCategory.getParent().getName() : null).name(parentCategory.getName()).categoryResponseDTOList(childrenDTOList).build();
     }
 
-    @Transactional
-    public ArticleResponseDTO saveArticle(String username, ArticleRequestDTO articleRequestDTO) {
-        SiteUser siteUser = this.userService.get(username);
-        Article article = this.articleService.save(articleRequestDTO, siteUser);
+    /**
+     * Review
+     */
 
-        return ArticleResponseDTO.builder()
-                .article(article)
-                .siteUser(siteUser)
-                .build();
+    @Transactional
+    public List<ReviewResponseDTO> getReviewList(Long productId) {
+        List<ReviewResponseDTO> reviewResponseDTOList = new ArrayList<>();
+
+        Product product = this.productService.getProduct(productId);
+        List<Review> reviewList = this.reviewService.getList(product);
+
+        for (Review review : reviewList) {
+            ReviewResponseDTO reviewResponseDTO = ReviewResponseDTO.builder()
+                    .user(review.getAuthor())
+                    .review(review)
+                    .build();
+            reviewResponseDTOList.add(reviewResponseDTO);
+        }
+        return reviewResponseDTOList;
     }
 
     @Transactional
-    public ArticleResponseDTO updateArticle(String username, ArticleRequestDTO articleRequestDTO) {
-        SiteUser user = userService.get(username);
-        Article _article = this.articleService.get(articleRequestDTO.getArticleId());
-        if (!user.getUsername().equals(_article.getAuthor().getUsername()) || !user.getRole().equals(UserRole.ADMIN)) {
-            throw new IllegalArgumentException("not role");
-        } else {
-            Article article = this.articleService.update(_article, articleRequestDTO);
-            return ArticleResponseDTO.builder()
-                    .article(article)
-                    .siteUser(article.getAuthor())
+    public List<ReviewResponseDTO> addToReview(String username, ReviewRequestDTO reviewRequestDTO) {
+        List<ReviewResponseDTO> reviewResponseDTOList = new ArrayList<>();
+        SiteUser user = this.userService.get(username);
+        Product product = this.productService.getProduct(reviewRequestDTO.getProductId());
+
+        // 사용자의 구매 기록을 가져옴
+        List<PaymentLog> paymentLogList = this.paymentLogService.get(user);
+        boolean hasPurchased = false;
+
+        for (PaymentLog paymentLog : paymentLogList) {
+            List<PaymentProduct> paymentProductList = this.paymentProductService.getList(paymentLog);
+            for (PaymentProduct paymentProduct : paymentProductList) {
+                if (Objects.equals(paymentProduct.getProductId(), product.getId())) {
+                    hasPurchased = true;
+                    break;
+                }
+            }
+            if (hasPurchased) {
+                break;
+            }
+        }
+
+        // 구매 기록이 없는 경우 IllegalArgumentException 발생
+        if (!hasPurchased) {
+            throw new NoSuchElementException("your paymentLogs have not this product");
+        }
+
+        // 구매 기록이 있는 경우에만 리뷰를 저장
+        this.reviewService.save(user, reviewRequestDTO, product);
+
+        // 리뷰 리스트를 가져와서 DTO로 변환하여 반환
+        List<Review> reviewList = this.reviewService.getList(product);
+        for (Review review : reviewList) {
+            ReviewResponseDTO reviewResponseDTO = ReviewResponseDTO.builder()
+                    .review(review)
+                    .user(user)
                     .build();
+            reviewResponseDTOList.add(reviewResponseDTO);
+        }
+        return reviewResponseDTOList;
+    }
+
+    @Transactional
+    public void deleteReview(String username, Long reviewId) {
+        Review review = this.reviewService.get(reviewId);
+        SiteUser user = this.userService.get(username);
+        if (review == null) {
+            throw new NoSuchElementException("not found review");
+        }
+        if (!review.getAuthor().equals(user) && !user.getRole().equals(UserRole.ADMIN)) {
+            throw new IllegalArgumentException("you have not auth");
+        } else {
+            this.reviewService.delete(review);
         }
     }
+
+    @Transactional
+    public List<ReviewResponseDTO> updateReview(String username, ReviewRequestDTO reviewRequestDTO) {
+        List<ReviewResponseDTO> reviewResponseDTOList = new ArrayList<>();
+
+        SiteUser user = this.userService.get(username);
+        Review review = this.reviewService.get(reviewRequestDTO.getReviewId());
+
+        if (review.getAuthor() != user && !user.getRole().equals(UserRole.ADMIN)) {
+            throw new IllegalArgumentException("not yours");
+        } else {
+            this.reviewService.update(review, reviewRequestDTO);
+            List<Review> reviewList = this.reviewService.getList(review.getProduct());
+            for (Review _review : reviewList) {
+                ReviewResponseDTO reviewResponseDTO = ReviewResponseDTO.builder()
+                        .review(_review)
+                        .user(user)
+                        .build();
+                reviewResponseDTOList.add(reviewResponseDTO);
+            }
+        }
+        return reviewResponseDTOList;
+    }
+
+    /**
+     * article
+     */
 
     @Transactional
     public void deleteArticle(String username, Long articleId) {
@@ -657,7 +896,64 @@ public class MultiService {
 
         return articleResponseDTOList;
     }
-    //
+
+    @Transactional
+    public ArticleResponseDTO saveArticle(String username, ArticleRequestDTO articleRequestDTO) {
+        SiteUser siteUser = this.userService.get(username);
+        Article article = this.articleService.save(articleRequestDTO, siteUser);
+
+        return ArticleResponseDTO.builder()
+                .article(article)
+                .siteUser(siteUser)
+                .build();
+    }
+
+    @Transactional
+    public ArticleResponseDTO updateArticle(String username, ArticleRequestDTO articleRequestDTO) {
+        SiteUser user = userService.get(username);
+        Article _article = this.articleService.get(articleRequestDTO.getArticleId());
+        if (!user.getUsername().equals(_article.getAuthor().getUsername()) || !user.getRole().equals(UserRole.ADMIN)) {
+            throw new IllegalArgumentException("not role");
+        } else {
+            Article article = this.articleService.update(_article, articleRequestDTO);
+            return ArticleResponseDTO.builder()
+                    .article(article)
+                    .siteUser(article.getAuthor())
+                    .build();
+        }
+    }
+
+    /**
+     * Recent
+     */
+    @Transactional
+    public void saveRecent(Long productId, String username) {
+        SiteUser user = userService.get(username);
+        Product product = productService.getProduct(productId);
+        if (user != null && product != null) {
+            Optional<Recent> _recent = recentService.checkRecent(product, user);
+            if (_recent.isPresent())
+                this.recentService.delete(_recent.get());
+            List<Recent> recentList = recentService.getRecent(user);
+            if(recentList.size() >= 10){
+                Recent recent = recentList.get(9);
+                this.recentService.delete(recent);
+            }
+            recentService.save(product, user);
+        }
+    }
+
+    @Transactional
+    public List<ProductResponseDTO> getReentList(String username) {
+        SiteUser user = userService.get(username);
+        List<Recent> recentList = recentService.getRecent(user);
+        List<ProductResponseDTO> responseDTOList = new ArrayList<>();
+        for (Recent recent : recentList) {
+            ProductResponseDTO productResponseDTO = getProduct(recent.getProduct().getId());
+            responseDTOList.add(productResponseDTO);
+        }
+        return responseDTOList;
+    }
 }
 
 

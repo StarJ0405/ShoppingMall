@@ -33,6 +33,10 @@ public class PaymentLogService {
     }
 
     public List<PaymentLog> get (SiteUser order) {
-        return this.paymentLogRepository.findByOrder(order);
+        return this.paymentLogRepository.findByOrderOrderByCreateDateDesc(order);
+    }
+
+    public void delete (PaymentLog paymentLog) {
+        this.paymentLogRepository.delete(paymentLog);
     }
 }

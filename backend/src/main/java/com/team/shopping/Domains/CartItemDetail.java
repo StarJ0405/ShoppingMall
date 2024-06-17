@@ -27,4 +27,6 @@ public class CartItemDetail {
         this.cartItem = cartItem;
         this.options = options;
     }
+
+
 }

@@ -32,12 +32,8 @@ public class ProductController {
 
     @GetMapping
     public ResponseEntity<?> getProduct(@RequestHeader("ProductId") Long productId) {
-        try {
-            ProductResponseDTO productResponseDTO = multiService.getProduct(productId);
-            return ResponseEntity.status(HttpStatus.OK).body(productResponseDTO);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
+        ProductResponseDTO productResponseDTO = multiService.getProduct(productId);
+        return ResponseEntity.status(HttpStatus.OK).body(productResponseDTO);
     }
 
     @GetMapping("/list")
@@ -47,6 +43,16 @@ public class ProductController {
             return ResponseEntity.status(HttpStatus.OK).body(productResponseDTOList);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("not productList");
+        }
+    }
+
+    @GetMapping("/best")
+    public ResponseEntity<?> bestProductList() {
+        try {
+            List<ProductResponseDTO> productResponseDTOList = multiService.getBestList();
+            return ResponseEntity.status(HttpStatus.OK).body(productResponseDTOList);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("베스트리스트 찾을 수 없음");
         }
     }
 

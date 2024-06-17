@@ -17,16 +17,18 @@ public class WishListService {
     private final WishListRepository wishListRepository;
 
     public List<Wish> get(SiteUser user) {
-        return this.wishListRepository.findByUser(user);
+        return this.wishListRepository.findByUserOrderByCreateDateDesc(user);
+    }
+
+
+    public Wish save (Wish wish) {
+        return this.wishListRepository.save(wish);
     }
 
     public Optional<Wish> get(SiteUser user, Product product) {
         return Optional.ofNullable(this.wishListRepository.findByUserAndProduct(user, product));
     }
 
-    public Wish save(Wish wishList) {
-        return this.wishListRepository.save(wishList);
-    }
 
     public Wish addToWishList(SiteUser user, Product product) {
         return wishListRepository.save(Wish.builder()

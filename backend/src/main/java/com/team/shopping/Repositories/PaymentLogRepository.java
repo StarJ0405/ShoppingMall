@@ -8,5 +8,5 @@ import java.util.List;
 
 public interface PaymentLogRepository extends JpaRepository<PaymentLog, Long> {
 
-    List<PaymentLog> findByOrder (SiteUser order);
+    List<PaymentLog> findByOrderOrderByCreateDateDesc(SiteUser order);
 }

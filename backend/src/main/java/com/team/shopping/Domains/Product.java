@@ -79,4 +79,5 @@ public class Product {
         this.brand = brand;
         this.createDate = LocalDateTime.now();
     }
+
 }

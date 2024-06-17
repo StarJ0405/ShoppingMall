@@ -21,20 +21,32 @@ public class CartItemService {
     }
 
     public List<CartItem> getCartItemList (SiteUser user) {
-        return this.cartItemRepository.findAllByUser(user);
+        return this.cartItemRepository.findAllByUserOrderByCreateDateDesc(user);
     }
 
     public CartItem addToCart(SiteUser user, Product product, int count) {
-        return this.cartItemRepository.save(CartItem.builder()
+        if (count <= 0) {
+            count = 1;
+        }
+        if (product.getRemain() - count <= -1) {
+            throw new IllegalArgumentException("this product remain is not enough");
+        }
+        else {
+            return this.cartItemRepository.save(CartItem.builder()
                         .count(count)
                         .createDate(LocalDateTime.now())
                         .product(product)
                         .user(user)
                 .build());
+        }
     }
 
     public CartItem save (CartItem cartItem) {
-        return this.cartItemRepository.save(cartItem);
+        if (cartItem.getProduct().getRemain() == 0 || cartItem.getProduct().getRemain() < cartItem.getCount()) {
+            throw new IllegalArgumentException("this product remain is not enough");
+        }else {
+            return this.cartItemRepository.save(cartItem);
+        }
     }
 
     public CartItem getCartItem(SiteUser user, Product product) {
