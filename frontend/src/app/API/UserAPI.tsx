@@ -30,10 +30,6 @@ UserApi.interceptors.response.use((response) => {
             localStorage.clear();
             window.location.href = '/account/login';
             return;
-        } else if (error.response.status === 500) {
-            localStorage.clear();
-            window.location.href = '/account/login';
-            return;
         }
     return Promise.reject(error);
 });
@@ -50,14 +46,14 @@ export const getUser = async () => {
     const response = await UserApi.get('/api/user');
     return response.data;
 }
-interface UpdateProps{
-    name:string,
-    email:string,
-    phoneNumber:string,
-    nickname:string,
-    password:string,
-    newPassword:string,
-    url:string
+interface UpdateProps {
+    name: string,
+    email: string,
+    phoneNumber: string,
+    nickname: string,
+    password: string,
+    newPassword: string,
+    url: string
 }
 export const updateUser = async (data: UpdateProps) => {
     const response = await UserApi.put('/api/user', data);
@@ -70,15 +66,24 @@ export const updateUserPassword = async (data: UpdateProps) => {
 export const deleteUser = async () => {
     await UserApi.delete('/api/user');
 }
+
+export const checkWish = async (data: number) => {
+    const response = await UserApi.get('/api/user/wishList/check', { headers: { 'ProductId': data } });
+    return response.data;
+}
+export const postWish = async (data: number) => {
+    const response = await UserApi.post('/api/user/wishList', { productId: data });
+    return response.data;
+}
 export const getWishList = async () => {
     const response = await UserApi.get('/api/user/wishList');
     return response.data;
 }
-export const deleteWishList = async (data: number) => {
+export const deleteWish = async (data: number) => {
     const response = await UserApi.delete('/api/user/wishList', { headers: { 'productId': data } });
     return response.data;
 }
-export const deleteWishListMultiple = async (data: any[]) => {
+export const deleteWishList = async (data: any[]) => {
     const response = await UserApi.delete('/api/user/wishList/Multi', { headers: { 'productIdList': data } });
     return response.data;
 }
@@ -97,16 +102,16 @@ interface productProps {
     a_s: string,
     brand: string,
     productTagList: string[],
-    url:string,
-    optionLists:any
+    url: string,
+    optionLists: any
 }
 export const productRegist = async (data: productProps) => {
     const response = await UserApi.post('/api/product', data);
     return response.data;
 }
 
-export const saveImage = async(data:any)=>{
-    const response = await UserApi.post('/api/image', data,{
+export const saveImage = async (data: any) => {
+    const response = await UserApi.post('/api/image', data, {
         headers: {
             'Content-Type': 'multipart/form-data'
         }

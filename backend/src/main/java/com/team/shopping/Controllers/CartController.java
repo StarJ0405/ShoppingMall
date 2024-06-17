@@ -19,7 +19,7 @@ public class CartController {
     private final MultiService multiService;
 
     @GetMapping("/cartList")
-    public ResponseEntity<?> cartList (@RequestHeader("Authorization") String accessToken) {
+    public ResponseEntity<?> cartList(@RequestHeader("Authorization") String accessToken) {
         TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
         if (tokenRecord.isOK()) {
             String username = tokenRecord.username();
@@ -42,8 +42,8 @@ public class CartController {
     }
 
     @PostMapping("/cartList")
-    public ResponseEntity<?> addToCartList (@RequestHeader("Authorization") String accessToken,
-                                            @RequestBody CartRequestDTO cartRequestDTO) {
+    public ResponseEntity<?> addToCartList(@RequestHeader("Authorization") String accessToken,
+                                           @RequestBody CartRequestDTO cartRequestDTO) {
         TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
         try {
             if (tokenRecord.isOK()) {
@@ -59,8 +59,8 @@ public class CartController {
     }
 
     @PutMapping("/cartList")
-    public ResponseEntity<?> updateToCart (@RequestHeader("Authorization") String accessToken,
-                                           @RequestBody CartRequestDTO cartRequestDTO) {
+    public ResponseEntity<?> updateToCart(@RequestHeader("Authorization") String accessToken,
+                                          @RequestBody CartRequestDTO cartRequestDTO) {
         TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
         try {
             if (tokenRecord.isOK()) {
@@ -79,7 +79,6 @@ public class CartController {
     @DeleteMapping("/cartList")
     public ResponseEntity<?> deleteToCartList (@RequestHeader("Authorization") String accessToken,
                                                @RequestHeader("productId") Long productId) {
-
         TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
         try {
             if (tokenRecord.isOK()) {
@@ -94,8 +93,8 @@ public class CartController {
     }
 
     @DeleteMapping("/cartList/multi")
-    public ResponseEntity<?> deleteMultiToCartList (@RequestHeader("Authorization") String accessToken,
-                                                    @RequestHeader("productIdList") List<Long> productIdList) {
+    public ResponseEntity<?> deleteMultiToCartList(@RequestHeader("Authorization") String accessToken,
+                                                   @RequestHeader("productIdList") List<Long> productIdList) {
         TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
         try {
             if (tokenRecord.isOK()) {

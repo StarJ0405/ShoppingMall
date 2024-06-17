@@ -19,8 +19,6 @@ public class QFileSystem extends EntityPathBase<FileSystem> {
 
     public static final QFileSystem fileSystem = new QFileSystem("fileSystem");
 
-    public final NumberPath<Long> id = createNumber("id", Long.class);
-
     public final StringPath k = createString("k");
 
     public final StringPath v = createString("v");

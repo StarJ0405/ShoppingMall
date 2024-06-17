@@ -1,7 +1,10 @@
 package com.team.shopping.Controllers;
 
-import com.team.shopping.DTOs.*;
+import com.team.shopping.DTOs.SignupRequestDTO;
+import com.team.shopping.DTOs.UserRequestDTO;
+import com.team.shopping.DTOs.UserResponseDTO;
 import com.team.shopping.Exceptions.DataDuplicateException;
+import com.team.shopping.Exceptions.DataNotFoundException;
 import com.team.shopping.Records.TokenRecord;
 import com.team.shopping.Services.Module.UserService;
 import com.team.shopping.Services.MultiService;
@@ -9,8 +12,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 
 @RestController
@@ -49,42 +50,60 @@ public class UserController {
 
     @GetMapping
     public ResponseEntity<?> profile(@RequestHeader("Authorization") String accessToken) {
-        TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
-        if (tokenRecord.isOK()) {
-            String username = tokenRecord.username();
-            // 기능
-            UserResponseDTO userResponseDTO = this.multiService.getProfile(username);
-            return tokenRecord.getResponseEntity(userResponseDTO);
+        try {
+            TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
+            if (tokenRecord.isOK()) {
+                String username = tokenRecord.username();
+                UserResponseDTO userResponseDTO = this.multiService.getProfile(username);
+                return tokenRecord.getResponseEntity(userResponseDTO);
+            }
+            return tokenRecord.getResponseEntity();
+        } catch (DataNotFoundException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
         }
-        return tokenRecord.getResponseEntity();
     }
-    
+
+    @GetMapping("/who")
+    public ResponseEntity<?> who(@RequestHeader("Username") String username) {
+        try {
+            UserResponseDTO userResponseDTO = this.multiService.getProfile(username);
+            return ResponseEntity.status(HttpStatus.OK).body(userResponseDTO);
+        } catch (DataNotFoundException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+        }
+    }
+
 
     @PutMapping
-    public ResponseEntity<?> updateProfile(@RequestHeader("Authorization") String accessToken, 
-                                           @RequestBody UserRequestDTO userRequestDTO) {
+    public ResponseEntity<?> updateProfile(@RequestHeader("Authorization") String accessToken, @RequestBody UserRequestDTO userRequestDTO) {
+        try {
+            TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
+            if (tokenRecord.isOK()) {
+                String username = tokenRecord.username();
+                UserResponseDTO userResponseDTO = multiService.updateProfile(username, userRequestDTO);
+                return tokenRecord.getResponseEntity(userResponseDTO);
 
-        TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
-        if (tokenRecord.isOK()) {
-            String username = tokenRecord.username();
-            UserResponseDTO userResponseDTO = multiService.updateProfile(username,userRequestDTO);
-
-            return tokenRecord.getResponseEntity(userResponseDTO);
+            }
+            return tokenRecord.getResponseEntity();
+        } catch (DataDuplicateException ex) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
         }
-        return tokenRecord.getResponseEntity();
 
     }
 
     @PutMapping("/password")
-    public ResponseEntity<?> updatePassword(@RequestHeader("Authorization") String accessToken , @RequestBody UserRequestDTO userRequestDTO){
-
-        TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
-        if(tokenRecord.isOK()){
-            String username = tokenRecord.username();
-            UserResponseDTO userResponseDTO = multiService.updatePassword(username,userRequestDTO);
-            return tokenRecord.getResponseEntity(userResponseDTO);
+    public ResponseEntity<?> updatePassword(@RequestHeader("Authorization") String accessToken, @RequestBody UserRequestDTO userRequestDTO) {
+        try {
+            TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
+            if (tokenRecord.isOK()) {
+                String username = tokenRecord.username();
+                UserResponseDTO userResponseDTO = multiService.updatePassword(username, userRequestDTO);
+                return tokenRecord.getResponseEntity(userResponseDTO);
+            }
+            return tokenRecord.getResponseEntity();
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
         }
-        return tokenRecord.getResponseEntity();
-    }
 
+    }
 }

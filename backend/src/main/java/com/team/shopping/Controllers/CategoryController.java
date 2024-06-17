@@ -39,29 +39,39 @@ public class CategoryController {
     @PutMapping
     public ResponseEntity<?> updateCategory(@RequestHeader("Authorization") String accessToken,
                                             @RequestBody CategoryRequestDTO categoryRequestDTO) {
-        TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
-        if (tokenRecord.isOK()) {
-            String username = tokenRecord.username();
-            multiService.updateCategory(username, categoryRequestDTO);
-            return tokenRecord.getResponseEntity("문제 없음");
+        try {
+            TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
+            if (tokenRecord.isOK()) {
+                String username = tokenRecord.username();
+                multiService.updateCategory(username, categoryRequestDTO);
+                return tokenRecord.getResponseEntity("문제 없음");
+            }
+            return tokenRecord.getResponseEntity();
+        } catch (DataDuplicateException ex) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
         }
-        return tokenRecord.getResponseEntity();
     }
 
     @DeleteMapping
     public ResponseEntity<?> deleteCategory(@RequestHeader("Authorization") String accessToken,
-                                            @RequestHeader Long categoryId ){
-        TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
-        if (tokenRecord.isOK()) {
-            try {multiService.deleteCategory(tokenRecord.username(), categoryId);
-                return ResponseEntity.ok("카테고리가 성공적으로 삭제되었습니다.");
-            } catch (IllegalArgumentException ex) {
-                return ResponseEntity.status(404).body(ex.getMessage());
-            } catch (Exception ex) {
-                return ResponseEntity.status(500).body("카테고리 삭제 중 오류가 발생했습니다.");
+                                            @RequestHeader Long categoryId) {
+        try {
+
+            TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
+            if (tokenRecord.isOK()) {
+                try {
+                    multiService.deleteCategory(tokenRecord.username(), categoryId);
+                    return ResponseEntity.ok("카테고리가 성공적으로 삭제되었습니다.");
+                } catch (IllegalArgumentException ex) {
+                    return ResponseEntity.status(404).body(ex.getMessage());
+                } catch (Exception ex) {
+                    return ResponseEntity.status(500).body("카테고리 삭제 중 오류가 발생했습니다.");
+                }
             }
+            return tokenRecord.getResponseEntity();
+        } catch (DataDuplicateException ex) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
         }
-        return tokenRecord.getResponseEntity();
     }
 
     @GetMapping
@@ -73,11 +83,6 @@ public class CategoryController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
-
-
-
-
-
 
 
 }

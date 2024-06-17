@@ -41,7 +41,6 @@ export default function Page() {
         getCategories()
             .then(r => setCategories(r))
             .catch(e => console.log(e));
-        const test = [];
     }, []);
     useEffect(() => {
         if (ACCESS_TOKEN)
@@ -56,10 +55,11 @@ export default function Page() {
             redirect('/account/login');
     }, [ACCESS_TOKEN]);
     function Regist() {
-        if (category != null)
+        if (category != -1)
             productRegist({ categoryId: category, price: price, description: simpleDescription, detail: detail, dateLimit: dateLimit, remain: remain, title: title, delivery: delivery, address: address, receipt: receipt, a_s: a_s, brand: brand, productTagList: tags, url: url, optionLists: options })
                 .then(() => window.location.href = '/')
                 .catch(e => console.log(e))
+        else alert('카테고리를 선택해주세요.');
     }
     function Change(file: any) {
         const formData = new FormData();
@@ -219,7 +219,7 @@ export default function Page() {
                     </tr>
                     <tr>
                         <th className='border border-black'>상세설명</th>
-                        <td className='px-2 flex pb-[50px]'>
+                        <td className='px-2 flex pb-[50px] min-h-[350px]'>
                             <ReactQuill className='min-h-[300px] w-full' placeholder='상세 설명 작성..' onChange={e => setDetail(e)} />
                         </td>
                     </tr>

@@ -16,6 +16,8 @@ public class ProductResponseDTO {
 
     private Long id;
     private String authorUsername;
+    private String topCategoryName;
+    private String middleCategoryName;
     private String categoryName;
     private int price;
     private String description;
@@ -31,11 +33,14 @@ public class ProductResponseDTO {
     private List<String> tagList;
     private LocalDateTime createDate;
     private LocalDateTime modifyDate;
+    private String url;
 
     @Builder
-    public ProductResponseDTO(Product product, List<String> tagList) {
+    public ProductResponseDTO(Product product, List<String> tagList, String url) {
         this.id = product.getId();
         this.authorUsername = product.getSeller().getUsername();
+        this.topCategoryName = product.getCategory().getParent() != null && product.getCategory().getParent().getParent() != null ? product.getCategory().getParent().getParent().getName() : null;
+        this.middleCategoryName = product.getCategory().getParent() != null ? product.getCategory().getParent().getName() : null;
         this.categoryName = product.getCategory().getName();
         this.price = product.getPrice();
         this.description = product.getDescription();
@@ -51,5 +56,6 @@ public class ProductResponseDTO {
         this.createDate = product.getCreateDate();
         this.modifyDate = product.getModifyDate();
         this.tagList = tagList;
+        this.url = url;
     }
 }

@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -19,9 +20,15 @@ public class WishListService {
         return this.wishListRepository.findByUserOrderByCreateDateDesc(user);
     }
 
+
     public Wish save (Wish wish) {
         return this.wishListRepository.save(wish);
     }
+
+    public Optional<Wish> get(SiteUser user, Product product) {
+        return Optional.ofNullable(this.wishListRepository.findByUserAndProduct(user, product));
+    }
+
 
     public Wish addToWishList(SiteUser user, Product product) {
         return wishListRepository.save(Wish.builder()

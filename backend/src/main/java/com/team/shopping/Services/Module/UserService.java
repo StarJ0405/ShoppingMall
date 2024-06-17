@@ -7,7 +7,6 @@ import com.team.shopping.Domains.SiteUser;
 import com.team.shopping.Enums.Gender;
 import com.team.shopping.Enums.UserRole;
 import com.team.shopping.Exceptions.DataDuplicateException;
-import com.team.shopping.Exceptions.DataNotFoundException;
 import com.team.shopping.Repositories.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -24,18 +23,7 @@ public class UserService {
 
     @Transactional
     public void save(SignupRequestDTO signupRequestDTO) {
-        userRepository.save(SiteUser
-                .builder()
-                .username(signupRequestDTO.getUsername())
-                .name(signupRequestDTO.getName())
-                .password(passwordEncoder.encode(signupRequestDTO.getPassword()))
-                .nickname(signupRequestDTO.getNickname())
-                .email(signupRequestDTO.getEmail())
-                .gender(Gender.values()[signupRequestDTO.getGender()])
-                .role(UserRole.values()[signupRequestDTO.getRole()])
-                .birthday(signupRequestDTO.getBirthday())
-                .phoneNumber(signupRequestDTO.getPhoneNumber())
-                .build());
+        userRepository.save(SiteUser.builder().username(signupRequestDTO.getUsername()).name(signupRequestDTO.getName()).password(passwordEncoder.encode(signupRequestDTO.getPassword())).nickname(signupRequestDTO.getNickname()).email(signupRequestDTO.getEmail()).gender(Gender.values()[signupRequestDTO.getGender()]).role(UserRole.values()[signupRequestDTO.getRole()]).birthday(signupRequestDTO.getBirthday()).phoneNumber(signupRequestDTO.getPhoneNumber()).build());
     }
 
     @Transactional
@@ -61,7 +49,7 @@ public class UserService {
 
     @Transactional
     public SiteUser get(String value) throws IllegalArgumentException {
-        return this.userRepository.findById(value).orElseThrow(() -> new DataNotFoundException("데이터가 존재하지 않습니다"));
+        return this.userRepository.findById(value).orElse(null);
     }
 
     public Optional<SiteUser> getOptional(String value) {
@@ -73,14 +61,14 @@ public class UserService {
         this.userRepository.delete(user);
     }
 
-    public void check(SignupRequestDTO signupRequestDTO) {
-        if (userRepository.isDuplicateUsername(signupRequestDTO.getUsername()))
-            throw new DataDuplicateException("username");
-        if (userRepository.isDuplicateEmail(signupRequestDTO.getEmail())) throw new DataDuplicateException("email");
-        if (userRepository.isDuplicateNickname(signupRequestDTO.getNickname()))
-            throw new DataDuplicateException("nickname");
-        if (userRepository.isDuplicatePhone(signupRequestDTO.getPhoneNumber()))
-            throw new DataDuplicateException("phone");
+    public void usernameCheck(String username) {
+        if (userRepository.isDuplicateUsername(username)) throw new DataDuplicateException("username");
+    }
+
+    public void otherCheck(String email, String nickname, String phone) {
+        if (userRepository.isDuplicateEmail(email)) throw new DataDuplicateException("email");
+        if (userRepository.isDuplicateNickname(nickname)) throw new DataDuplicateException("nickname");
+        if (userRepository.isDuplicatePhone(phone)) throw new DataDuplicateException("phone");
     }
 
     public boolean isMatch(String password1, String password2) {

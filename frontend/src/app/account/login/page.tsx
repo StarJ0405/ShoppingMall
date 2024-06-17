@@ -23,8 +23,10 @@ export default function Page() {
                 switch (error.response.data) {
                     case 'username': { setError('아이디가 잘못되었습니다.'); break; }
                     case 'password': { setError('잘못된 비밀번호입니다.'); break; }
+                    default:
+                        console.log(error);
                 }
-                console.log(error);
+                
             });
     }
 
