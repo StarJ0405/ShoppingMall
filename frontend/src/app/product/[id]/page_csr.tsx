@@ -40,16 +40,17 @@ export default function Page(props: pageProps) {
     useEffect(() => {
         getReviews(product.id)
             // .then(r=>setReviews(r))
-            .then(r => { setReviews(r); console.log(product, r) })
+            .then(r => setReviews(r))
             .catch(e => console.log(e));
     }, []);
     function Move(data: number) {
         setFocus(data);
         document.getElementById(String(data))?.scrollIntoView();
     }
-    function getDate() {
+    function getDate(d:any) {
+        console.log(d);
         const date = new Date();
-        return date.getFullYear() + '.' + date.getMonth() + '.' + date.getDate();
+        return date.getFullYear() + '.' + (date.getMonth()+1) + '.' + date.getDate();
     }
     function Wish() {
         if (love)
@@ -101,7 +102,7 @@ export default function Page(props: pageProps) {
                                     <input type='radio' className='bg-orange-500 mask mask-star-2 mask-half-1' defaultChecked={product?.grade > 4.25 && product?.grade <= 4.75} onClick={e => e.preventDefault()} />
                                     <input type='radio' className='bg-orange-500 mask mask-star-2 mask-half-2' defaultChecked={product?.grade > 4.75} onClick={e => e.preventDefault()} />
                                 </div>
-                                <a href='/' className='ml-2'> {'37 리뷰보기 >'}</a>
+                                <a onClick={e=>Move(1)} className='ml-2 cursor-pointer'>{product?.reviewSize.toLocaleString("ko-kr")+' 리뷰보기 >'}</a>
                             </div>
                             <div className='mt-4 flex justify-between w-full'>
                                 <label className='text-3xl'>{product?.title}</label>
@@ -125,11 +126,11 @@ export default function Page(props: pageProps) {
                         <button className={'w-[220px] h-[60px]' + (focus == 3 ? ' text-white bg-red-500' : '')} onClick={() => Move(3)}>판매자정보<label className={'text-base font-normal' + (focus == 3 ? ' text-white' : ' text-gray-600')}>(반품/교환)</label></button>
                     </div>
                     <div>
-                        <table>
+                        <table >
                             <tbody>
                                 <tr className='h-[47px]'>
                                     <th className='w-[158px]'>상품상태</th><td className='w-[281px]'>새상품</td>
-                                    <th>상품번호</th><td>{product?.id}</td>
+                                    <th className='w-[158px]'>상품번호</th><td className='w-[281px]'>{product?.id}</td>
                                 </tr>
                                 <tr className='h-[47px]'>
                                     <th>배송방법</th><td>{product?.delivery}</td>
@@ -179,7 +180,7 @@ export default function Page(props: pageProps) {
                                     <input type='radio' className='bg-orange-500 mask mask-star-2 mask-half-1' defaultChecked={product?.grade > 4.25 && product?.grade <= 4.75} onClick={e => e.preventDefault()} />
                                     <input type='radio' className='bg-orange-500 mask mask-star-2 mask-half-2' defaultChecked={product?.grade > 4.75} onClick={e => e.preventDefault()} />
                                 </div>
-                                <label className='mt-3'>16,922건</label>
+                                <label className='mt-3'>{product?.reviewSize.toLocaleString("ko-kr")}건</label>
                             </div>
                             <div className='divider divider-horizontal'></div>
                             <div className='flex items-center flex-col justify-center'>
@@ -192,15 +193,15 @@ export default function Page(props: pageProps) {
                             </div>
                         </div>
                         <div className='divider'></div>
-                        <label className='font-bold text-2xl'>전체리뷰<label className='font-normal text-sm ml-2'>16,392건</label></label>
+                        <label className='font-bold text-2xl'>전체리뷰<label className='font-normal text-sm ml-2'>{product?.reviewSize.toLocaleString("ko-kr")}건</label></label>
 
-                        {reviews?.map((review, index) => <>
-                            <div className='flex' key={index}>
+                        {reviews?.map((review, index) => <div key={index} className='w-full'>
+                            <div className='flex'>
                                 <img className='min-w-[52px] w-[52px] min-h-[52px] h-[52px]' src={review?.url ? review.url : '/base_profile.png'} />
                                 <div className='flex flex-col p-2 w-full'>
                                     <div className='flex justify-between w-full items-center'>
                                         <label className='font-bold text-lg'>{review?.authorName}</label>
-                                        <a href='/' className='text-gray-500 text-sm'>{getDate()} 신고</a>
+                                        <a href='/' className='text-gray-500 text-sm'>{getDate(review?.createDate)} 신고</a>
                                     </div>
                                     <div>
                                         <div className='rating rating-sm rating-half'>
@@ -223,7 +224,7 @@ export default function Page(props: pageProps) {
                                 </div>
                             </div>
                             <div className='divider'></div>
-                        </>)}
+                        </div>)}
                     </div>
                     {/* <table>
                         <thead>

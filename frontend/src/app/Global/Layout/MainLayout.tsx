@@ -61,7 +61,7 @@ export default function Main(props: Readonly<pageInterface>) {
             :
             <a href='/account/login' className='hover:underline'>로그인</a>
           }
-          <button><img alt='x' src='/x.png' className='w-[24px] h-[24px]' /></button>
+          <button onClick={()=>setIsSideOpen(false)}><img alt='x' src='/x.png' className='w-[24px] h-[24px]' /></button>
         </div>
         <div className='overflow-y-scroll h-full'>
           <div className='mt-[20px] flex flex-col'>
