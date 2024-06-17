@@ -24,7 +24,7 @@ export default function Page(props: pageProps) {
         <div className='w-full h-full flex justify-center'>
             <div className='flex flex-wrap w-[1240px]'>
                 {productList.map((product, index) =>
-                    <a href={'/product/' + product.id} key={index}>
+                    <a href={'/product/' + product.id} key={index} className='mr-4'>
                         <div className='w-[394px] h-[431px] flex flex-col p-4 hover:border border-gray-500'>
                             <img src={product?.url ? product.url : '/empty_product.png'} className='w-[190px] h-[190px]' />
                             <label className='text-lg mt-2'>{product?.title}</label>

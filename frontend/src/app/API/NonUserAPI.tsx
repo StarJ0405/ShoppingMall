@@ -12,6 +12,11 @@ export const getProductList = async () => {
     const response = await NonUserApi.get('/api/product/list');
     return response.data;
 }
+export const getProductBest = async () => {
+    const response = await NonUserApi.get('/api/product/best');
+    return response.data;
+}
+
 export const getProduct = async (data: number) => {
     const response = await NonUserApi.get('/api/product', { headers: { 'productId': data } });
     return response.data;
