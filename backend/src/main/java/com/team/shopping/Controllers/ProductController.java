@@ -46,6 +46,16 @@ public class ProductController {
         }
     }
 
+    @GetMapping("/best")
+    public ResponseEntity<?> bestProductList() {
+        try {
+            List<ProductResponseDTO> productResponseDTOList = multiService.getBestList();
+            return ResponseEntity.status(HttpStatus.OK).body(productResponseDTOList);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("베스트리스트 찾을 수 없음");
+        }
+    }
+
     @PostMapping("/question")
     public ResponseEntity<?> productQuestion(@RequestHeader("Authorization") String accessToken, @RequestBody ProductQARequestDTO requestDTO) {
         TokenRecord tokenRecord = this.multiService.checkToken(accessToken);

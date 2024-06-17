@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @RestController
 @RequiredArgsConstructor
@@ -53,6 +54,8 @@ public class CartController {
             }
         }catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("남은 재고보다 많은 수량을 담을 수 없음");
+        }catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("옵션 수량 확인 바람");
         }
 
         return tokenRecord.getResponseEntity();
@@ -83,8 +86,8 @@ public class CartController {
         try {
             if (tokenRecord.isOK()) {
                 String username = tokenRecord.username();
-                // 기능
                 List<CartResponseDTO> cartResponseDTOList = this.multiService.deleteToCart(username, productId);
+                return tokenRecord.getResponseEntity(cartResponseDTOList);
             }
         }catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("이미 지워지거나 없는 상품입니다.");
@@ -99,7 +102,6 @@ public class CartController {
         try {
             if (tokenRecord.isOK()) {
                 String username = tokenRecord.username();
-                // 기능
                 List<CartResponseDTO> cartResponseDTOList = this.multiService.deleteMultipleToCart(username, productIdList);
                 return tokenRecord.getResponseEntity(cartResponseDTOList);
             }

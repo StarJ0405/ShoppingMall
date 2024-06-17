@@ -18,7 +18,7 @@ public class ArticleService {
     private final ArticleRepository articleRepository;
 
     // set 방식
-//    public Article save(String title , String content , SiteUser author , Type type) { // 저장
+//    public Article saveCartItemDetail(String title , String content , SiteUser author , Type type) { // 저장
 //        Article article = new Article();
 //        article.setTitle(title);
 //        article.setContent(content);
@@ -26,7 +26,7 @@ public class ArticleService {
 //        article.setType(type);
 //        article.setCreateDate(LocalDateTime.now());
 //
-//        return articleRepository.save(article);
+//        return articleRepository.saveCartItemDetail(article);
 //
 //    }
 

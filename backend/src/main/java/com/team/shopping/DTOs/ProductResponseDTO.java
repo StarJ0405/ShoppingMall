@@ -1,6 +1,7 @@
 package com.team.shopping.DTOs;
 
 import com.team.shopping.Domains.Product;
+import com.team.shopping.Domains.Review;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -34,9 +35,12 @@ public class ProductResponseDTO {
     private LocalDateTime createDate;
     private LocalDateTime modifyDate;
     private String url;
+    private Double grade;
+    private int reviewSize;
 
     @Builder
-    public ProductResponseDTO(Product product, List<String> tagList, String url) {
+    public ProductResponseDTO(Product product, List<String> tagList, String url, List<Review> reviewList, Double averageGrade) {
+
         this.id = product.getId();
         this.authorUsername = product.getSeller().getUsername();
         this.topCategoryName = product.getCategory().getParent() != null && product.getCategory().getParent().getParent() != null ? product.getCategory().getParent().getParent().getName() : null;
@@ -57,5 +61,7 @@ public class ProductResponseDTO {
         this.modifyDate = product.getModifyDate();
         this.tagList = tagList;
         this.url = url;
+        this.reviewSize = reviewList.size();
+        this.grade = averageGrade;
     }
 }

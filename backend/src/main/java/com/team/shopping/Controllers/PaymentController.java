@@ -44,8 +44,6 @@ public class PaymentController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("남은재고 부족");
         }catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("장바구니 비었음");
-        }catch (NullPointerException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("선택수량 확인해야함");
         }
         return tokenRecord.getResponseEntity();
     }
