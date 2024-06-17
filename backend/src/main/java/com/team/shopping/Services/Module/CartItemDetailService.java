@@ -19,7 +19,11 @@ public class CartItemDetailService {
         return this.cartItemDetailRepository.findAllByCartItem(cartItem);
     }
 
-    public CartItemDetail save (CartItem cartItem, Options options) {
+    public CartItemDetail save (CartItemDetail cartItemDetail) {
+        return this.cartItemDetailRepository.save(cartItemDetail);
+    }
+
+    public CartItemDetail saveCartItemDetail(CartItem cartItem, Options options) {
             return this.cartItemDetailRepository.save(CartItemDetail.builder()
                     .cartItem(cartItem)
                     .options(options)

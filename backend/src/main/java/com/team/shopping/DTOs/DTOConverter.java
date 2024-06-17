@@ -14,9 +14,11 @@ public class DTOConverter {
     public static CartResponseDTO toCartResponseDTO(CartItem cartItem, List<CartItemDetail> cartItemDetails) {
         List<OptionResponseDTO> optionResponseDTOList = new ArrayList<>();
         int totalPrice = cartItem.getProduct().getPrice() * cartItem.getCount();
+
         for (CartItemDetail cartItemDetail : cartItemDetails) {
-            optionResponseDTOList.add(DTOConverter.toOptionResponseDTO(cartItemDetail.getOptions()));
-            totalPrice += cartItemDetail.getOptions().getPrice() * cartItemDetail.getOptions().getCount();
+            Options option = cartItemDetail.getOptions();
+            optionResponseDTOList.add(DTOConverter.toOptionResponseDTO(option));
+            totalPrice += (option.getPrice() * option.getCount()) * cartItem.getCount();
         }
 
         return CartResponseDTO.builder()
@@ -25,6 +27,7 @@ public class DTOConverter {
                 .totalPrice(totalPrice)
                 .build();
     }
+
 
     public static PaymentProductDetailResponseDTO toPaymentProductDetailResponseDTO (PaymentProductDetail paymentProductDetail) {
         return new PaymentProductDetailResponseDTO(paymentProductDetail);
@@ -55,8 +58,5 @@ public class DTOConverter {
                 .paymentProductResponseDTOList(paymentProductResponseDTOList)
                 .build();
     }
-
-
-
 
 }

@@ -299,22 +299,42 @@ public class MultiService {
             this.cartItemService.save(cartItem);
         } else {
             cartItem = this.cartItemService.addToCart(user, product, cartRequestDTO.getCount());
-            }
+        }
+
         List<Options> options = this.optionsService.getOptionsList(cartRequestDTO.getOptionIdList());
+        List<CartItemDetail> cartItemDetailList = this.cartItemDetailService.getList(cartItem);
+
         for (Options option : options) {
             if (option.getCount() <= 0) {
-                throw new NoSuchElementException("option remain 0");
+                throw new NoSuchElementException("option count 0");
             }
-            this.cartItemDetailService.save(cartItem, option);
+
+            boolean found = false;
+            for (CartItemDetail cartItemDetail : cartItemDetailList) {
+                if (cartItemDetail.getOptions().getId().equals(option.getId())) {
+                    cartItemDetail.getOptions().setCount(cartItemDetail.getOptions().getCount());
+                    this.cartItemDetailService.save(cartItemDetail);
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found) {
+                this.cartItemDetailService.saveCartItemDetail(cartItem, option);
+            }
         }
+
         List<CartResponseDTO> responseDTOList = new ArrayList<>();
         List<CartItem> cartItems = this.cartItemService.getCartItemList(user);
+
         for (CartItem item : cartItems) {
             List<CartItemDetail> cartItemDetails = this.cartItemDetailService.getList(item);
             responseDTOList.add(DTOConverter.toCartResponseDTO(item, cartItemDetails));
         }
+
         return responseDTOList;
     }
+
 
 
 
