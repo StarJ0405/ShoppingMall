@@ -188,6 +188,7 @@ public class MultiService {
     /**
      * List
      */
+
     public boolean checkWishList(String username, Long product_id) {
         SiteUser user = userService.get(username);
         Product product = productService.getProduct(product_id);
@@ -681,32 +682,6 @@ public class MultiService {
         return CategoryResponseDTO.builder().id(parentCategory.getId()).parent_name(parentCategory.getParent() != null ? parentCategory.getParent().getName() : null).name(parentCategory.getName()).categoryResponseDTOList(childrenDTOList).build();
     }
 
-    @Transactional
-    public ArticleResponseDTO saveArticle(String username, ArticleRequestDTO articleRequestDTO) {
-        SiteUser siteUser = this.userService.get(username);
-        Article article = this.articleService.save(articleRequestDTO, siteUser);
-
-        return ArticleResponseDTO.builder()
-                .article(article)
-                .siteUser(siteUser)
-                .build();
-    }
-
-    @Transactional
-    public ArticleResponseDTO updateArticle(String username, ArticleRequestDTO articleRequestDTO) {
-        SiteUser user = userService.get(username);
-        Article _article = this.articleService.get(articleRequestDTO.getArticleId());
-        if (!user.getUsername().equals(_article.getAuthor().getUsername()) || !user.getRole().equals(UserRole.ADMIN)) {
-            throw new IllegalArgumentException("not role");
-        } else {
-            Article article = this.articleService.update(_article, articleRequestDTO);
-            return ArticleResponseDTO.builder()
-                    .article(article)
-                    .siteUser(article.getAuthor())
-                    .build();
-        }
-    }
-
     /**
      * Review
      * */
@@ -809,6 +784,10 @@ public class MultiService {
         return reviewResponseDTOList;
     }
 
+    /**
+     * article
+     * */
+
     @Transactional
     public void deleteArticle(String username, Long articleId) {
         SiteUser user = this.userService.get(username);
@@ -836,7 +815,32 @@ public class MultiService {
 
         return articleResponseDTOList;
     }
-    //
+
+    @Transactional
+    public ArticleResponseDTO saveArticle(String username, ArticleRequestDTO articleRequestDTO) {
+        SiteUser siteUser = this.userService.get(username);
+        Article article = this.articleService.save(articleRequestDTO, siteUser);
+
+        return ArticleResponseDTO.builder()
+                .article(article)
+                .siteUser(siteUser)
+                .build();
+    }
+
+    @Transactional
+    public ArticleResponseDTO updateArticle(String username, ArticleRequestDTO articleRequestDTO) {
+        SiteUser user = userService.get(username);
+        Article _article = this.articleService.get(articleRequestDTO.getArticleId());
+        if (!user.getUsername().equals(_article.getAuthor().getUsername()) || !user.getRole().equals(UserRole.ADMIN)) {
+            throw new IllegalArgumentException("not role");
+        } else {
+            Article article = this.articleService.update(_article, articleRequestDTO);
+            return ArticleResponseDTO.builder()
+                    .article(article)
+                    .siteUser(article.getAuthor())
+                    .build();
+        }
+    }
 }
 
 
