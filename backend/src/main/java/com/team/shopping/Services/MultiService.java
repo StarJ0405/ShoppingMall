@@ -625,7 +625,7 @@ public class MultiService {
 
         int count = 0;
         for (Map.Entry<Product, Double> entry : sortedEntries) {
-            if (count >= 20) {
+            if (count >= 15) {
                 break;
             }
             bestList.add(entry.getKey());
