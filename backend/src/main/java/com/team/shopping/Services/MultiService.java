@@ -299,10 +299,13 @@ public class MultiService {
             this.cartItemService.save(cartItem);
         } else {
             cartItem = this.cartItemService.addToCart(user, product, cartRequestDTO.getCount());
-            List<Options> options = this.optionsService.getOptionsList(cartRequestDTO.getOptionIdList());
-            for (Options option : options) {
-                this.cartItemDetailService.save(cartItem, option);
             }
+        List<Options> options = this.optionsService.getOptionsList(cartRequestDTO.getOptionIdList());
+        for (Options option : options) {
+            if (option.getCount() <= 0) {
+                throw new NoSuchElementException("option remain 0");
+            }
+            this.cartItemDetailService.save(cartItem, option);
         }
         List<CartResponseDTO> responseDTOList = new ArrayList<>();
         List<CartItem> cartItems = this.cartItemService.getCartItemList(user);
@@ -548,12 +551,25 @@ public class MultiService {
         List<Review> reviewList = this.reviewService.getList(product);
         String url = _fileSystem.map(FileSystem::getV).orElse(null);
 
+        Double totalGrade = 0.0;
+        for (Review review : reviewList) {
+            totalGrade += review.getGrade();
+        }
+        Double averageGrade = totalGrade / reviewList.size();
+
+        if (averageGrade <= 0) {
+            averageGrade = 0.0;
+        } else {
+            averageGrade = Math.round(averageGrade * 10) / 10.0;
+        }
+
         return ProductResponseDTO
                 .builder()
                 .product(product)
                 .tagList(tagList)
                 .url(url)
                 .reviewList(reviewList)
+                .averageGrade(averageGrade)
                 .build();
     }
 

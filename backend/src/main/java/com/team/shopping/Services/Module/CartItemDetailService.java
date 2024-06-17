@@ -20,10 +20,10 @@ public class CartItemDetailService {
     }
 
     public CartItemDetail save (CartItem cartItem, Options options) {
-        return this.cartItemDetailRepository.save(CartItemDetail.builder()
-                        .cartItem(cartItem)
-                        .options(options)
-                .build());
+            return this.cartItemDetailRepository.save(CartItemDetail.builder()
+                    .cartItem(cartItem)
+                    .options(options)
+                    .build());
     }
 
     public void delete (CartItemDetail cartItemDetail) {
