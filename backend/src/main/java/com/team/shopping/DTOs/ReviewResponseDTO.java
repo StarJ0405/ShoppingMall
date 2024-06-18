@@ -16,7 +16,9 @@ public class ReviewResponseDTO {
 
     private Long id;
 
-    private String authorName;
+    private String username;
+
+    private String nickname;
 
     private String title;
 
@@ -28,14 +30,18 @@ public class ReviewResponseDTO {
 
     private LocalDateTime modifyDate;
 
+    private String url;
+
     @Builder
-    public ReviewResponseDTO (SiteUser user, Review review) {
+    public ReviewResponseDTO (SiteUser user, Review review, String url) {
         this.id = review.getId();
-        this.authorName = user.getNickname();
+        this.nickname = user.getNickname();
+        this.username = user.getUsername();
         this.title = review.getTitle();
         this.content = review.getContent();
         this.grade = review.getGrade();
         this.createDate = review.getCreateDate();
         this.modifyDate = review.getModifyDate();
+        this.url = url;
     }
 }
