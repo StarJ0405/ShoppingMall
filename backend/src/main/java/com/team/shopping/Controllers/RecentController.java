@@ -26,7 +26,8 @@ public class RecentController {
         if (tokenRecord.isOK()) {
             String username = tokenRecord.username();
             this.multiService.saveRecent(requestDTO.getProductId(), username);
-            return tokenRecord.getResponseEntity("문제 없음");
+            List<RecentResponseDTO> responseDTOList = this.multiService.getRecentList(username);
+            return tokenRecord.getResponseEntity(responseDTOList);
         }
         return tokenRecord.getResponseEntity();
     }
@@ -49,7 +50,8 @@ public class RecentController {
         if (tokenRecord.isOK()) {
             String username = tokenRecord.username();
             this.multiService.deleteRecent(recentId, username);
-            return tokenRecord.getResponseEntity("recent delete");
+            List<RecentResponseDTO> responseDTOList = this.multiService.getRecentList(username);
+            return tokenRecord.getResponseEntity(responseDTOList);
         }
         return tokenRecord.getResponseEntity();
     }
