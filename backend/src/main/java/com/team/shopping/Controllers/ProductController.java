@@ -58,14 +58,16 @@ public class ProductController {
     }
 
     @GetMapping("/latest")
-    public ResponseEntity<?> latestProductList(@RequestBody PageRequestDTO requestDTO){
+    public ResponseEntity<?> latestProductList(@RequestHeader("page") int page){
         try {
-            Page<ProductResponseDTO> productResponseDTOList = multiService.getLatestList(requestDTO.getPage());
+            Page<ProductResponseDTO> productResponseDTOList = multiService.getLatestList(page);
             return ResponseEntity.status(HttpStatus.OK).body(productResponseDTOList);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("not desc list");
         }
     }
+
+
 
     @PostMapping("/question")
     public ResponseEntity<?> productQuestion(@RequestHeader("Authorization") String accessToken, @RequestBody ProductQARequestDTO requestDTO) {
@@ -79,7 +81,8 @@ public class ProductController {
     }
 
     @PostMapping("/answer")
-    public ResponseEntity<?> productAnswer(@RequestHeader("Authorization") String accessToken, @RequestBody ProductQARequestDTO requestDTO) {
+    public ResponseEntity<?> productAnswer(@RequestHeader("Authorization") String accessToken,
+                                           @RequestBody ProductQARequestDTO requestDTO) {
         TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
         if (tokenRecord.isOK()) {
             String username = tokenRecord.username();

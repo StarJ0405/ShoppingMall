@@ -1,12 +1,13 @@
 package com.team.shopping.Controllers;
 
-import com.team.shopping.DTOs.AuthResponseDTO;
 import com.team.shopping.DTOs.CategoryRequestDTO;
 import com.team.shopping.DTOs.CategoryResponseDTO;
+import com.team.shopping.DTOs.ProductResponseDTO;
 import com.team.shopping.Exceptions.DataDuplicateException;
 import com.team.shopping.Records.TokenRecord;
 import com.team.shopping.Services.MultiService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +20,18 @@ import java.util.List;
 public class CategoryController {
     private final MultiService multiService;
 
+    @GetMapping("/search")
+    public ResponseEntity<?> searchedProductList (@RequestHeader("page") int page,
+                                                  @RequestParam(value = "keyword", defaultValue = "") String keyword,
+                                                  @RequestHeader("sort") int sort,
+                                                  @RequestHeader("categoryId") Long categoryId){
+        try {
+            Page<ProductResponseDTO> productResponseDTOList = this.multiService.categorySearchByKeyword(page, keyword, sort, categoryId);
+            return ResponseEntity.status(HttpStatus.OK).body(productResponseDTOList);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("해당하는 제품 찾을 수 없음");
+        }
+    }
 
     @PostMapping
     public ResponseEntity<?> createCategory(@RequestHeader("Authorization") String accessToken,

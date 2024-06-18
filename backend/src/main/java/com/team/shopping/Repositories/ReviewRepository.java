@@ -11,6 +11,5 @@ import java.util.List;
 public interface ReviewRepository extends JpaRepository<Review, Long> {
 
     List<Review> findByProductOrderByCreateDateDesc(Product product);
-    void deleteByProduct(Product product);
 
 }

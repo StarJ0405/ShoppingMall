@@ -28,6 +28,7 @@ public class Category {
     private List<Category> children = new ArrayList<>();
 
     private LocalDateTime createDate;
+
     private LocalDateTime modifyDate;
 
     @Builder
