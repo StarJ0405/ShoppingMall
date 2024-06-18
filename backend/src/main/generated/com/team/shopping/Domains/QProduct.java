@@ -44,7 +44,7 @@ public class QProduct extends EntityPathBase<Product> {
 
     public final DateTimePath<java.time.LocalDateTime> modifyDate = createDateTime("modifyDate", java.time.LocalDateTime.class);
 
-    public final NumberPath<Integer> price = createNumber("totalPrice", Integer.class);
+    public final NumberPath<Integer> price = createNumber("price", Integer.class);
 
     public final StringPath receipt = createString("receipt");
 

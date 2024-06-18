@@ -29,7 +29,7 @@ public class Product {
     @Column(length = 300)
     private String description;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "LONGTEXT")
     private String detail;
 
     private LocalDateTime dateLimit;

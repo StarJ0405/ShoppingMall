@@ -26,7 +26,7 @@ public class Review {
     @Column(length = 50)
     private String title;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "LONGTEXT")
     private String content;
 
     private Double grade;

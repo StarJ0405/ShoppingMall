@@ -768,6 +768,21 @@ public class MultiService {
      * Review
      */
 
+    private ReviewResponseDTO getReview (Review review) {
+        String _username = review.getAuthor().getUsername();
+        Optional<FileSystem> _fileSystem = fileSystemService.get(ImageKey.USER.getKey(_username));
+        String url = null;
+
+        if (_fileSystem.isPresent())
+            url = _fileSystem.get().getV();
+
+        return ReviewResponseDTO.builder()
+                .url(url)
+                .review(review)
+                .user(review.getAuthor())
+                .build();
+    }
+
     @Transactional
     public List<ReviewResponseDTO> getReviewList(Long productId) {
         List<ReviewResponseDTO> reviewResponseDTOList = new ArrayList<>();
@@ -776,10 +791,7 @@ public class MultiService {
         List<Review> reviewList = this.reviewService.getList(product);
 
         for (Review review : reviewList) {
-            ReviewResponseDTO reviewResponseDTO = ReviewResponseDTO.builder()
-                    .user(review.getAuthor())
-                    .review(review)
-                    .build();
+            ReviewResponseDTO reviewResponseDTO = this.getReview(review);
             reviewResponseDTOList.add(reviewResponseDTO);
         }
         return reviewResponseDTOList;
@@ -819,14 +831,13 @@ public class MultiService {
         // 리뷰 리스트를 가져와서 DTO로 변환하여 반환
         List<Review> reviewList = this.reviewService.getList(product);
         for (Review review : reviewList) {
-            ReviewResponseDTO reviewResponseDTO = ReviewResponseDTO.builder()
-                    .review(review)
-                    .user(user)
-                    .build();
+            ReviewResponseDTO reviewResponseDTO = this.getReview(review);
             reviewResponseDTOList.add(reviewResponseDTO);
         }
         return reviewResponseDTOList;
     }
+
+
 
     @Transactional
     public void deleteReview(String username, Long reviewId) {
@@ -855,10 +866,7 @@ public class MultiService {
             this.reviewService.update(review, reviewRequestDTO);
             List<Review> reviewList = this.reviewService.getList(review.getProduct());
             for (Review _review : reviewList) {
-                ReviewResponseDTO reviewResponseDTO = ReviewResponseDTO.builder()
-                        .review(_review)
-                        .user(user)
-                        .build();
+                ReviewResponseDTO reviewResponseDTO = this.getReview(_review);
                 reviewResponseDTOList.add(reviewResponseDTO);
             }
         }
