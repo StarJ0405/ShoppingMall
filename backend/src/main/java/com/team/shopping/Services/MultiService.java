@@ -1041,6 +1041,7 @@ public class MultiService {
         SiteUser user = userService.get(username);
         if (_recent.isPresent() && _recent.get().getUser().equals(user))
             this.recentService.delete(_recent.get());
+    }
 
     private Long dateTimeTransfer (LocalDateTime dateTime) {
         if (dateTime == null) {
