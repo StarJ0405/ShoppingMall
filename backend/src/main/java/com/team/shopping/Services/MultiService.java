@@ -4,6 +4,7 @@ package com.team.shopping.Services;
 import com.team.shopping.DTOs.*;
 import com.team.shopping.Domains.*;
 import com.team.shopping.Enums.ImageKey;
+import com.team.shopping.Enums.Sorts;
 import com.team.shopping.Enums.Type;
 import com.team.shopping.Enums.UserRole;
 import com.team.shopping.Exceptions.DataDuplicateException;
@@ -25,6 +26,8 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -653,6 +656,7 @@ public class MultiService {
         }
         return responseDTOList;
     }
+    @Transactional
     public List<ProductResponseDTO> getBestList() {
         List<Product> bestList = new ArrayList<>();
         List<Product> productList = this.productService.getProductList();
@@ -1043,6 +1047,44 @@ public class MultiService {
             this.recentService.delete(_recent.get());
     }
 
+    /**
+     * search
+     * */
+
+    @Transactional
+    public Page<ProductResponseDTO> searchByKeyword(int page, String encodedKeyword, int sort) {
+        String keyword = URLDecoder.decode(encodedKeyword, StandardCharsets.UTF_8);
+        Sorts sorts = Sorts.values()[sort];
+
+        Pageable pageable = PageRequest.of(page, 15);
+        Page<Product> productPage = this.productService.searchByKeyword(pageable, keyword, sorts);
+        List<ProductResponseDTO> productResponseDTOList = new ArrayList<>();
+        for (Product product : productPage) {
+            ProductResponseDTO productResponseDTO = this.getProduct(product);
+            productResponseDTOList.add(productResponseDTO);
+        }
+        return new PageImpl<>(productResponseDTOList, pageable, productPage.getTotalElements());
+    }
+
+    @Transactional
+    public Page<ProductResponseDTO> categorySearchByKeyword (int page, String encodedKeyword, int sort, Long categoryId) {
+        String keyword = URLDecoder.decode(encodedKeyword, StandardCharsets.UTF_8);
+        Sorts sorts = Sorts.values()[sort];
+
+        Pageable pageable = PageRequest.of(page, 15);
+        Page<Product> productPage = this.productService.categorySearchByTitle(pageable, keyword, sorts, categoryId);
+        List<ProductResponseDTO> productResponseDTOList = new ArrayList<>();
+        for (Product product : productPage) {
+            ProductResponseDTO productResponseDTO = this.getProduct(product);
+            productResponseDTOList.add(productResponseDTO);
+        }
+        return new PageImpl<>(productResponseDTOList, pageable, productPage.getTotalElements());
+    }
+
+
+
+
+
     private Long dateTimeTransfer (LocalDateTime dateTime) {
         if (dateTime == null) {
             return null;
@@ -1060,7 +1102,6 @@ public class MultiService {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
         String dateTimeString = dateTime.format(formatter);
         return Long.parseLong(dateTimeString);
-
     }
 }
 

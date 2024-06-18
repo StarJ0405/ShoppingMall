@@ -4,6 +4,7 @@ import com.team.shopping.DTOs.ProductCreateRequestDTO;
 import com.team.shopping.Domains.Category;
 import com.team.shopping.Domains.Product;
 import com.team.shopping.Domains.SiteUser;
+import com.team.shopping.Enums.Sorts;
 import com.team.shopping.Repositories.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -55,5 +56,12 @@ public class ProductService {
 
     public Page<Product> getLatestList(Pageable pageable) {
         return productRepository.findAllPage(pageable);
+    }
+
+    public Page<Product> searchByKeyword(Pageable pageable, String keyword, Sorts sorts) {
+        return productRepository.searchByKeyword(pageable, keyword, sorts);
+    }
+    public Page<Product> categorySearchByTitle (Pageable pageable, String keyword, Sorts sorts, Long categoryId) {
+        return productRepository.findByTitleOrTagGroupByCategory(pageable, keyword,categoryId, sorts);
     }
 }
