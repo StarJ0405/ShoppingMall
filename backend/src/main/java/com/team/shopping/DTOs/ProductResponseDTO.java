@@ -9,6 +9,7 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @Getter
 @Setter
@@ -37,9 +38,10 @@ public class ProductResponseDTO {
     private String url;
     private Double grade;
     private int reviewSize;
+    private Map<String , Integer> numOfGrade;
 
     @Builder
-    public ProductResponseDTO(Product product, List<String> tagList, String url, List<Review> reviewList, Double averageGrade) {
+    public ProductResponseDTO(Product product, List<String> tagList, String url, List<Review> reviewList, Double averageGrade, Map<String , Integer> numOfGrade) {
 
         this.id = product.getId();
         this.authorUsername = product.getSeller().getUsername();
@@ -63,5 +65,6 @@ public class ProductResponseDTO {
         this.url = url;
         this.reviewSize = reviewList.size();
         this.grade = averageGrade;
+        this.numOfGrade = numOfGrade;
     }
 }

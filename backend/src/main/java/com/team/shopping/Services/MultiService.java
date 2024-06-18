@@ -566,10 +566,33 @@ public class MultiService {
         Optional<FileSystem> _fileSystem = fileSystemService.get(ImageKey.PRODUCT.getKey(product.getId().toString()));
         List<Review> reviewList = this.reviewService.getList(product);
         String url = _fileSystem.map(FileSystem::getV).orElse(null);
+        Map<String, Integer> numOfGrade = new HashMap<>();
+
+        numOfGrade.put("0", 0);
+        numOfGrade.put("0.5~1", 0);
+        numOfGrade.put("1.5~2", 0);
+        numOfGrade.put("2.5~3", 0);
+        numOfGrade.put("3.5~4", 0);
+        numOfGrade.put("4.5~5", 0);
 
         Double totalGrade = 0.0;
         for (Review review : reviewList) {
-            totalGrade += review.getGrade();
+            double grade = review.getGrade();
+            totalGrade += grade;
+
+            if (grade == 0) {
+                numOfGrade.put("0", numOfGrade.get("0") + 1);
+            } else if (grade <= 1) {
+                numOfGrade.put("0.5~1", numOfGrade.get("0.5~1") + 1);
+            } else if (grade <= 2) {
+                numOfGrade.put("1.5~2", numOfGrade.get("1.5~2") + 1);
+            } else if (grade <= 3) {
+                numOfGrade.put("2.5~3", numOfGrade.get("2.5~3") + 1);
+            } else if (grade <= 4) {
+                numOfGrade.put("3.5~4", numOfGrade.get("3.5~4") + 1);
+            } else if (grade <= 5) {
+                numOfGrade.put("4.5~5", numOfGrade.get("4.5~5") + 1);
+            }
         }
         Double averageGrade = totalGrade / reviewList.size();
 
@@ -586,6 +609,7 @@ public class MultiService {
                 .url(url)
                 .reviewList(reviewList)
                 .averageGrade(averageGrade)
+                .numOfGrade(numOfGrade)
                 .build();
     }
 
