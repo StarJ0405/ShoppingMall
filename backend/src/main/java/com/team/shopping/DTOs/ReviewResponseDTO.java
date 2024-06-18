@@ -7,8 +7,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
-
 @Getter
 @Setter
 @NoArgsConstructor
@@ -26,22 +24,23 @@ public class ReviewResponseDTO {
 
     private Double grade;
 
-    private LocalDateTime createDate;
+    private Long createDate;
 
-    private LocalDateTime modifyDate;
+    private Long modifyDate;
 
     private String url;
 
     @Builder
-    public ReviewResponseDTO (SiteUser user, Review review, String url) {
+    public ReviewResponseDTO (SiteUser user, Review review, String url,
+                              Long createDate, Long modifyDate) {
         this.id = review.getId();
         this.nickname = user.getNickname();
         this.username = user.getUsername();
         this.title = review.getTitle();
         this.content = review.getContent();
         this.grade = review.getGrade();
-        this.createDate = review.getCreateDate();
-        this.modifyDate = review.getModifyDate();
+        this.createDate = createDate;
+        this.modifyDate = modifyDate;
         this.url = url;
     }
 }

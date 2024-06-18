@@ -2,6 +2,8 @@ package com.team.shopping.DTOs;
 
 import com.team.shopping.Domains.*;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,6 +14,12 @@ public class DTOConverter {
     }
 
     public static CartResponseDTO toCartResponseDTO(CartItem cartItem, List<CartItemDetail> cartItemDetails) {
+
+        LocalDateTime _createDate = cartItem.getCreateDate();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+        String dateTimeString = _createDate.format(formatter);
+        Long createDate = Long.parseLong(dateTimeString);
+
         List<OptionResponseDTO> optionResponseDTOList = new ArrayList<>();
         int totalPrice = cartItem.getProduct().getPrice() * cartItem.getCount();
 
@@ -25,6 +33,7 @@ public class DTOConverter {
                 .optionResponseDTOList(optionResponseDTOList)
                 .cartItem(cartItem)
                 .totalPrice(totalPrice)
+                .createDate(createDate)
                 .build();
     }
 
@@ -47,7 +56,13 @@ public class DTOConverter {
                 .build();
     }
 
-    public static PaymentLogResponseDTO toPaymentLogResponseDTO(PaymentLog paymentLog, List<PaymentProductResponseDTO> paymentProductResponseDTOList) {
+    public static PaymentLogResponseDTO toPaymentLogResponseDTO(PaymentLog paymentLog,
+                                                                List<PaymentProductResponseDTO> paymentProductResponseDTOList)  {
+        LocalDateTime createDate = paymentLog.getCreateDate();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+        String dateTimeString = createDate.format(formatter);
+        Long paymentDate = Long.parseLong(dateTimeString);
+
         int totalPrice = 0;
         for (PaymentProductResponseDTO paymentProductResponseDTO : paymentProductResponseDTOList) {
             totalPrice += paymentProductResponseDTO.getWithOptionPrice();
@@ -56,6 +71,7 @@ public class DTOConverter {
                 .totalPrice(totalPrice)
                 .paymentLog(paymentLog)
                 .paymentProductResponseDTOList(paymentProductResponseDTOList)
+                .paymentDate(paymentDate)
                 .build();
     }
 

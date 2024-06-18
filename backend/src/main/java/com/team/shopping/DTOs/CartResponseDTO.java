@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -30,17 +29,18 @@ public class CartResponseDTO {
 
     private int totalPrice;
 
-    private LocalDateTime createDate;
+    private Long createDate;
 
     @Builder
-    public CartResponseDTO (CartItem cartItem, List<OptionResponseDTO> optionResponseDTOList, int totalPrice) {
+    public CartResponseDTO (CartItem cartItem, List<OptionResponseDTO> optionResponseDTOList,
+                            int totalPrice, Long createDate) {
         this.cartItemId = cartItem.getId();
         this.authorName = cartItem.getProduct().getSeller().getName();
         this.productId = cartItem.getProduct().getId();
         this.productTitle = cartItem.getProduct().getTitle();
         this.count = cartItem.getCount();
         this.optionResponseDTOList = optionResponseDTOList;
-        this.createDate = cartItem.getCreateDate();
+        this.createDate = createDate;
         this.productPrice = cartItem.getProduct().getPrice();
         this.totalPrice = totalPrice;
     }
