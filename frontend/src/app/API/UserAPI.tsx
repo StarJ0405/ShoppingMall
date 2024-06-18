@@ -126,3 +126,7 @@ export const postRecent = async (data: number) => {
     const response = await UserApi.post('/api/recent', { productId: data });
     return response.data;
 }
+export const deleteRecent = async (data: number) => {
+    const response = await UserApi.delete('/api/recent', { headers: { 'RecentId': data } });
+    return response.data;
+}

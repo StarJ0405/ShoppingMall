@@ -27,9 +27,12 @@ export default function Page(props: pageProps) {
     const seller = props.seller;
     const topCategory = props.topCategory;
     const middleCategory = props.middleCategory;
-    useEffect(() => {
-
-    }, []);
+    const grade0 = product?.numOfGrade['0'];
+    const grade1 = product?.numOfGrade['0.5~1'];
+    const grade2 = product?.numOfGrade['1.5~2'];
+    const grade3 = product?.numOfGrade['2.5~3'];
+    const grade4 = product?.numOfGrade['3.5~4'];
+    const grade5 = product?.numOfGrade['4.5~5'];
     useEffect(() => {
         if (ACCESS_TOKEN)
             getUser()
@@ -39,11 +42,8 @@ export default function Page(props: pageProps) {
                         .then(r => setLove(r))
                         .catch(e => console.log(e));
                     postRecent(product.id)
-                        .then(() => {
-                            getRecent()
-                                .then(r => setRecentList(r))
-                                .catch(e => console.log(e));
-                        }).catch(e=>console.log(e));
+                        .then(r => setRecentList(r)
+                        ).catch(e => console.log(e));
                 })
                 .catch(e => console.log(e));
     }, [ACCESS_TOKEN]);
@@ -56,9 +56,8 @@ export default function Page(props: pageProps) {
         setFocus(data);
         document.getElementById(String(data))?.scrollIntoView();
     }
-    function getDate(d: any) {
-        // console.log(d);
-        const date = new Date();
+    function getDate(data: any) {
+        const date = new Date(data);
         return date.getFullYear() + '.' + (date.getMonth() + 1) + '.' + date.getDate();
     }
     function Wish() {
@@ -68,7 +67,7 @@ export default function Page(props: pageProps) {
             postWish(product.id);
         setLove(!love);
     }
-    return <Main user={user} recentList={recentList}>
+    return <Main user={user} recentList={recentList} setRecentList={setRecentList}>
         <div className='flex flex-col w-[1240px] min-h-[670px]'>
             <div className='text-sm flex'>
                 <label className='text-2xl font-bold'>{props.seller.nickname}</label>
@@ -193,12 +192,12 @@ export default function Page(props: pageProps) {
                             </div>
                             <div className='divider divider-horizontal'></div>
                             <div className='flex items-center flex-col justify-center'>
-                                <label className='flex items-center text-gray-500'>5점<progress className='progress progress-info w-[300px] h-[18px] mx-3' value='73' max='100' /><label className='text-blue-400 w-[32px]'>73%</label></label>
-                                <label className='flex items-center text-gray-500'>4점<progress className='progress progress-info w-[300px] h-[18px] mx-3' value='9' max='100' /><label className='text-blue-400 w-[32px]'>19%</label></label>
-                                <label className='flex items-center text-gray-500'>3점<progress className='progress progress-info w-[300px] h-[18px] mx-3' value='6' max='100' /><label className='text-blue-400 w-[32px]'>6%</label></label>
-                                <label className='flex items-center text-gray-500'>2점<progress className='progress progress-info w-[300px] h-[18px] mx-3' value='1' max='100' /><label className='text-blue-400 w-[32px]'>1%</label></label>
-                                <label className='flex items-center text-gray-500'>1점<progress className='progress progress-info w-[300px] h-[18px] mx-3' value='1' max='100' /><label className='text-blue-400 w-[32px]'>1%</label></label>
-                                <label className='flex items-center text-gray-500'>0점<progress className='progress progress-info w-[300px] h-[18px] mx-3' value='0' max='100' /><label className='text-blue-400 w-[32px]'>0%</label></label>
+                                <label className='flex items-center text-gray-500'>5점<progress className='progress progress-info w-[300px] h-[18px] mx-3' value={grade5} max={product?.reviewSize} /><label className='text-blue-400 w-[32px]'>{(grade5 / product?.reviewSize * 100).toLocaleString('ko-kr', { maximumFractionDigits: 0 })}%</label></label>
+                                <label className='flex items-center text-gray-500'>4점<progress className='progress progress-info w-[300px] h-[18px] mx-3' value={grade4} max={product?.reviewSize} /><label className='text-blue-400 w-[32px]'>{(grade4 / product?.reviewSize * 100).toLocaleString('ko-kr', { maximumFractionDigits: 0 })}%</label></label>
+                                <label className='flex items-center text-gray-500'>3점<progress className='progress progress-info w-[300px] h-[18px] mx-3' value={grade3} max={product?.reviewSize} /><label className='text-blue-400 w-[32px]'>{(grade3 / product?.reviewSize * 100).toLocaleString('ko-kr', { maximumFractionDigits: 0 })}%</label></label>
+                                <label className='flex items-center text-gray-500'>2점<progress className='progress progress-info w-[300px] h-[18px] mx-3' value={grade2} max={product?.reviewSize} /><label className='text-blue-400 w-[32px]'>{(grade2 / product?.reviewSize * 100).toLocaleString('ko-kr', { maximumFractionDigits: 0 })}%</label></label>
+                                <label className='flex items-center text-gray-500'>1점<progress className='progress progress-info w-[300px] h-[18px] mx-3' value={grade1} max={product?.reviewSize} /><label className='text-blue-400 w-[32px]'>{(grade1 / product?.reviewSize * 100).toLocaleString('ko-kr', { maximumFractionDigits: 0 })}%</label></label>
+                                <label className='flex items-center text-gray-500'>0점<progress className='progress progress-info w-[300px] h-[18px] mx-3' value={grade0} max={product?.reviewSize} /><label className='text-blue-400 w-[32px]'>{(grade0 / product?.reviewSize * 100).toLocaleString('ko-kr', { maximumFractionDigits: 0 })}%</label></label>
                             </div>
                         </div>
                         <div className='divider'></div>
@@ -209,7 +208,7 @@ export default function Page(props: pageProps) {
                                 <img className='min-w-[52px] w-[52px] min-h-[52px] h-[52px]' src={review?.url ? review.url : '/base_profile.png'} />
                                 <div className='flex flex-col p-2 w-full'>
                                     <div className='flex justify-between w-full items-center'>
-                                        <label className='font-bold text-lg'>{review?.authorName}</label>
+                                        <label className='font-bold text-lg'>{review?.nickname}</label>
                                         <a href='/' className='text-gray-500 text-sm'>{getDate(review?.createDate)} 신고</a>
                                     </div>
                                     <div>
@@ -227,7 +226,7 @@ export default function Page(props: pageProps) {
                                             <input type='radio' className='bg-orange-500 mask mask-star-2 mask-half-2' defaultChecked={review?.grade > 4.75} onClick={e => e.preventDefault()} />
                                         </div>
                                         <label className='ml-2'>{review?.grade}</label>
-                                        <div><div dangerouslySetInnerHTML={{ __html: review.content }} /></div>
+                                        <div><div dangerouslySetInnerHTML={{ __html: review?.content }} /></div>
                                         <button className='btn btn-info btn-sm'>추천</button>
                                     </div>
                                 </div>

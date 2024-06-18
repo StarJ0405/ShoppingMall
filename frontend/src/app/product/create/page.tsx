@@ -147,7 +147,7 @@ export default function Page() {
     function openModal(type: number) {
         setISModalOpen(type);
     }
-    return <Main className='flex justify-center' user={user} recentList={recentList}>
+    return <Main className='flex justify-center' user={user} recentList={recentList} setRecentList={setRecentList}>
         <div className='w-[1240px] min-h-[750px]'>
             <table>
                 <tbody className='border border-black'>

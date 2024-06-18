@@ -61,6 +61,7 @@ public class ProductController {
     public ResponseEntity<?> latestProductList(@RequestHeader("page") int page){
         try {
             Page<ProductResponseDTO> productResponseDTOList = multiService.getLatestList(page);
+
             return ResponseEntity.status(HttpStatus.OK).body(productResponseDTOList);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("not desc list");

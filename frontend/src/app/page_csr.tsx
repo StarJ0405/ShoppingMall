@@ -5,7 +5,7 @@ import { getRecent, getUser } from './API/UserAPI';
 import { MonthDate } from './Global/Method';
 
 interface pageProps {
-    productList: any[];
+    productList: any;
 }
 export default function Page(props: pageProps) {
     const [user, setUser] = useState(null as any);
@@ -24,10 +24,10 @@ export default function Page(props: pageProps) {
                 .catch(e => console.log(e));
     }, [ACCESS_TOKEN]);
 
-    return <Main user={user} recentList={recentList}>
+    return <Main user={user} recentList={recentList} setRecentList={setRecentList}>
         <div className='w-full h-full flex justify-center'>
             <div className='flex flex-wrap w-[1240px]'>
-                {productList.map((product, index) =>
+                {(productList.content as any[]).map((product, index) =>
                     <a href={'/product/' + product.id} key={index} className='mr-4'>
                         <div className='w-[394px] h-[431px] flex flex-col p-4 hover:border border-gray-500'>
                             <img src={product?.url ? product.url : '/empty_product.png'} className='w-[190px] h-[190px]' />
@@ -52,7 +52,7 @@ export default function Page(props: pageProps) {
                             <label className='mt-1 text-sm'>포인트 최대 <label className='text-blue-400'>{(product?.price / 100).toLocaleString("ko-kr", { maximumFractionDigits: 0 })}P</label> 적립</label>
                             <div className='text-sm flex justify-between w-full mt-auto'>
                                 <label>무료배송 <label className='text-blue-400'>{MonthDate()} 도착</label></label>
-                                <label>{product?.count.toLocaleString('ko-KR')}개 남음</label>
+                                <label>{product?.remain.toLocaleString('ko-KR')}개 남음</label>
                             </div>
                         </div>
                     </a>
