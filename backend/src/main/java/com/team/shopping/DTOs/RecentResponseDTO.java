@@ -13,10 +13,10 @@ import java.time.LocalDateTime;
 public class RecentResponseDTO {
     private Long id;
     private String url;
-    private LocalDateTime createDate;
+    private Long createDate;
 
     @Builder
-    public RecentResponseDTO(Long id, String url, LocalDateTime createDate) {
+    public RecentResponseDTO(Long id, String url, Long createDate) {
         this.id = id;
         this.url = url;
         this.createDate = createDate;
