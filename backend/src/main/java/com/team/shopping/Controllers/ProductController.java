@@ -4,6 +4,7 @@ import com.team.shopping.DTOs.*;
 import com.team.shopping.Records.TokenRecord;
 import com.team.shopping.Services.MultiService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -53,6 +54,16 @@ public class ProductController {
             return ResponseEntity.status(HttpStatus.OK).body(productResponseDTOList);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("베스트리스트 찾을 수 없음");
+        }
+    }
+
+    @GetMapping("/latest")
+    public ResponseEntity<?> latestProductList(@RequestBody PageRequestDTO requestDTO){
+        try {
+            Page<ProductResponseDTO> productResponseDTOList = multiService.getLatestList(requestDTO.getPage());
+            return ResponseEntity.status(HttpStatus.OK).body(productResponseDTOList);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("not desc list");
         }
     }
 

@@ -15,6 +15,10 @@ import com.team.shopping.Services.Module.*;
 import com.team.shopping.ShoppingApplication;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
@@ -623,7 +627,6 @@ public class MultiService {
         }
         return responseDTOList;
     }
-
     public List<ProductResponseDTO> getBestList() {
         List<Product> bestList = new ArrayList<>();
         List<Product> productList = this.productService.getProductList();
@@ -666,6 +669,17 @@ public class MultiService {
         return responseDTOList;
     }
 
+    @Transactional
+    public Page<ProductResponseDTO> getLatestList(int page) {
+        Pageable pageable = PageRequest.of(page, 10);
+        Page<Product> productPage = productService.getLatestList(pageable);
+        List<ProductResponseDTO> productResponseDTOList = new ArrayList<>();
+        for (Product product : productPage) {
+            ProductResponseDTO productResponseDTO = this.getProduct(product);
+            productResponseDTOList.add(productResponseDTO);
+        }
+        return new PageImpl<>(productResponseDTOList, pageable, productPage.getTotalElements());
+    }
 
     @Transactional
     public void productQASave(String username, ProductQARequestDTO requestDTO) {
@@ -976,7 +990,7 @@ public class MultiService {
     }
 
     @Transactional
-    public List<ProductResponseDTO> getReentList(String username) {
+    public List<ProductResponseDTO> getRecentList(String username) {
         SiteUser user = userService.get(username);
         List<Recent> recentList = recentService.getRecent(user);
         List<ProductResponseDTO> responseDTOList = new ArrayList<>();
@@ -986,6 +1000,7 @@ public class MultiService {
         }
         return responseDTOList;
     }
+
 }
 
 
