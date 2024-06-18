@@ -6,6 +6,8 @@ import com.team.shopping.Domains.Product;
 import com.team.shopping.Domains.SiteUser;
 import com.team.shopping.Repositories.ProductRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -49,5 +51,9 @@ public class ProductService {
 
     public void deleteProduct (Product product) {
         this.productRepository.delete(product);
+    }
+
+    public Page<Product> getLatestList(Pageable pageable) {
+        return productRepository.findAllPage(pageable);
     }
 }
