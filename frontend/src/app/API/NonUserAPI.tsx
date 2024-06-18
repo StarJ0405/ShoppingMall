@@ -8,6 +8,10 @@ export const getCategories = async () => {
     const response = await NonUserApi.get('/api/category');
     return response.data;
 }
+export const getProductRecentList = async (data:number) =>{
+    const response = await NonUserApi.get('/api/product/latest',{ headers: { 'page': data } });
+    return response.data;
+}
 export const getProductList = async () => {
     const response = await NonUserApi.get('/api/product/list');
     return response.data;

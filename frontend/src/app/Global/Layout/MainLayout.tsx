@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Side from '../Side';
 import DropDown, { Direcion } from '../DropDown';
+import { deleteRecent } from '@/app/API/UserAPI';
 
 
 
@@ -11,6 +12,7 @@ interface pageInterface {
   className?: string
   user: any
   recentList: any[];
+  setRecentList: (data: any) => void;
 }
 
 export default function Main(props: Readonly<pageInterface>) {
@@ -31,6 +33,10 @@ export default function Main(props: Readonly<pageInterface>) {
       clearInterval(userHoverInterval);
     const interval = setInterval(() => { setUserHover(false); clearInterval(interval); }, 100);
     setUserHoverInterval(interval);
+  }
+  function getDate(data: any) {
+    const date = new Date(data);
+    return date.getFullYear() + '.' + (date.getMonth() + 1) + '.' + date.getDate();
   }
   return (
     <main id='main' className={'min-h-screen flex flex-col items-center realtive ' + className}>
@@ -86,7 +92,7 @@ export default function Main(props: Readonly<pageInterface>) {
           <div className='flex justify-between w-full items-center'>
             <div>
               <label className='text-xl font-bold'>최근 본 상품</label>
-              <a className='text-sm text-gray-500 ml-4 hover:underline'>{'찜 목록 보기 >'}</a>
+              <a href="/account/wish/" className='text-sm text-gray-500 ml-4 hover:underline'>{'찜 목록 보기 >'}</a>
             </div>
             <button className='text-2xl cursor-pointer' onClick={() => setIsRecentOpen(false)}>X</button>
           </div>
@@ -94,12 +100,13 @@ export default function Main(props: Readonly<pageInterface>) {
         <div className='divider'></div>
         <ul>
           {recentList?.map((recent, index) => <li className='list-disc ml-4' key={index}>
-            <label>{recent?.createDate}</label>
+            <label>{getDate(recent?.createDate)}</label>
             <div className='relative w-[104px]'>
               <img onClick={() => window.location.href = '/product/' + recent.id} src={recent?.url ? recent.url : '/empty_product.png'} className={'w-[104px] h-[104px] cursor-pointer ' + (hover == index ? ' border-2 border-black' : '')} onMouseEnter={() => setHover(index)} onMouseLeave={() => setHover(-1)} />
-              <button className={'text-sm absolute font-bold right-0 top-0 text-white bg-black w-[14px] text-center' + (hover != index ? ' hidden' : '')} onClick={() => { }} onMouseEnter={() => setHover(index)} onMouseLeave={() => setHover(-1)} >X</button>
+              <button className={'text-sm absolute font-bold right-0 top-0 text-white bg-black w-[14px] z-[1] text-center' + (hover != index ? ' hidden' : '')} onClick={() => {
+                deleteRecent(recent.id).then(r => {props.setRecentList(r); console.log(r)}).catch(e => console.log(e))
+              }} onMouseEnter={() => setHover(index)} onMouseLeave={() => setHover(-1)} >X</button>
             </div>
-
           </li>)}
         </ul>
       </Side>
