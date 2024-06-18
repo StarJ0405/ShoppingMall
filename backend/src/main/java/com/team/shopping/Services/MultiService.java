@@ -671,7 +671,7 @@ public class MultiService {
 
     @Transactional
     public Page<ProductResponseDTO> getLatestList(int page) {
-        Pageable pageable = PageRequest.of(page, 10);
+        Pageable pageable = PageRequest.of(page, 15);
         Page<Product> productPage = productService.getLatestList(pageable);
         List<ProductResponseDTO> productResponseDTOList = new ArrayList<>();
         for (Product product : productPage) {
