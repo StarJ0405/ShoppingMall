@@ -990,17 +990,29 @@ public class MultiService {
     }
 
     @Transactional
-    public List<ProductResponseDTO> getRecentList(String username) {
+    public List<RecentResponseDTO> getRecentList(String username) {
         SiteUser user = userService.get(username);
         List<Recent> recentList = recentService.getRecent(user);
-        List<ProductResponseDTO> responseDTOList = new ArrayList<>();
+        List<RecentResponseDTO> responseDTOList = new ArrayList<>();
         for (Recent recent : recentList) {
-            ProductResponseDTO productResponseDTO = getProduct(recent.getProduct().getId());
-            responseDTOList.add(productResponseDTO);
+            ProductResponseDTO responseDTO = getProduct(recent.getProduct().getId());
+
+            responseDTOList.add(RecentResponseDTO.builder()
+                    .id(responseDTO.getId())
+                    .url(responseDTO.getUrl())
+                    .createDate(responseDTO.getCreateDate())
+                    .build());
         }
         return responseDTOList;
     }
 
+    @Transactional
+    public void deleteRecent(Long recentId, String username) {
+        Optional<Recent> _recent = recentService.getRecentId(recentId);
+        SiteUser user = userService.get(username);
+        if (_recent.isPresent() && _recent.get().getUser().equals(user))
+            this.recentService.delete(_recent.get());
+    }
 }
 
 

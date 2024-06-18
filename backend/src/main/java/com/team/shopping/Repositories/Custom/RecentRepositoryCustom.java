@@ -12,4 +12,6 @@ public interface RecentRepositoryCustom {
     Optional<Recent> findProductByUser(Product product, SiteUser user);
 
     List<Recent> findUsernameList(SiteUser user);
+
+    Optional<Recent> findRecentId(Long id);
 }
