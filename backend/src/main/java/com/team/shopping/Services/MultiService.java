@@ -33,7 +33,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.time.ZoneId;
 import java.util.*;
 
 @Service
@@ -1089,19 +1089,14 @@ public class MultiService {
         if (dateTime == null) {
             return null;
         }
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
-        String dateTimeString = dateTime.format(formatter);
-        return Long.parseLong(dateTimeString);
-
+        return dateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
     }
     private Long dateTimeTransfer(LocalDate date) {
         if (date == null) {
             return null;
         }
         LocalDateTime dateTime = date.atStartOfDay();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
-        String dateTimeString = dateTime.format(formatter);
-        return Long.parseLong(dateTimeString);
+        return dateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
     }
 }
 
