@@ -28,10 +28,14 @@ public class RecentService {
     }
 
     public void delete(Recent recent) {
-        recentRepository.delete(recent);
+        this.recentRepository.delete(recent);
     }
 
     public List<Recent> getRecent(SiteUser user) {
         return recentRepository.findUsernameList(user);
+    }
+
+    public Optional<Recent> getRecentId(Long recentId) {
+        return recentRepository.findRecentId(recentId);
     }
 }

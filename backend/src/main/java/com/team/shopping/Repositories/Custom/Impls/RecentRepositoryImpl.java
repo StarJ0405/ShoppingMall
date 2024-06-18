@@ -28,5 +28,11 @@ public class RecentRepositoryImpl implements RecentRepositoryCustom {
         return jpaQueryFactory.select(qRecent).from(qRecent).where(qRecent.user.eq(user)).orderBy(qRecent.createDate.desc()).fetch();
     }
 
+    @Override
+    public Optional<Recent> findRecentId(Long id) {
+        Recent recent = jpaQueryFactory.select(qRecent).from(qRecent).where(qRecent.id.eq(id)).fetchOne();
+        return Optional.ofNullable(recent);
+    }
+
 
 }
