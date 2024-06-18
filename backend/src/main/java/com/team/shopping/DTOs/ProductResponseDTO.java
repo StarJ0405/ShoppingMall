@@ -7,7 +7,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -24,7 +23,7 @@ public class ProductResponseDTO {
     private int price;
     private String description;
     private String detail;
-    private LocalDateTime dateLimit;
+    private Long dateLimit;
     private int remain;
     private String title;
     private String delivery;
@@ -33,15 +32,17 @@ public class ProductResponseDTO {
     private String a_s;
     private String brand;
     private List<String> tagList;
-    private LocalDateTime createDate;
-    private LocalDateTime modifyDate;
+    private Long createDate;
+    private Long modifyDate;
     private String url;
     private Double grade;
     private int reviewSize;
     private Map<String , Integer> numOfGrade;
 
     @Builder
-    public ProductResponseDTO(Product product, List<String> tagList, String url, List<Review> reviewList, Double averageGrade, Map<String , Integer> numOfGrade) {
+    public ProductResponseDTO(Product product, List<String> tagList, String url,
+                              List<Review> reviewList, Double averageGrade, Map<String , Integer> numOfGrade,
+                              Long dateLimit, Long createDate, Long modifyDate) {
 
         this.id = product.getId();
         this.authorUsername = product.getSeller().getUsername();
@@ -51,7 +52,7 @@ public class ProductResponseDTO {
         this.price = product.getPrice();
         this.description = product.getDescription();
         this.detail = product.getDetail();
-        this.dateLimit = product.getDateLimit();
+        this.dateLimit = dateLimit;
         this.remain = product.getRemain();
         this.title = product.getTitle();
         this.delivery = product.getDelivery();
@@ -59,8 +60,8 @@ public class ProductResponseDTO {
         this.receipt = product.getReceipt();
         this.a_s = product.getA_s();
         this.brand = product.getBrand();
-        this.createDate = product.getCreateDate();
-        this.modifyDate = product.getModifyDate();
+        this.createDate = createDate;
+        this.modifyDate = modifyDate;
         this.tagList = tagList;
         this.url = url;
         this.reviewSize = reviewList.size();

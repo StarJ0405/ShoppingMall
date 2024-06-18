@@ -24,6 +24,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Service
@@ -141,9 +144,9 @@ public class MultiService {
                 .point(siteUser.getPoint())
                 .phoneNumber(siteUser.getPhoneNumber())
                 .nickname(siteUser.getNickname())
-                .birthday(siteUser.getBirthday())
-                .createDate(siteUser.getCreateDate())
-                .modifyDate(siteUser.getModifyDate())
+                .birthday(this.dateTimeTransfer(siteUser.getBirthday()))
+                .createDate(this.dateTimeTransfer(siteUser.getCreateDate()))
+                .modifyDate(this.dateTimeTransfer(siteUser.getModifyDate()))
                 .name(siteUser.getName())
                 .url(url)
                 .build();
@@ -170,7 +173,16 @@ public class MultiService {
             if (newUrl != null)
                 fileSystemService.save(ImageKey.USER.getKey(username), newUrl);
         }
-        return UserResponseDTO.builder().username(siteUser.getUsername()).gender(siteUser.getGender().toString()).email(siteUser.getEmail()).point(siteUser.getPoint()).phoneNumber(siteUser.getPhoneNumber()).nickname(siteUser.getNickname()).birthday(siteUser.getBirthday()).createDate(siteUser.getCreateDate()).modifyDate(siteUser.getModifyDate())
+        return UserResponseDTO.builder()
+                .username(siteUser.getUsername())
+                .gender(siteUser.getGender().toString())
+                .email(siteUser.getEmail())
+                .point(siteUser.getPoint())
+                .phoneNumber(siteUser.getPhoneNumber())
+                .nickname(siteUser.getNickname())
+                .birthday(this.dateTimeTransfer(siteUser.getBirthday()))
+                .createDate(this.dateTimeTransfer(siteUser.getCreateDate()))
+                .modifyDate(this.dateTimeTransfer(siteUser.getModifyDate()))
                 .url(newUrl).name(siteUser.getName()).build();
     }
 
@@ -182,7 +194,18 @@ public class MultiService {
             throw new IllegalArgumentException("not match");
         SiteUser siteUser = userService.updatePassword(user, userRequestDTO.getNewPassword());
 
-        return UserResponseDTO.builder().username(siteUser.getUsername()).gender(siteUser.getGender().toString()).email(siteUser.getEmail()).point(siteUser.getPoint()).phoneNumber(siteUser.getPhoneNumber()).nickname(siteUser.getNickname()).birthday(siteUser.getBirthday()).createDate(siteUser.getCreateDate()).modifyDate(siteUser.getModifyDate()).name(siteUser.getName()).build();
+        return UserResponseDTO.builder()
+                .username(siteUser.getUsername())
+                .gender(siteUser.getGender().toString())
+                .email(siteUser.getEmail())
+                .point(siteUser.getPoint())
+                .phoneNumber(siteUser.getPhoneNumber())
+                .nickname(siteUser.getNickname())
+                .birthday(this.dateTimeTransfer(siteUser.getBirthday()))
+                .createDate(this.dateTimeTransfer(siteUser.getCreateDate()))
+                .modifyDate(this.dateTimeTransfer(siteUser.getModifyDate()))
+                .name(siteUser.getName())
+                .build();
     }
 
 
@@ -607,6 +630,9 @@ public class MultiService {
                 .product(product)
                 .tagList(tagList)
                 .url(url)
+                .dateLimit(this.dateTimeTransfer(product.getDateLimit()))
+                .createDate(this.dateTimeTransfer(product.getCreateDate()))
+                .modifyDate(this.dateTimeTransfer(product.getModifyDate()))
                 .reviewList(reviewList)
                 .averageGrade(averageGrade)
                 .numOfGrade(numOfGrade)
@@ -802,6 +828,8 @@ public class MultiService {
 
         return ReviewResponseDTO.builder()
                 .url(url)
+                .createDate(this.dateTimeTransfer(review.getCreateDate()))
+                .modifyDate(this.dateTimeTransfer(review.getModifyDate()))
                 .review(review)
                 .user(review.getAuthor())
                 .build();
@@ -919,10 +947,7 @@ public class MultiService {
 
         List<Article> articleList = this.articleService.getArticleList(Type.values()[type]); // 예를들어 Type 인데 값이 1인거 ->결국 int 가아닌 Type이다
         for (Article article : articleList) {
-            ArticleResponseDTO articleResponseDTO = ArticleResponseDTO.builder()
-                    .article(article)
-                    .siteUser(article.getAuthor())
-                    .build();
+            ArticleResponseDTO articleResponseDTO = this.getArticleResponseDTO(article);
             articleResponseDTOList.add(articleResponseDTO);
         }
 
@@ -934,10 +959,7 @@ public class MultiService {
         SiteUser siteUser = this.userService.get(username);
         Article article = this.articleService.save(articleRequestDTO, siteUser);
 
-        return ArticleResponseDTO.builder()
-                .article(article)
-                .siteUser(siteUser)
-                .build();
+        return this.getArticleResponseDTO(article);
     }
 
     @Transactional
@@ -948,11 +970,17 @@ public class MultiService {
             throw new IllegalArgumentException("not role");
         } else {
             Article article = this.articleService.update(_article, articleRequestDTO);
-            return ArticleResponseDTO.builder()
-                    .article(article)
-                    .siteUser(article.getAuthor())
-                    .build();
+            return this.getArticleResponseDTO(article);
         }
+    }
+
+    private ArticleResponseDTO getArticleResponseDTO(Article article) {
+        return ArticleResponseDTO.builder()
+                .article(article)
+                .siteUser(article.getAuthor())
+                .createDate(this.dateTimeTransfer(article.getCreateDate()))
+                .modifyDate(this.dateTimeTransfer(article.getModifyDate()))
+                .build();
     }
 
     /**
@@ -976,7 +1004,7 @@ public class MultiService {
     }
 
     @Transactional
-    public List<ProductResponseDTO> getReentList(String username) {
+    public List<ProductResponseDTO> getRecentList(String username) {
         SiteUser user = userService.get(username);
         List<Recent> recentList = recentService.getRecent(user);
         List<ProductResponseDTO> responseDTOList = new ArrayList<>();
@@ -985,6 +1013,25 @@ public class MultiService {
             responseDTOList.add(productResponseDTO);
         }
         return responseDTOList;
+    }
+
+    private Long dateTimeTransfer (LocalDateTime dateTime) {
+        if (dateTime == null) {
+            return null;
+        }
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+        String dateTimeString = dateTime.format(formatter);
+        return Long.parseLong(dateTimeString);
+
+    }
+    private Long dateTimeTransfer(LocalDate date) {
+        if (date == null) {
+            return null;
+        }
+        LocalDateTime dateTime = date.atStartOfDay();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+        String dateTimeString = dateTime.format(formatter);
+        return Long.parseLong(dateTimeString);
     }
 }
 

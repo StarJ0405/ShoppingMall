@@ -1,9 +1,7 @@
 package com.team.shopping.Controllers;
 
-import com.team.shopping.DTOs.ProductCreateRequestDTO;
 import com.team.shopping.DTOs.ProductResponseDTO;
 import com.team.shopping.DTOs.RecentRequestDTO;
-import com.team.shopping.Domains.Recent;
 import com.team.shopping.Records.TokenRecord;
 import com.team.shopping.Services.MultiService;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +33,7 @@ public class RecentController {
         TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
         if (tokenRecord.isOK()) {
             String username = tokenRecord.username();
-            List<ProductResponseDTO> responseDTOList = this.multiService.getReentList(username);
+            List<ProductResponseDTO> responseDTOList = this.multiService.getRecentList(username);
             return tokenRecord.getResponseEntity(responseDTOList);
         }
         return tokenRecord.getResponseEntity();

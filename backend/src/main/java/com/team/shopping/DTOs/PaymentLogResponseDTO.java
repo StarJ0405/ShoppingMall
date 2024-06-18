@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -22,7 +21,7 @@ public class PaymentLogResponseDTO {
 
     private int totalPrice;
 
-    private LocalDateTime paymentDate;
+    private Long paymentDate;
 
     private String recipient;
 
@@ -40,12 +39,12 @@ public class PaymentLogResponseDTO {
 
     @Builder
     public PaymentLogResponseDTO (int totalPrice, PaymentLog paymentLog,
-                                  List<PaymentProductResponseDTO> paymentProductResponseDTOList) {
+                                  List<PaymentProductResponseDTO> paymentProductResponseDTOList, Long paymentDate) {
         this.paymentLogId = paymentLog.getId();
         this.paymentStatus = paymentLog.getPaymentStatus().getStatus();
         this.recipient = paymentLog.getRecipient();
         this.totalPrice = totalPrice;
-        this.paymentDate = paymentLog.getCreateDate();
+        this.paymentDate = paymentDate;
         this.paymentProductResponseDTOList = paymentProductResponseDTOList;
         this.phoneNumber = paymentLog.getPhoneNumber();
         this.mainAddress = paymentLog.getMainAddress();

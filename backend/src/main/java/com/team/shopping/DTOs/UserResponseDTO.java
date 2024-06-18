@@ -5,9 +5,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-
 @Getter
 @Setter
 @NoArgsConstructor
@@ -23,7 +20,7 @@ public class UserResponseDTO {
 
     private String phoneNumber;
 
-    private LocalDate birthday;
+    private Long birthday;
 
     private String gender;
 
@@ -31,19 +28,20 @@ public class UserResponseDTO {
 
     private int point;
 
-    private LocalDateTime createDate;
+    private Long createDate;
 
-    private LocalDateTime modifyDate;
+    private Long modifyDate;
 
     private String address;
+
     private String url;
 
 
 
     @Builder
     public UserResponseDTO (String username, String name, String email, String nickname,
-                            String phoneNumber, LocalDate birthday, String gender, String role, int point,
-                            LocalDateTime createDate, LocalDateTime modifyDate, String url ) {
+                            String phoneNumber, String gender, String role, int point,
+                            String url, Long createDate, Long modifyDate, Long birthday ) {
         this.username = username;
         this.name = name;
         this.email = email;
