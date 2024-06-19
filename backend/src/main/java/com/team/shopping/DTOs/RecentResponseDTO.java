@@ -5,19 +5,19 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
-
 @Getter
 @Setter
 @NoArgsConstructor
 public class RecentResponseDTO {
-    private Long id;
+    private Long recentId;
+    private Long productId;
     private String url;
     private Long createDate;
 
     @Builder
-    public RecentResponseDTO(Long id, String url, Long createDate) {
-        this.id = id;
+    public RecentResponseDTO(Long recentId,Long productId, String url, Long createDate) {
+        this.recentId = recentId;
+        this.productId = productId;
         this.url = url;
         this.createDate = createDate;
     }
