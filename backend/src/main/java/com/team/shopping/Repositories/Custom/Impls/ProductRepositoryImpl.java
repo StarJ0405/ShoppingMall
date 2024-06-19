@@ -19,7 +19,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
     QReview qReview = QReview.review;
     QTag qTag = QTag.tag;
     QCategory qCategory = QCategory.category;
-    QSiteUser qSiteUser = QSiteUser.siteUser;
+
 
     @Override
     public Page<Product> findAllPage(Pageable pageable) {
