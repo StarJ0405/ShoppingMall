@@ -1,12 +1,10 @@
 package com.team.shopping.Domains;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Getter
 @Setter
@@ -22,4 +20,10 @@ public class EventProduct {
 
     @ManyToOne
     private Product product;
+
+    @Builder
+    public EventProduct (Event event, Product product) {
+        this.event = event;
+        this.product = product;
+    }
 }

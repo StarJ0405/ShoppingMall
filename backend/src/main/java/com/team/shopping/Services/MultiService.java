@@ -215,6 +215,62 @@ public class MultiService {
                 .build();
     }
 
+    /**
+     * address
+     * */
+
+    @Transactional
+    public List<AddressResponseDTO> getAddressList (String username) {
+        SiteUser user = this.userService.get(username);
+        List<Address> addressList = this.addressService.getList(user);
+        List<AddressResponseDTO> addressResponseDTOList = new ArrayList<>();
+
+        for (Address address : addressList) {
+            addressResponseDTOList.add(AddressResponseDTO.builder()
+                    .address(address)
+                    .build());
+        }
+        return addressResponseDTOList;
+    }
+
+    @Transactional
+    public AddressResponseDTO createAddress (String username, AddressRequestDTO addressRequestDTO) {
+        SiteUser user = this.userService.get(username);
+        Address address = this.addressService.saveAddress(user, addressRequestDTO);
+        return AddressResponseDTO.builder()
+                .address(address)
+                .build();
+    }
+
+    @Transactional
+    public AddressResponseDTO updateAddress (String username, AddressRequestDTO addressRequestDTO) {
+        SiteUser user = this.userService.get(username);
+        Address _address = this.addressService.get(addressRequestDTO.getAddressId());
+        if (!username.equals(_address.getUser().getUsername()) && !user.getRole().equals(UserRole.ADMIN)) {
+            throw new NoSuchElementException("not role");
+        }
+        else {
+            Address address = this.addressService.updateAddress(addressRequestDTO);
+            return AddressResponseDTO.builder()
+                .address(address)
+                .build();
+        }
+    }
+
+    @Transactional
+    public void deleteAddress (String username, List<Long> addressIdList) {
+        SiteUser user = this.userService.get(username);
+        for (Long addressId : addressIdList) {
+            Address address = this.addressService.get(addressId);
+            if (!username.equals(address.getUser().getUsername()) && !user.getRole().equals(UserRole.ADMIN)) {
+                throw new NoSuchElementException("not role");
+            }
+            else {
+                this.addressService.delete(address);
+            }
+        }
+    }
+
 
     /**
      * List
@@ -1081,6 +1137,20 @@ public class MultiService {
         }
         return new PageImpl<>(productResponseDTOList, pageable, productPage.getTotalElements());
     }
+
+    /**
+     * event
+     * */
+
+    @Transactional
+    public void createEvent (String username, EventRequestDTO eventRequestDTO) {
+        SiteUser user = this.userService.get(username);
+
+    }
+
+    /**
+     * function
+     * */
 
     private Long dateTimeTransfer (LocalDateTime dateTime) {
         if (dateTime == null) {
