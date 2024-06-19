@@ -3,6 +3,7 @@ package com.team.shopping.DTOs;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 public class EventRequestDTO {
@@ -13,6 +14,6 @@ public class EventRequestDTO {
 
     private Double discount;
 
-    private Long ProductId;
+    private List<Long> productIdList;
 
 }

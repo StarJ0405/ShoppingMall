@@ -2,6 +2,7 @@ package com.team.shopping.Services.Module;
 
 import com.team.shopping.DTOs.EventRequestDTO;
 import com.team.shopping.Domains.Event;
+import com.team.shopping.Domains.Product;
 import com.team.shopping.Domains.SiteUser;
 import com.team.shopping.Repositories.EventRepository;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,10 @@ public class EventService {
                 .creator(creator)
                 .discount(eventRequestDTO.getDiscount())
                 .build());
+    }
+
+    public Event findByProduct (Product product) {
+        return this.eventRepository.findByProduct(product);
     }
 
 }

@@ -1,6 +1,7 @@
 package com.team.shopping.Controllers;
 
 import com.team.shopping.DTOs.EventRequestDTO;
+import com.team.shopping.DTOs.EventResponseDTO;
 import com.team.shopping.Records.TokenRecord;
 import com.team.shopping.Services.MultiService;
 import lombok.RequiredArgsConstructor;
@@ -24,13 +25,13 @@ public class EventController {
         try {
             if (tokenRecord.isOK()) {
                 String username = tokenRecord.username();
-
-                return tokenRecord.getResponseEntity();
+                EventResponseDTO eventResponseDTO = this.multiService.createEvent(username, eventRequestDTO);
+                return tokenRecord.getResponseEntity(eventResponseDTO);
             }
         }catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("권한이 없습니다.");
         }catch (NoSuchElementException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("제품을 찾지 못했습니다.");
         }
         return tokenRecord.getResponseEntity();
     }
