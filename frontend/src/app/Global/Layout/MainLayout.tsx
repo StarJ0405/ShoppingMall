@@ -104,7 +104,7 @@ export default function Main(props: Readonly<pageInterface>) {
             <div className='relative w-[104px]'>
               <img onClick={() => window.location.href = '/product/' + recent.id} src={recent?.url ? recent.url : '/empty_product.png'} className={'w-[104px] h-[104px] cursor-pointer ' + (hover == index ? ' border-2 border-black' : '')} onMouseEnter={() => setHover(index)} onMouseLeave={() => setHover(-1)} />
               <button className={'text-sm absolute font-bold right-0 top-0 text-white bg-black w-[14px] z-[1] text-center' + (hover != index ? ' hidden' : '')} onClick={() => {
-                deleteRecent(recent.id).then(r => {props.setRecentList(r); console.log(r)}).catch(e => console.log(e))
+                deleteRecent(recent.recentId).then(r => {props.setRecentList(r); console.log(r)}).catch(e => console.log(e))
               }} onMouseEnter={() => setHover(index)} onMouseLeave={() => setHover(-1)} >X</button>
             </div>
           </li>)}

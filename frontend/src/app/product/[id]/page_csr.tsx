@@ -174,7 +174,7 @@ export default function Page(props: pageProps) {
                         <div className='flex'>
                             <div className='flex flex-col items-center justify-center w-[400px] h-[196px]'>
                                 <label className='font-bold text-lg mb-1'>구매만족도</label>
-                                <label className='font-bold text-3xl mb-3'>4.6</label>
+                                <label className='font-bold text-3xl mb-3'>{product.grade}</label>
                                 <div className='rating rating-lg rating-half'>
                                     <input type='radio' className='rating-hidden' defaultChecked={!product?.grade || (product?.grade == 0 && product?.grade < 0.25)} onClick={e => e.preventDefault()} />
                                     <input type='radio' className='bg-orange-500 mask mask-star-2 mask-half-1' defaultChecked={product?.grade > 0.25 && product?.grade <= 0.75} onClick={e => e.preventDefault()} />

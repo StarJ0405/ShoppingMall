@@ -20,7 +20,7 @@ export default function SideList(props: sideListProps) {
         <div className="flex flex-col border-x-2 border-b-2 border-gray-400 py-2 px-4 w-full">
             <label className="font-bold mb-3">나의 관심 목록</label>
             <a href="/account/wish" className="text-sm text-gray-500 hover:underline">찜한 상품</a>
-            <a href="" className="text-sm text-gray-500 hover:underline">최근본 상품</a>
+            <a href="/account/recent" className="text-sm text-gray-500 hover:underline">최근본 상품</a>
         </div>
         <div className="flex flex-col border-x-2 border-b-2 border-gray-400 py-2 px-4 w-full">
             <label className="font-bold mb-3">회원 정보 변경</label>
