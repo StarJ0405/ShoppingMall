@@ -16,9 +16,9 @@ public class SearchController {
     private final MultiService multiService;
 
     @GetMapping
-    public ResponseEntity<?> searchedProductList (@RequestHeader("page") int page,
-                                                  @RequestParam(value = "keyword", defaultValue = "") String keyword,
-                                                  @RequestHeader("sort") int sort){
+    public ResponseEntity<?> searchedProductList (@RequestHeader("Page") int page,
+                                                  @RequestParam(value = "Keyword", defaultValue = "") String keyword,
+                                                  @RequestHeader("Sort") int sort){
         try {
             Page<ProductResponseDTO> productResponseDTOList = this.multiService.searchByKeyword(page, keyword, sort);
             return ResponseEntity.status(HttpStatus.OK).body(productResponseDTOList);

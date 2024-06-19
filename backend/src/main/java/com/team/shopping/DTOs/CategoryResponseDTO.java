@@ -13,14 +13,17 @@ import java.util.List;
 public class CategoryResponseDTO {
 
     private Long id;
-    private String parent_name;
+
+    private String parentName;
+
     private String name;
+
     private List<CategoryResponseDTO> categoryResponseDTOList;
 
     @Builder
-    public CategoryResponseDTO(Long id, String parent_name, String name, List<CategoryResponseDTO> categoryResponseDTOList) {
+    public CategoryResponseDTO(Long id, String parentName, String name, List<CategoryResponseDTO> categoryResponseDTOList) {
         this.id = id;
-        this.parent_name=parent_name;
+        this.parentName=parentName;
         this.name = name;
         this.categoryResponseDTOList = categoryResponseDTOList;
     }

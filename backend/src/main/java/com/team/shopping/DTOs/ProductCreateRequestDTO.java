@@ -11,6 +11,7 @@ import java.util.List;
 @Getter
 @Setter
 public class ProductCreateRequestDTO {
+
     private Long categoryId;
     private int price;
     private String description;
