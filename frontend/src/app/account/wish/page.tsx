@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 export default function Page() {
   const [user, setUser] = useState(null as any);
   const ACCESS_TOKEN = typeof window == 'undefined' ? null : localStorage.getItem('accessToken');
-  const [widhList, setWishList] = useState(null as unknown as any[]);
+  const [wishList, setWishList] = useState(null as unknown as any[]);
   const [recentList, setRecentList] = useState(null as unknown as any[]);
   useEffect(() => {
     if (ACCESS_TOKEN)
@@ -51,7 +51,7 @@ export default function Page() {
   function SelectAll(e: any) {
     document.getElementsByName('check').forEach((check: any) => check.checked = e.target.checked);
   }
-  return <Profile user={user} recentList={recentList}>
+  return <Profile user={user} recentList={recentList} setRecentList={setRecentList}>
     <label className="font-bold text-xl"><label className="text-red-500">찜한</label> 상품</label>
     <li className="list-disc text-xs">찜한 상품은 등록일로부터 <label className="font-bold">최대 1년간</label> 저장됩니다.</li>
     <table>
@@ -65,7 +65,7 @@ export default function Page() {
         </tr>
       </thead>
       <tbody className="text-center">
-        {widhList?.map((wish, index) =>
+        {wishList?.map((wish, index) =>
           <tr className="h-[64px] align-middle" key={index}>
             <td><input name="check" type="checkbox" value={wish.id} /></td>
             <td className="text-start px-2">
@@ -75,7 +75,7 @@ export default function Page() {
               </a>
             </td>
             <td >{wish.price.toLocaleString('ko-KR') + '원'}</td>
-            <td >?</td>
+            <td >{wish.grade}</td>
             <td className="text-xs">
               <button className="px-2 border border-black mb-1 btn btn-xs">장바구니</button>
               <button className="px-2 border border-black btn btn-xs" onClick={() => Delete(wish.id)}>삭제하기</button>
