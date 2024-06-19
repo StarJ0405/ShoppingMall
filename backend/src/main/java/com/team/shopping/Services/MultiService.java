@@ -1081,10 +1081,6 @@ public class MultiService {
         return new PageImpl<>(productResponseDTOList, pageable, productPage.getTotalElements());
     }
 
-
-
-
-
     private Long dateTimeTransfer (LocalDateTime dateTime) {
         if (dateTime == null) {
             return null;

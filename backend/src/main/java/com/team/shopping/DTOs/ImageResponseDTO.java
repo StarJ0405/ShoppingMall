@@ -9,6 +9,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class ImageResponseDTO {
+
     private String url;
 
     @Builder

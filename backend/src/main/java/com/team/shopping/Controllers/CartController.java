@@ -32,7 +32,7 @@ public class CartController {
 
     @GetMapping("/select")
     public ResponseEntity<?> selectCart(@RequestHeader("Authorization") String accessToken,
-                                        @RequestHeader("cartItemList") List<Long> cartItemIdList) {
+                                        @RequestHeader("CartItemIdList") List<Long> cartItemIdList) {
         TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
         if (tokenRecord.isOK()) {
             String username = tokenRecord.username();
@@ -81,7 +81,7 @@ public class CartController {
 
     @DeleteMapping("/cartList")
     public ResponseEntity<?> deleteToCartList (@RequestHeader("Authorization") String accessToken,
-                                               @RequestHeader("productId") Long productId) {
+                                               @RequestHeader("ProductId") Long productId) {
         TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
         try {
             if (tokenRecord.isOK()) {
@@ -97,7 +97,7 @@ public class CartController {
 
     @DeleteMapping("/cartList/multi")
     public ResponseEntity<?> deleteMultiToCartList(@RequestHeader("Authorization") String accessToken,
-                                                   @RequestHeader("productIdList") List<Long> productIdList) {
+                                                   @RequestHeader("ProductIdList") List<Long> productIdList) {
         TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
         try {
             if (tokenRecord.isOK()) {
