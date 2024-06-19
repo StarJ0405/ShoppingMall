@@ -1,6 +1,6 @@
 "use client"
 
-import { getRecent, getUser, postWish } from "@/app/API/UserAPI";
+import { getRecent, getUser, postCartList, postWish } from "@/app/API/UserAPI";
 import Profile from "@/app/Global/Layout/ProfileLayout";
 import { redirect } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -25,9 +25,21 @@ export default function Page() {
     function SelectAll(e: any) {
         document.getElementsByName('check').forEach((check: any) => check.checked = e.target.checked);
     }
+    function addCart(id: number) {
+        if (confirm("선택하신 찜한 상품을 장바구니에 추가하시겠습니까?"))
+          postCartList({ productId: id, optionIdList: [], count: 1 })
+            .then(r => window.location.href = "/account/cart")
+      }
+      function addCartList() {
+        if (confirm("선택하신 찜한 상품들을 장바구니에 추가하시겠습니까?"))
+          document.getElementsByName('check').forEach((check: any) => check.checked ?
+            (postCartList({ productId: check.value, optionIdList: [], count: 1 })
+              .then(r => window.location.href = "/account/cart"))
+            : null);
+      }
     return <Profile user={user} recentList={recentList} setRecentList={setRecentList}>
         <label className="font-bold text-xl"><label className="text-red-500">찜한</label> 상품</label>
-        <li className="list-disc text-xs">찜한 상품은 등록일로부터 <label className="font-bold">최대 1년간</label> 저장됩니다.</li>
+        <li className="list-disc text-xs">최근 상품은 등록일로부터 <label className="font-bold">최대 1년간</label> 저장됩니다.</li>
         <table>
             <thead className="text-center">
                 <tr>
@@ -51,14 +63,14 @@ export default function Page() {
                         <td >{recent?.price?.toLocaleString('ko-KR') + '원'}</td>
                         <td >{recent?.price?.grade}</td>
                         <td className="text-xs">
-                            <button className="px-2 border border-black mb-1 btn btn-xs">장바구니</button>
+                            <button className="px-2 border border-black mb-1 btn btn-xs" onClick={() => addCart(recent?.productId)}>장바구니</button>
                             <button className="px-2 border border-black btn btn-xs" onClick={() => { postWish(recent?.productId).catch(e => console.log(e))}}>찜하기</button>
                         </td>
                     </tr>
                 )}
             </tbody>
         </table>
-        <button className="mt-2 text-xs border border-black mb-1 w-[145px] h-[18px] btn btn-xs mr-2">선택상품 장바구니 담기</button>
+        <button className="mt-2 text-xs border border-black mb-1 w-[145px] h-[18px] btn btn-xs mr-2" onClick={() => addCartList()}>선택상품 장바구니 담기</button>
 
     </Profile>;
 }

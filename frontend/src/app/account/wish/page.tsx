@@ -1,5 +1,5 @@
 "use client"
-import { deleteWish, deleteWishList, getRecent, getUser, getWishList } from "@/app/API/UserAPI";
+import { deleteWish, deleteWishList, getRecent, getUser, getWishList, postCartList } from "@/app/API/UserAPI";
 import Profile from "@/app/Global/Layout/ProfileLayout";
 import { redirect } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -48,6 +48,18 @@ export default function Page() {
         }).catch(e => console.log(e))
     }
   }
+  function addCart(id: number) {
+    if (confirm("선택하신 찜한 상품을 장바구니에 추가하시겠습니까?"))
+      postCartList({ productId: id, optionIdList: [], count: 1 })
+        .then(r => window.location.href = "/account/cart")
+  }
+  function addCartList() {
+    if (confirm("선택하신 찜한 상품들을 장바구니에 추가하시겠습니까?"))
+      document.getElementsByName('check').forEach((check: any) => check.checked ?
+        (postCartList({ productId: check.value, optionIdList: [], count: 1 })
+          .then(r => window.location.href = "/account/cart"))
+        : null);
+  }
   function SelectAll(e: any) {
     document.getElementsByName('check').forEach((check: any) => check.checked = e.target.checked);
   }
@@ -77,7 +89,7 @@ export default function Page() {
             <td >{wish.price.toLocaleString('ko-KR') + '원'}</td>
             <td >{wish.grade}</td>
             <td className="text-xs">
-              <button className="px-2 border border-black mb-1 btn btn-xs">장바구니</button>
+              <button className="px-2 border border-black mb-1 btn btn-xs" onClick={() => addCart(wish.id)}>장바구니</button>
               <button className="px-2 border border-black btn btn-xs" onClick={() => Delete(wish.id)}>삭제하기</button>
             </td>
           </tr>
@@ -85,7 +97,7 @@ export default function Page() {
       </tbody>
     </table>
     <div className="text-xs flex mt-2">
-      <button className="border border-black mb-1 w-[145px] h-[18px] btn btn-xs mr-2">선택상품 장바구니 담기</button>
+      <button className="border border-black mb-1 w-[145px] h-[18px] btn btn-xs mr-2" onClick={() => addCartList()}>선택상품 장바구니 담기</button>
       <button className="border border-black w-[66px] h-[18px] btn btn-xs" onClick={() => DeleteAll()}>삭제하기</button>
     </div>
   </Profile>
