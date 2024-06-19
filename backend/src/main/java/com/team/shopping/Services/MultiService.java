@@ -1030,7 +1030,8 @@ public class MultiService {
             ProductResponseDTO responseDTO = getProduct(recent.getProduct().getId());
 
             responseDTOList.add(RecentResponseDTO.builder()
-                    .id(responseDTO.getId())
+                    .recentId(recent.getId())
+                    .productId(responseDTO.getId())
                     .url(responseDTO.getUrl())
                     .createDate(responseDTO.getCreateDate())
                     .build());
