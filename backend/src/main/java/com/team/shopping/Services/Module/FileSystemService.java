@@ -5,6 +5,7 @@ import com.team.shopping.Repositories.FileSystemRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -23,4 +24,7 @@ public class FileSystemService {
         return fileSystemRepository.findById(key);
     }
 
+    public List<FileSystem> getList(String key) {
+        return fileSystemRepository.findByKeyList(key);
+    }
 }

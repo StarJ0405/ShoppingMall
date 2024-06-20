@@ -28,4 +28,17 @@ public class ImageController {
         }
         return tokenRecord.getResponseEntity();
     }
+
+    @PostMapping("/list")
+    public ResponseEntity<?> tempImageList(@RequestHeader("Authorization") String accessToken,
+                                       ImageRequestDTO imageRequestDTO) {
+        TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
+        if (tokenRecord.isOK()) {
+            String username = tokenRecord.username();
+            ImageResponseDTO imageResponseDTO = this.multiService.tempImageList(imageRequestDTO, username);
+            return tokenRecord.getResponseEntity(imageResponseDTO);
+        }
+        return tokenRecord.getResponseEntity();
+    }
+
 }
