@@ -30,12 +30,12 @@ public class ReviewResponseDTO {
 
     private Long modifyDate;
 
-    private String url;
+    private String profileUrl;
 
     private List<String> urlList;
 
     @Builder
-    public ReviewResponseDTO (SiteUser user, Review review, List<String> urlList, String url,
+    public ReviewResponseDTO (SiteUser user, Review review, List<String> urlList, String profileUrl,
                               Long createDate, Long modifyDate) {
         this.id = review.getId();
         this.nickname = user.getNickname();
@@ -45,7 +45,8 @@ public class ReviewResponseDTO {
         this.grade = review.getGrade();
         this.createDate = createDate;
         this.modifyDate = modifyDate;
-        this.url = url;
+        this.profileUrl = profileUrl;
         this.urlList = urlList;
+
     }
 }

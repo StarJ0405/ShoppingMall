@@ -13,23 +13,28 @@ public class DTOConverter {
         return new OptionResponseDTO(options);
     }
 
+    public static CartItemDetailResponseDTO toCartItemDetailResponseDTO (Options options) {
+
+        return new CartItemDetailResponseDTO(options);
+    }
+
     public static CartResponseDTO toCartResponseDTO(CartItem cartItem, List<CartItemDetail> cartItemDetails,
                                                     Double discount, int discountPrice, String imageUrl) {
 
         LocalDateTime _createDate = cartItem.getCreateDate();
         Long createDate = dateTimeTransfer(_createDate);
 
-        List<OptionResponseDTO> optionResponseDTOList = new ArrayList<>();
+        List<CartItemDetailResponseDTO> cartItemDetailResponseDTOList = new ArrayList<>();
         long totalPrice =  ((long)discountPrice * cartItem.getCount());
 
         for (CartItemDetail cartItemDetail : cartItemDetails) {
             Options option = cartItemDetail.getOptions();
-            optionResponseDTOList.add(DTOConverter.toOptionResponseDTO(option));
-            totalPrice += ((long) option.getPrice() * option.getCount()) * cartItem.getCount();
+            cartItemDetailResponseDTOList.add(DTOConverter.toCartItemDetailResponseDTO(option));
+            totalPrice += ((long) option.getPrice() * cartItem.getCount());
         }
 
         return CartResponseDTO.builder()
-                .optionResponseDTOList(optionResponseDTOList)
+                .cartItemDetailResponseDTOList(cartItemDetailResponseDTOList)
                 .cartItem(cartItem)
                 .discount(discount)
                 .discountPrice(discountPrice)
@@ -44,9 +49,17 @@ public class DTOConverter {
         return new PaymentProductDetailResponseDTO(paymentProductDetail);
     }
 
-    public static PaymentProductResponseDTO toPaymentProductResponseDTO (PaymentProduct paymentProduct, List<PaymentProductDetail> paymentProductDetailList) {
+    public static PaymentProductResponseDTO toPaymentProductResponseDTO (PaymentProduct paymentProduct,
+                                                                         List<PaymentProductDetail> paymentProductDetailList,
+                                                                         String imageUrl) {
         List<PaymentProductDetailResponseDTO> paymentProductDetailResponseDTOList = new ArrayList<>();
-        int withOptionPrice = paymentProduct.getPrice() * paymentProduct.getCount();
+
+        double discount = (paymentProduct.getDiscount() != null) ? paymentProduct.getDiscount() : 0.0;
+        double discountedPrice = paymentProduct.getPrice() * (1 - discount / 100);
+        discountedPrice = Math.round(discountedPrice * 10) / 10.0;
+        int discountPrice = (int) Math.round(discountedPrice);
+
+        int withOptionPrice = discountPrice * paymentProduct.getCount();
         for (PaymentProductDetail paymentProductDetail : paymentProductDetailList) {
             paymentProductDetailResponseDTOList.add(DTOConverter.toPaymentProductDetailResponseDTO(paymentProductDetail));
             withOptionPrice += paymentProductDetail.getOptionPrice() * paymentProduct.getCount();
@@ -54,6 +67,8 @@ public class DTOConverter {
         return PaymentProductResponseDTO.builder()
                 .paymentProduct(paymentProduct)
                 .withOptionPrice(withOptionPrice)
+                .discountPrice(discountPrice)
+                .imageUrl(imageUrl)
                 .paymentProductDetailResponseDTOList(paymentProductDetailResponseDTOList)
                 .build();
     }

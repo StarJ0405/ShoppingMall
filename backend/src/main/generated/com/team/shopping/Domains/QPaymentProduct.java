@@ -28,6 +28,8 @@ public class QPaymentProduct extends EntityPathBase<PaymentProduct> {
 
     public final StringPath description = createString("description");
 
+    public final NumberPath<Double> discount = createNumber("discount", Double.class);
+
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
     public final QPaymentLog paymentLog;

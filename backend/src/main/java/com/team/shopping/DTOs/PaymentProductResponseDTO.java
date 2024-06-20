@@ -19,6 +19,10 @@ public class PaymentProductResponseDTO {
 
     private int productPrice;
 
+    private Double discount;
+
+    private int discountPrice;
+
     private String description;
 
     private String title;
@@ -27,6 +31,8 @@ public class PaymentProductResponseDTO {
 
     private int count;
 
+    private String imageUrl;
+
     private List<PaymentProductDetailResponseDTO> paymentProductDetailResponseDTOList;
 
     private int withOptionPrice;
@@ -34,7 +40,7 @@ public class PaymentProductResponseDTO {
     @Builder
     public PaymentProductResponseDTO (PaymentProduct paymentProduct,
                                       List<PaymentProductDetailResponseDTO> paymentProductDetailResponseDTOList,
-                                      int withOptionPrice) {
+                                      int withOptionPrice, String imageUrl, int discountPrice) {
         this.productId = paymentProduct.getProductId();
         this.seller = paymentProduct.getSeller();
         this.productPrice = paymentProduct.getPrice();
@@ -43,7 +49,10 @@ public class PaymentProductResponseDTO {
         this.title = paymentProduct.getTitle();
         this.brand = paymentProduct.getBrand();
         this.count = paymentProduct.getCount();
+        this.discount = paymentProduct.getDiscount();
+        this.discountPrice = discountPrice;
         this.paymentProductDetailResponseDTOList = paymentProductDetailResponseDTOList;
+        this.imageUrl = imageUrl;
 
     }
 }

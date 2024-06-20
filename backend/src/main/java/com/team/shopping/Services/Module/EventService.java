@@ -15,11 +15,15 @@ public class EventService {
     private final EventRepository eventRepository;
 
     public Event saveEvent (SiteUser creator, EventRequestDTO eventRequestDTO) {
+        Double discount = eventRequestDTO.getDiscount();
+        if (discount < 0.0) {
+            discount = 0.0;
+        }
         return this.eventRepository.save(Event.builder()
                 .startDate(eventRequestDTO.getStartDate())
                 .endDate(eventRequestDTO.getEndDate())
                 .creator(creator)
-                .discount(eventRequestDTO.getDiscount())
+                .discount(discount)
                 .build());
     }
 

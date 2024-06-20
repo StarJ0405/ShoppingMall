@@ -396,31 +396,19 @@ public class MultiService {
 
         boolean updated = false;
 
-        if (cartItemList.isEmpty()) {
-            CartItem cartItem = this.cartItemService.addToCart(user, product, cartRequestDTO.getCount());
-            List<Options> options = this.optionsService.getOptionsList(cartRequestDTO.getOptionIdList());
-            for (Options option : options) {
-                if (option.getCount() <= 0) {
-                    throw new NoSuchElementException("option count 0");
-                } else {
-                    this.cartItemDetailService.saveCartItemDetail(cartItem, option);
-                }
+        for (CartItem cartItem : cartItemList) {
+            List<CartItemDetail> cartItemDetailList = this.cartItemDetailService.getList(cartItem);
+            List<Long> cartItemOptionIds = new ArrayList<>();
+            for (CartItemDetail detail : cartItemDetailList) {
+                cartItemOptionIds.add(detail.getOptions().getId());
             }
-        } else {
-            for (CartItem cartItem : cartItemList) {
-                List<CartItemDetail> cartItemDetailList = this.cartItemDetailService.getList(cartItem);
-                List<Long> cartItemOptionIds = new ArrayList<>();
-                for (CartItemDetail detail : cartItemDetailList) {
-                    cartItemOptionIds.add(detail.getOptions().getId());
-                }
-                Collections.sort(cartItemOptionIds);
+            Collections.sort(cartItemOptionIds);
 
-                if (isOptionListEqual(cartItemOptionIds, cartRequestDTO.getOptionIdList())) {
-                    cartItem.updateCount(cartItem.getCount() + cartRequestDTO.getCount());
-                    this.cartItemService.save(cartItem);
-                    updated = true;
-                    break;
-                }
+            if (isOptionListEqual(cartItemOptionIds, cartRequestDTO.getOptionIdList())) {
+                cartItem.updateCount(cartItem.getCount() + cartRequestDTO.getCount());
+                this.cartItemService.save(cartItem);
+                updated = true;
+                break;
             }
         }
 
@@ -541,8 +529,9 @@ public class MultiService {
 
             for (PaymentProduct paymentProduct : paymentProductList) {
                 List<PaymentProductDetail> paymentProductDetailList = this.paymentProductDetailService.getList(paymentProduct);
-
-                PaymentProductResponseDTO paymentProductResponseDTO = DTOConverter.toPaymentProductResponseDTO(paymentProduct, paymentProductDetailList);
+                Product product = this.productService.getProduct(paymentProduct.getProductId());
+                String url = this.getImageUrl(product);
+                PaymentProductResponseDTO paymentProductResponseDTO = DTOConverter.toPaymentProductResponseDTO(paymentProduct, paymentProductDetailList, url);
                 paymentProductResponseDTOList.add(paymentProductResponseDTO);
             }
 
@@ -588,7 +577,8 @@ public class MultiService {
             Product product = cartItem.getProduct();
 
             // 결제 상품 생성 및 저장
-            PaymentProduct paymentProduct = this.paymentProductService.save(paymentLog, product, cartItem);
+            Double discount = this.getProductDiscount(product);
+            PaymentProduct paymentProduct = this.paymentProductService.save(paymentLog, product, cartItem, discount);
 
             // 상품 재고 감소
             product.setRemain(product.getRemain() - paymentProduct.getCount());
@@ -619,7 +609,9 @@ public class MultiService {
         List<PaymentProductResponseDTO> paymentProductResponseDTOList = new ArrayList<>();
         for (PaymentProduct paymentProduct : paymentProductList) {
             List<PaymentProductDetail> paymentProductDetailList = this.paymentProductDetailService.getList(paymentProduct);
-            PaymentProductResponseDTO paymentProductResponseDTO = DTOConverter.toPaymentProductResponseDTO(paymentProduct, paymentProductDetailList);
+            Product product = this.productService.getProduct(paymentProduct.getProductId());
+            String url = this.getImageUrl(product);
+            PaymentProductResponseDTO paymentProductResponseDTO = DTOConverter.toPaymentProductResponseDTO(paymentProduct, paymentProductDetailList, url);
             paymentProductResponseDTOList.add(paymentProductResponseDTO);
         }
 
@@ -705,53 +697,15 @@ public class MultiService {
     }
 
     private ProductResponseDTO getProduct(Product product) {
+
         List<String> tagList = tagService.findByProduct(product);
         List<Review> reviewList = this.reviewService.getList(product);
         String url = this.getImageUrl(product);
-        double totalGrade = 0.0;
-        Map<String, Integer> numOfGrade = new HashMap<>();
+        Map<String, Object> gradeCalculate = this.gradeCalculate(reviewList);
+      
+        Map<String, Integer> numOfGrade = (Map<String, Integer>) gradeCalculate.get("numOfGrade");
+        Double averageGrade = (Double) gradeCalculate.get("averageGrade");
 
-        Event event = this.eventService.findByProduct(product);
-        Optional<MultiKey> _multiKey = multiKeyService.get(ImageKey.PRODUCT.getKey(product.getId().toString()));
-        List<String> urlList = new ArrayList<>();
-        if (_multiKey.isPresent())
-            for (String keyName : _multiKey.get().getVs()) {
-                Optional<FileSystem> _contentFileSystem = fileSystemService.get(keyName);
-                _contentFileSystem.ifPresent(fileSystem -> urlList.add(fileSystem.getV()));
-            }
-
-        numOfGrade.put("0", 0);
-        numOfGrade.put("0.5~1", 0);
-        numOfGrade.put("1.5~2", 0);
-        numOfGrade.put("2.5~3", 0);
-        numOfGrade.put("3.5~4", 0);
-        numOfGrade.put("4.5~5", 0);
-
-        for (Review review : reviewList) {
-            double grade = review.getGrade();
-            totalGrade += grade;
-
-            if (grade == 0) {
-                numOfGrade.put("0", numOfGrade.get("0") + 1);
-            } else if (grade <= 1) {
-                numOfGrade.put("0.5~1", numOfGrade.get("0.5~1") + 1);
-            } else if (grade <= 2) {
-                numOfGrade.put("1.5~2", numOfGrade.get("1.5~2") + 1);
-            } else if (grade <= 3) {
-                numOfGrade.put("2.5~3", numOfGrade.get("2.5~3") + 1);
-            } else if (grade <= 4) {
-                numOfGrade.put("3.5~4", numOfGrade.get("3.5~4") + 1);
-            } else if (grade <= 5) {
-                numOfGrade.put("4.5~5", numOfGrade.get("4.5~5") + 1);
-            }
-        }
-        Double averageGrade = totalGrade / reviewList.size();
-
-        if (averageGrade <= 0) {
-            averageGrade = 0.0;
-        } else {
-            averageGrade = Math.round(averageGrade * 10) / 10.0;
-        }
         Double discount = this.getProductDiscount(product);
         int discountPrice = this.getProductDiscountPrice(product);
 
@@ -1003,9 +957,9 @@ public class MultiService {
     private ReviewResponseDTO getReview(Review review) {
         String _username = review.getAuthor().getUsername();
         Optional<FileSystem> _fileSystem = fileSystemService.get(ImageKey.USER.getKey(_username));
-        String url = null;
+        String profileUrl = null;
         if (_fileSystem.isPresent())
-            url = _fileSystem.get().getV();
+            profileUrl = _fileSystem.get().getV();
 
         Optional<MultiKey> _multiKey = multiKeyService.get(ImageKey.REVIEW.getKey(review.getId().toString()));
         List<String> urlList = new ArrayList<>();
@@ -1014,10 +968,9 @@ public class MultiService {
                 Optional<FileSystem> _reviewFileSystem = fileSystemService.get(key);
                 _reviewFileSystem.ifPresent(fileSystem -> urlList.add(fileSystem.getV()));
             }
-
-
+      
         return ReviewResponseDTO.builder()
-                .url(url)
+                .profileUrl(profileUrl)
                 .urlList(urlList)
                 .createDate(this.dateTimeTransfer(review.getCreateDate()))
                 .modifyDate(this.dateTimeTransfer(review.getModifyDate()))
@@ -1334,16 +1287,62 @@ public class MultiService {
         Event event = this.eventService.findByProduct(product);
 
         double discount = (event != null) ? event.getDiscount() : 0.0;
-        double discountPrice = (event != null) ? product.getPrice() * (1 - discount / 100) : product.getPrice();
-        discountPrice = Math.round(discountPrice * 10) / 10.0;
-
-        return (int) Math.round(discountPrice);
+        if (discount < 0.0) {
+            discount = 0.0;
+        }
+        double discountedPrice = product.getPrice() * (1 - discount / 100);
+        discountedPrice = Math.round(discountedPrice * 10) / 10.0;
+        return (int) Math.round(discountedPrice);
     }
 
     private Double getProductDiscount (Product product) {
         Event event = this.eventService.findByProduct(product);
 
         return (event != null) ? event.getDiscount() : 0.0;
+    }
+
+    private Map<String, Object> gradeCalculate(List<Review> reviewList) {
+        double totalGrade = 0.0;
+        Map<String, Integer> numOfGrade = new HashMap<>();
+
+        numOfGrade.put("0", 0);
+        numOfGrade.put("0.5~1", 0);
+        numOfGrade.put("1.5~2", 0);
+        numOfGrade.put("2.5~3", 0);
+        numOfGrade.put("3.5~4", 0);
+        numOfGrade.put("4.5~5", 0);
+
+        for (Review review : reviewList) {
+            double grade = review.getGrade();
+            totalGrade += grade;
+
+            if (grade == 0) {
+                numOfGrade.put("0", numOfGrade.get("0") + 1);
+            } else if (grade <= 1) {
+                numOfGrade.put("0.5~1", numOfGrade.get("0.5~1") + 1);
+            } else if (grade <= 2) {
+                numOfGrade.put("1.5~2", numOfGrade.get("1.5~2") + 1);
+            } else if (grade <= 3) {
+                numOfGrade.put("2.5~3", numOfGrade.get("2.5~3") + 1);
+            } else if (grade <= 4) {
+                numOfGrade.put("3.5~4", numOfGrade.get("3.5~4") + 1);
+            } else if (grade <= 5) {
+                numOfGrade.put("4.5~5", numOfGrade.get("4.5~5") + 1);
+            }
+        }
+
+        double averageGrade = totalGrade / reviewList.size();
+        if (averageGrade <= 0) {
+            averageGrade = 0.0;
+        } else {
+            averageGrade = Math.round(averageGrade * 10) / 10.0;
+        }
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("numOfGrade", numOfGrade);
+        result.put("averageGrade", averageGrade);
+
+        return result;
     }
 }
 
