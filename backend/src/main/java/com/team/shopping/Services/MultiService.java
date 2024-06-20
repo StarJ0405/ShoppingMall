@@ -970,15 +970,17 @@ public class MultiService {
      */
 
     private ReviewResponseDTO getReview(Review review) {
-        String _username = review.getAuthor().getUsername();
-        Optional<FileSystem> _fileSystem = fileSystemService.get(ImageKey.USER.getKey(_username));
-        String url = null;
+        Optional<MultiKey> _multiKey = multiKeyService.get(ImageKey.REVIEW.getKey(review.getId().toString()));
+        List<String> urlList = new ArrayList<>();
+        if (_multiKey.isPresent())
+            for (String key : _multiKey.get().getVs()) {
+                Optional<FileSystem> _fileSystem = fileSystemService.get(key);
+                _fileSystem.ifPresent(fileSystem -> urlList.add(fileSystem.getV()));
+            }
 
-        if (_fileSystem.isPresent())
-            url = _fileSystem.get().getV();
 
         return ReviewResponseDTO.builder()
-                .url(url)
+                .urlList(urlList)
                 .createDate(this.dateTimeTransfer(review.getCreateDate()))
                 .modifyDate(this.dateTimeTransfer(review.getModifyDate()))
                 .review(review)
@@ -1029,7 +1031,26 @@ public class MultiService {
         }
 
         // 구매 기록이 있는 경우에만 리뷰를 저장
-        this.reviewService.save(user, reviewRequestDTO, product);
+        Review reviewKey = this.reviewService.save(user, reviewRequestDTO, product);
+
+        // 이미지 저장
+        Optional<MultiKey> _multiKey = multiKeyService.get(ImageKey.TEMP.getKey(username));
+        if (_multiKey.isPresent()) {
+            for (String keyName : _multiKey.get().getVs()) {
+                Optional<MultiKey> _reviewMulti = multiKeyService.get(ImageKey.REVIEW.getKey(reviewKey.getId().toString()));
+                Optional<FileSystem> _fileSystem = fileSystemService.get(keyName);
+                if (_reviewMulti.isEmpty()) {
+                    MultiKey multiKey = multiKeyService.save(ImageKey.REVIEW.getKey(reviewKey.getId().toString()), ImageKey.REVIEW.getKey(reviewKey.getId().toString()) + ".0");
+                    fileSystemService.save(multiKey.getVs().getLast(), _fileSystem.get().getV());
+                } else {
+                    multiKeyService.add(_reviewMulti.get(), ImageKey.REVIEW.getKey(reviewKey.getId().toString()) + "." + _reviewMulti.get().getVs().size());
+                    fileSystemService.save(_reviewMulti.get().getVs().getLast(), _fileSystem.get().getV());
+                }
+                String newFile = "/api/review" + "_" + reviewKey.getId() + "/";
+                this.fileMove(_fileSystem.get().getV(), newFile, _fileSystem.get());
+            }
+            multiKeyService.delete(_multiKey.get());
+        }
 
         // 리뷰 리스트를 가져와서 DTO로 변환하여 반환
         List<Review> reviewList = this.reviewService.getList(product);
@@ -1037,7 +1058,11 @@ public class MultiService {
             ReviewResponseDTO reviewResponseDTO = this.getReview(review);
             reviewResponseDTOList.add(reviewResponseDTO);
         }
+
+
+
         return reviewResponseDTOList;
+
     }
 
 
