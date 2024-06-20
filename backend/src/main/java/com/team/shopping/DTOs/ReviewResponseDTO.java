@@ -45,7 +45,7 @@ public class ReviewResponseDTO {
         this.grade = review.getGrade();
         this.createDate = createDate;
         this.modifyDate = modifyDate;
-        this.url = url
+        this.url = url;
         this.urlList = urlList;
     }
 }
