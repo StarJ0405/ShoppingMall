@@ -1001,16 +1001,23 @@ public class MultiService {
      */
 
     private ReviewResponseDTO getReview(Review review) {
+        String _username = review.getAuthor().getUsername();
+        Optional<FileSystem> _fileSystem = fileSystemService.get(ImageKey.USER.getKey(_username));
+        String url = null;
+        if (_fileSystem.isPresent())
+            url = _fileSystem.get().getV();
+
         Optional<MultiKey> _multiKey = multiKeyService.get(ImageKey.REVIEW.getKey(review.getId().toString()));
         List<String> urlList = new ArrayList<>();
         if (_multiKey.isPresent())
             for (String key : _multiKey.get().getVs()) {
-                Optional<FileSystem> _fileSystem = fileSystemService.get(key);
-                _fileSystem.ifPresent(fileSystem -> urlList.add(fileSystem.getV()));
+                Optional<FileSystem> _reviewFileSystem = fileSystemService.get(key);
+                _reviewFileSystem.ifPresent(fileSystem -> urlList.add(fileSystem.getV()));
             }
 
 
         return ReviewResponseDTO.builder()
+                .url(url)
                 .urlList(urlList)
                 .createDate(this.dateTimeTransfer(review.getCreateDate()))
                 .modifyDate(this.dateTimeTransfer(review.getModifyDate()))
