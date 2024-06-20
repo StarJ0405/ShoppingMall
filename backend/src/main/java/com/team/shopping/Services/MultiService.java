@@ -349,7 +349,7 @@ public class MultiService {
     private CartResponseDTO createCartResponseDTO(CartItem cartItem) {
         List<CartItemDetail> cartItemDetails = this.cartItemDetailService.getList(cartItem);
         Double discount = this.getProductDiscount(cartItem.getProduct());
-        int discountPrice = this.getProductDiscountPrice(cartItem.getProduct());
+        int discountPrice = this.getProductDiscountPrice(cartItem.getProduct(), discount);
         String url = this.getImageUrl(cartItem.getProduct());
         return DTOConverter.toCartResponseDTO(cartItem, cartItemDetails, discount, discountPrice, url);
     }
@@ -707,7 +707,7 @@ public class MultiService {
         Double averageGrade = (Double) gradeCalculate.get("averageGrade");
 
         Double discount = this.getProductDiscount(product);
-        int discountPrice = this.getProductDiscountPrice(product);
+        int discountPrice = this.getProductDiscountPrice(product, discount);
 
         return ProductResponseDTO
                 .builder()
@@ -1240,12 +1240,14 @@ public class MultiService {
     @Transactional
     public EventResponseDTO createEvent(String username, EventRequestDTO eventRequestDTO) {
         SiteUser user = this.userService.get(username);
-        Event event = this.eventService.saveEvent(user, eventRequestDTO);
-        List<Long> productIdList = eventRequestDTO.getProductIdList();
-        List<ProductResponseDTO> productResponseDTOList = new ArrayList<>();
         if (user.getRole().equals(UserRole.USER)) {
             throw new IllegalArgumentException("not role");
         }
+
+        Event event = this.eventService.saveEvent(user, eventRequestDTO);
+        List<Long> productIdList = eventRequestDTO.getProductIdList();
+        List<ProductResponseDTO> productResponseDTOList = new ArrayList<>();
+
         for (Long productId : productIdList) {
             Product product = this.productService.getProduct(productId);
             this.eventProductService.saveEventProduct(event, product);
@@ -1283,10 +1285,7 @@ public class MultiService {
         return dateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
     }
 
-    private Integer getProductDiscountPrice (Product product) {
-        Event event = this.eventService.findByProduct(product);
-
-        double discount = (event != null) ? event.getDiscount() : 0.0;
+    private Integer getProductDiscountPrice (Product product, Double discount) {
         if (discount < 0.0) {
             discount = 0.0;
         }
@@ -1295,10 +1294,25 @@ public class MultiService {
         return (int) Math.round(discountedPrice);
     }
 
-    private Double getProductDiscount (Product product) {
-        Event event = this.eventService.findByProduct(product);
+    private Double getProductDiscount(Product product) {
+        List<Event> eventList = this.eventService.findByProduct(product);
+        Event maxDiscountEvent = null;
+        double maxDiscount = 0.0;
+        LocalDateTime now = LocalDateTime.now();
 
-        return (event != null) ? event.getDiscount() : 0.0;
+        for (Event event : eventList) {
+            if ((now.isEqual(event.getStartDate()) || now.isAfter(event.getStartDate())) && now.isBefore(event.getEndDate())) {
+                double discount = event.getDiscount();
+                if (discount > maxDiscount) {
+                    maxDiscountEvent = event;
+                }
+            }
+        }
+        if (maxDiscountEvent != null) {
+            return maxDiscountEvent.getDiscount();
+        } else {
+            return 0.0;
+        }
     }
 
     private Map<String, Object> gradeCalculate(List<Review> reviewList) {
