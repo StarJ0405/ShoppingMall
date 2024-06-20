@@ -7,6 +7,9 @@ import com.team.shopping.Repositories.EventProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.NoSuchElementException;
+
 @Service
 @RequiredArgsConstructor
 public class EventProductService {
@@ -18,5 +21,26 @@ public class EventProductService {
                 .product(product)
                 .event(event)
                 .build());
+    }
+    public void delete (EventProduct eventProduct) {
+        this.eventProductRepository.delete(eventProduct);
+    }
+
+    public List<EventProduct> getList (Event event) {
+        return this.eventProductRepository.findByEvent(event);
+    }
+
+    public void deleteEventProduct (List<Long> eventProductId) {
+        for (Long id : eventProductId) {
+            EventProduct eventProduct = this.get(id);
+            if (eventProduct != null) {
+                this.delete(eventProduct);
+            }
+        }
+    }
+
+    public EventProduct get (Long id) {
+        return this.eventProductRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("not found eventProduct"));
     }
 }

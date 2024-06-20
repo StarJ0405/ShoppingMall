@@ -21,6 +21,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 
@@ -1254,6 +1255,64 @@ public class MultiService {
             ProductResponseDTO productResponseDTO = this.getProduct(product);
             productResponseDTOList.add(productResponseDTO);
         }
+        return this.getEventDTO(event,productResponseDTOList, user);
+    }
+
+    @Transactional
+    public EventResponseDTO updateEvent(String username, EventRequestDTO eventRequestDTO) {
+        SiteUser user = this.userService.get(username);
+        Event _event = this.eventService.get(eventRequestDTO.getEventId());
+
+        if (user.getRole().equals(UserRole.USER) || !_event.getCreator().equals(user)) {
+            throw new IllegalArgumentException("not role");
+        }
+        List<Long> productIdList = eventRequestDTO.getProductIdList();
+        List<ProductResponseDTO> productResponseDTOList = new ArrayList<>();
+
+
+        List<EventProduct> eventProductList = this.eventProductService.getList(_event);
+        Iterator<EventProduct> iterator = eventProductList.iterator();
+        while (iterator.hasNext()) {
+            EventProduct eventProduct = iterator.next();
+            Long productId = eventProduct.getProduct().getId();
+
+            if (!productIdList.contains(productId)) {
+                this.eventProductService.delete(eventProduct);
+                iterator.remove();
+            } else {
+                productResponseDTOList.add(this.getProduct(eventProduct.getProduct()));
+            }
+        }
+
+        for (Long productId : productIdList) {
+            boolean exists = eventProductList.stream()
+                    .anyMatch(ep -> ep.getProduct().getId().equals(productId));
+            if (!exists) {
+                Product product = this.productService.getProduct(productId);
+                this.eventProductService.saveEventProduct(_event, product);
+                productResponseDTOList.add(this.getProduct(product));
+            }
+        }
+
+        Event updatedEvent = this.eventService.updateEvent(_event, eventRequestDTO);
+        return this.getEventDTO(updatedEvent, productResponseDTOList, user);
+    }
+
+    @Scheduled(cron = "0 0 0 * * *")
+    public void deleteEvent () {
+        LocalDateTime now = LocalDateTime.now();
+        List<Event> eventList = this.eventService.findByEndDateAfter(now);
+
+        for (Event event : eventList) {
+            List<EventProduct> eventProductList = this.eventProductService.getList(event);
+            for (EventProduct eventProduct : eventProductList) {
+                this.eventProductService.delete(eventProduct);
+            }
+            this.eventService.delete(event);
+        }
+    }
+
+    private EventResponseDTO getEventDTO (Event event, List<ProductResponseDTO> productResponseDTOList, SiteUser user) {
         return EventResponseDTO.builder()
                 .startDate(this.dateTimeTransfer(event.getStartDate()))
                 .endDate(this.dateTimeTransfer(event.getEndDate()))

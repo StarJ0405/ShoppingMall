@@ -8,6 +8,8 @@ import java.util.List;
 @Getter
 public class EventRequestDTO {
 
+    private Long eventId;
+
     private LocalDateTime startDate;
 
     private LocalDateTime endDate;
