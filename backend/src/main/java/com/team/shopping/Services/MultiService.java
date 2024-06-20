@@ -366,7 +366,6 @@ public class MultiService {
         List<CartItem> cartItemList = this.cartItemService.getCartItemList(user);
         List<CartResponseDTO> cartResponseDTOList = new ArrayList<>();
 
-        // cartItemIdList에 포함된 카트 아이템 ID와 일치하는 카트 아이템들만 선택하여 처리
         for (CartItem cartItem : cartItemList) {
             if (cartItemIdList.contains(cartItem.getId())) {
                 List<CartItemDetail> cartItemDetails = this.cartItemDetailService.getList(cartItem);
@@ -380,42 +379,54 @@ public class MultiService {
     public List<CartResponseDTO> addToCart(String username, CartRequestDTO cartRequestDTO) {
         SiteUser user = this.userService.get(username);
         Product product = this.productService.getProduct(cartRequestDTO.getProductId());
-        CartItem cartItem = this.cartItemService.getCartItem(user, product);
+        List<CartItem> cartItemList = this.cartItemService.getCartItem(user, product);
 
-        if (cartItem != null) {
-            cartItem.updateCount(cartItem.getCount() + cartRequestDTO.getCount());
-            this.cartItemService.save(cartItem);
-        } else {
-            cartItem = this.cartItemService.addToCart(user, product, cartRequestDTO.getCount());
-        }
+        List<CartResponseDTO> responseDTOList = new ArrayList<>();
 
-        List<Options> options = this.optionsService.getOptionsList(cartRequestDTO.getOptionIdList());
-        List<CartItemDetail> cartItemDetailList = this.cartItemDetailService.getList(cartItem);
+        boolean updated = false;
 
-        for (Options option : options) {
-            if (option.getCount() <= 0) {
-                throw new NoSuchElementException("option count 0");
+        if (cartItemList.isEmpty()) {
+            CartItem cartItem = this.cartItemService.addToCart(user, product, cartRequestDTO.getCount());
+            List<Options> options = this.optionsService.getOptionsList(cartRequestDTO.getOptionIdList());
+            for (Options option : options) {
+                if (option.getCount() <= 0) {
+                    throw new NoSuchElementException("option count 0");
+                } else {
+                    this.cartItemDetailService.saveCartItemDetail(cartItem, option);
+                }
             }
+        } else {
+            for (CartItem cartItem : cartItemList) {
+                List<CartItemDetail> cartItemDetailList = this.cartItemDetailService.getList(cartItem);
+                List<Long> cartItemOptionIds = new ArrayList<>();
+                for (CartItemDetail detail : cartItemDetailList) {
+                    cartItemOptionIds.add(detail.getOptions().getId());
+                }
+                Collections.sort(cartItemOptionIds);
 
-            boolean found = false;
-            for (CartItemDetail cartItemDetail : cartItemDetailList) {
-                if (cartItemDetail.getOptions().getId().equals(option.getId())) {
-                    cartItemDetail.getOptions().setCount(cartItemDetail.getOptions().getCount());
-                    this.cartItemDetailService.save(cartItemDetail);
-                    found = true;
+                if (isOptionListEqual(cartItemOptionIds, cartRequestDTO.getOptionIdList())) {
+                    cartItem.updateCount(cartItem.getCount() + cartRequestDTO.getCount());
+                    this.cartItemService.save(cartItem);
+                    updated = true;
                     break;
                 }
             }
+        }
 
-            if (!found) {
-                this.cartItemDetailService.saveCartItemDetail(cartItem, option);
+        if (!updated) {
+            CartItem cartItem = this.cartItemService.addToCart(user, product, cartRequestDTO.getCount());
+            List<Options> options = this.optionsService.getOptionsList(cartRequestDTO.getOptionIdList());
+            for (Options option : options) {
+                if (option.getCount() <= 0) {
+                    throw new NoSuchElementException("option count 0");
+                } else {
+                    this.cartItemDetailService.saveCartItemDetail(cartItem, option);
+                }
             }
         }
 
-        List<CartResponseDTO> responseDTOList = new ArrayList<>();
-        List<CartItem> cartItems = this.cartItemService.getCartItemList(user);
-
-        for (CartItem item : cartItems) {
+        List<CartItem> updatedCartItems = this.cartItemService.getCartItemList(user);
+        for (CartItem item : updatedCartItems) {
             List<CartItemDetail> cartItemDetails = this.cartItemDetailService.getList(item);
             responseDTOList.add(DTOConverter.toCartResponseDTO(item, cartItemDetails));
         }
@@ -423,13 +434,27 @@ public class MultiService {
         return responseDTOList;
     }
 
+    private boolean isOptionListEqual(List<Long> list1, List<Long> list2) {
+        if (list1.size() != list2.size()) {
+            return false;
+        }
+        Collections.sort(list1);
+        Collections.sort(list2);
+        for (int i = 0; i < list1.size(); i++) {
+            if (!list1.get(i).equals(list2.get(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     @Transactional
     public List<CartResponseDTO> updateToCart(String username, CartRequestDTO cartRequestDTO) {
         SiteUser user = this.userService.get(username);
-        Product product = this.productService.getProduct(cartRequestDTO.getProductId());
-        CartItem cartItem = this.cartItemService.getCartItem(user, product);
+        CartItem cartItem = this.cartItemService.get(cartRequestDTO.getCartItemId());
+
         cartItem.updateCount(cartRequestDTO.getCount());
-        if (cartItem.getCount() > product.getRemain()) {
+        if (cartItem.getCount() > cartItem.getProduct().getRemain()) {
             throw new IllegalArgumentException("a lot your item count more than product remain");
         } else {
             this.cartItemService.save(cartItem);
@@ -448,15 +473,14 @@ public class MultiService {
 
 
     @Transactional
-    public List<CartResponseDTO> deleteToCart(String username, Long productId) {
+    public List<CartResponseDTO> deleteToCart(String username, Long cartItemId) {
         SiteUser user = this.userService.get(username);
-        Product product = this.productService.getProduct(productId);
-        CartItem cartItem = this.cartItemService.getCartItem(user, product);
+        CartItem cartItem = this.cartItemService.get(cartItemId);
         if (cartItem != null) {
             this.cartItemDetailService.deleteByCartItem(cartItem);
             this.cartItemService.delete(cartItem);
         } else {
-            throw new IllegalArgumentException("CartItem not found for user: " + username + " and product: " + productId);
+            throw new IllegalArgumentException("CartItem not found for user: " + username + " and product: " + cartItem.getProduct().getId());
         }
 
         List<CartResponseDTO> responseDTOList = new ArrayList<>();
@@ -469,16 +493,15 @@ public class MultiService {
     }
 
     @Transactional
-    public List<CartResponseDTO> deleteMultipleToCart(String username, List<Long> productIdList) {
+    public List<CartResponseDTO> deleteMultipleToCart(String username, List<Long> cartItemIdList) {
         SiteUser user = this.userService.get(username);
-        for (Long productId : productIdList) {
-            Product product = this.productService.getProduct(productId);
-            CartItem cartItem = this.cartItemService.getCartItem(user, product);
+        for (Long cartItemId : cartItemIdList) {
+            CartItem cartItem = this.cartItemService.get(cartItemId);
             if (cartItem != null) {
                 this.cartItemDetailService.deleteByCartItem(cartItem);
                 this.cartItemService.delete(cartItem);
             } else {
-                throw new IllegalArgumentException("CartItem not found for user: " + username + " and product: " + productId);
+                throw new IllegalArgumentException("CartItem not found for user: " + username + " and product: " + cartItem.getProduct().getId());
             }
         }
 
