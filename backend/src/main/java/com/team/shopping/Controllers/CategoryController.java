@@ -67,7 +67,7 @@ public class CategoryController {
 
     @DeleteMapping
     public ResponseEntity<?> deleteCategory(@RequestHeader("Authorization") String accessToken,
-                                            @RequestHeader Long categoryId) {
+                                            @RequestHeader("CategoryId") Long categoryId) {
         try {
 
             TokenRecord tokenRecord = this.multiService.checkToken(accessToken);

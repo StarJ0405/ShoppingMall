@@ -27,4 +27,8 @@ public class FileSystemService {
     public List<FileSystem> getList(String key) {
         return fileSystemRepository.findByKeyList(key);
     }
+
+    public void delete(FileSystem fileSystem) {
+        fileSystemRepository.delete(fileSystem);
+    }
 }

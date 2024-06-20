@@ -35,8 +35,8 @@ public class ImageController {
         TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
         if (tokenRecord.isOK()) {
             String username = tokenRecord.username();
-            ImageResponseDTO imageResponseDTO = this.multiService.tempImageList(imageRequestDTO, username);
-            return tokenRecord.getResponseEntity(imageResponseDTO);
+            this.multiService.tempImageList(imageRequestDTO, username);
+            return tokenRecord.getResponseEntity("문제 없음");
         }
         return tokenRecord.getResponseEntity();
     }
