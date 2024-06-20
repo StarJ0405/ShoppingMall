@@ -35,4 +35,22 @@ public class EventController {
         }
         return tokenRecord.getResponseEntity();
     }
+
+    @PutMapping
+    public ResponseEntity<?> updateEvent (@RequestHeader("Authorization") String accessToken,
+                                          @RequestBody EventRequestDTO eventRequestDTO) {
+        TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
+        try {
+            if (tokenRecord.isOK()) {
+                String username = tokenRecord.username();
+                EventResponseDTO eventResponseDTO = this.multiService.updateEvent(username, eventRequestDTO);
+                return tokenRecord.getResponseEntity(eventResponseDTO);
+            }
+        }catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("권한이 없습니다.");
+        }catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("제품을 찾지 못했습니다.");
+        }
+        return tokenRecord.getResponseEntity();
+    }
 }

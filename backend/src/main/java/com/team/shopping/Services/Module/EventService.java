@@ -8,7 +8,9 @@ import com.team.shopping.Repositories.EventRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 @RequiredArgsConstructor
@@ -29,12 +31,28 @@ public class EventService {
                 .build());
     }
 
-    public void startEvent () {
-
-    }
-
     public List<Event> findByProduct (Product product) {
         return this.eventRepository.findByProduct(product);
     }
 
+    public List<Event> findByEndDateAfter (LocalDateTime now) {
+        return this.eventRepository.findByEndDateAfter (now);
+    }
+
+    public void delete (Event event) {
+        this.eventRepository.delete(event);
+    }
+
+    public Event get (Long eventId) {
+        return this.eventRepository.findById(eventId)
+                .orElseThrow(()-> new NoSuchElementException("not found Event"));
+    }
+
+    public Event updateEvent(Event event, EventRequestDTO eventRequestDTO) {
+        event.setDiscount(eventRequestDTO.getDiscount() != null ? eventRequestDTO.getDiscount() : event.getDiscount());
+        event.setStartDate(eventRequestDTO.getStartDate() != null ? eventRequestDTO.getStartDate() : event.getStartDate());
+        event.setEndDate(eventRequestDTO.getEndDate() != null ? eventRequestDTO.getEndDate() : event.getEndDate());
+        event.setModifyDate(LocalDateTime.now());
+        return this.eventRepository.save(event);
+    }
 }
