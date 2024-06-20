@@ -16,7 +16,6 @@ import com.team.shopping.Services.Module.*;
 import com.team.shopping.ShoppingApplication;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.commonmark.node.Image;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -64,7 +63,6 @@ public class MultiService {
     private final MultiKeyService multiKeyService;
     private final EventService eventService;
     private final EventProductService eventProductService;
-
 
 
     /**
@@ -182,9 +180,12 @@ public class MultiService {
         // 새로 생성
         if (newUserRequestDTO.getUrl() != null && !newUserRequestDTO.getUrl().isBlank()) {
             String newFile = "/api/user" + "_" + siteUser.getUsername() + "/";
-            newUrl = this.fileMove(newUserRequestDTO.getUrl(), newFile);
-            if (newUrl != null)
-                fileSystemService.save(ImageKey.USER.getKey(username), newUrl);
+            Optional<FileSystem> _ordFileSystem = fileSystemService.get(ImageKey.TEMP.getKey(username));
+            if (_ordFileSystem.isPresent()) {
+                newUrl = this.fileMove(newUserRequestDTO.getUrl(), newFile, _ordFileSystem.get());
+                if (newUrl != null)
+                    fileSystemService.save(ImageKey.USER.getKey(username), newUrl);
+            }
         }
         return UserResponseDTO.builder()
                 .username(siteUser.getUsername())
@@ -223,10 +224,10 @@ public class MultiService {
 
     /**
      * address
-     * */
+     */
 
     @Transactional
-    public List<AddressResponseDTO> getAddressList (String username) {
+    public List<AddressResponseDTO> getAddressList(String username) {
         SiteUser user = this.userService.get(username);
         List<Address> addressList = this.addressService.getList(user);
         List<AddressResponseDTO> addressResponseDTOList = new ArrayList<>();
@@ -240,7 +241,7 @@ public class MultiService {
     }
 
     @Transactional
-    public AddressResponseDTO createAddress (String username, AddressRequestDTO addressRequestDTO) {
+    public AddressResponseDTO createAddress(String username, AddressRequestDTO addressRequestDTO) {
         SiteUser user = this.userService.get(username);
         Address address = this.addressService.saveAddress(user, addressRequestDTO);
         return AddressResponseDTO.builder()
@@ -249,29 +250,27 @@ public class MultiService {
     }
 
     @Transactional
-    public AddressResponseDTO updateAddress (String username, AddressRequestDTO addressRequestDTO) {
+    public AddressResponseDTO updateAddress(String username, AddressRequestDTO addressRequestDTO) {
         SiteUser user = this.userService.get(username);
         Address _address = this.addressService.get(addressRequestDTO.getAddressId());
         if (!username.equals(_address.getUser().getUsername()) && !user.getRole().equals(UserRole.ADMIN)) {
             throw new NoSuchElementException("not role");
-        }
-        else {
+        } else {
             Address address = this.addressService.updateAddress(addressRequestDTO);
             return AddressResponseDTO.builder()
-                .address(address)
-                .build();
+                    .address(address)
+                    .build();
         }
     }
 
     @Transactional
-    public void deleteAddress (String username, List<Long> addressIdList) {
+    public void deleteAddress(String username, List<Long> addressIdList) {
         SiteUser user = this.userService.get(username);
         for (Long addressId : addressIdList) {
             Address address = this.addressService.get(addressId);
             if (!username.equals(address.getUser().getUsername()) && !user.getRole().equals(UserRole.ADMIN)) {
                 throw new NoSuchElementException("not role");
-            }
-            else {
+            } else {
                 this.addressService.delete(address);
             }
         }
@@ -656,22 +655,37 @@ public class MultiService {
                 }
             }
         }
-
+        if (requestDTO.getUrl() != null && !requestDTO.getUrl().isBlank()) {
+            Optional<FileSystem> _fileSystem = fileSystemService.get(ImageKey.TEMP.getKey(username));
+            String newFile = "/api/product" + "_" + product.getId() + "/";
+            if (_fileSystem.isPresent()) {
+                String newUrl = this.fileMove(requestDTO.getUrl(), newFile, _fileSystem.get());
+                if (newUrl != null) {
+                    String path = ShoppingApplication.getOsType().getLoc();
+                    File file = new File(path + requestDTO.getUrl());
+                    if (file.exists()) {
+                        file.delete();
+                    }
+                    fileSystemService.save(ImageKey.PRODUCT.getKey(product.getId().toString()), newUrl);
+                }
+            }
+        }
         Optional<MultiKey> _multiKey = multiKeyService.get(ImageKey.TEMP.getKey(username));
         if (_multiKey.isPresent()) {
-            Optional<MultiKey> _productMulti = multiKeyService.get(ImageKey.PRODUCT.getKey(product.getId().toString()));
-            for (String name1 : _multiKey.get().getVs()) {
-                Optional<FileSystem> fileSystem = fileSystemService.get(name1);
+            for (String keyName : _multiKey.get().getVs()) {
+                Optional<MultiKey> _productMulti = multiKeyService.get(ImageKey.PRODUCT.getKey(product.getId().toString()));
+                Optional<FileSystem> _fileSystem = fileSystemService.get(keyName);
                 if (_productMulti.isEmpty()) {
                     MultiKey multiKey = multiKeyService.save(ImageKey.PRODUCT.getKey(product.getId().toString()), ImageKey.PRODUCT.getKey(product.getId().toString()) + ".0");
-                    fileSystemService.save(multiKey.getVs().getLast(), fileSystem.get().getV());
+                    fileSystemService.save(multiKey.getVs().getLast(), _fileSystem.get().getV());
                 } else {
                     multiKeyService.add(_productMulti.get(), ImageKey.PRODUCT.getKey(product.getId().toString()) + "." + _productMulti.get().getVs().size());
-                    fileSystemService.save(_productMulti.get().getVs().getLast(), fileSystem.get().getV());
+                    fileSystemService.save(_productMulti.get().getVs().getLast(), _fileSystem.get().getV());
                 }
                 String newFile = "/api/product" + "_" + product.getId() + "/";
-                this.fileMove(fileSystem.get().getV(), newFile);
+                this.fileMove(_fileSystem.get().getV(), newFile, _fileSystem.get());
             }
+            multiKeyService.delete(_multiKey.get());
         }
     }
 
@@ -697,6 +711,14 @@ public class MultiService {
         double totalGrade = 0.0;
         Map<String, Integer> numOfGrade = new HashMap<>();
 
+        Event event = this.eventService.findByProduct(product);
+        Optional<MultiKey> _multiKey = multiKeyService.get(ImageKey.PRODUCT.getKey(product.getId().toString()));
+        List<String> urlList = new ArrayList<>();
+        if (_multiKey.isPresent())
+            for (String keyName : _multiKey.get().getVs()) {
+                Optional<FileSystem> _contentFileSystem = fileSystemService.get(keyName);
+                _contentFileSystem.ifPresent(fileSystem -> urlList.add(fileSystem.getV()));
+            }
 
         numOfGrade.put("0", 0);
         numOfGrade.put("0.5~1", 0);
@@ -743,6 +765,7 @@ public class MultiService {
                 .dateLimit(this.dateTimeTransfer(product.getDateLimit()))
                 .createDate(this.dateTimeTransfer(product.getCreateDate()))
                 .modifyDate(this.dateTimeTransfer(product.getModifyDate()))
+                .urlList(urlList)
                 .reviewList(reviewList)
                 .averageGrade(averageGrade)
                 .numOfGrade(numOfGrade)
@@ -837,7 +860,7 @@ public class MultiService {
      */
 
     @Transactional
-    public String fileMove(String url, String newUrl) {
+    public String fileMove(String url, String newUrl, FileSystem fileSystem) {
         try {
             String path = ShoppingApplication.getOsType().getLoc();
             Path tempPath = Paths.get(path + url);
@@ -848,6 +871,7 @@ public class MultiService {
             File file = tempPath.toFile();
             if (file.exists())
                 file.delete();
+            fileSystemService.delete(fileSystem);
             return newUrl + tempPath.getFileName();
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -881,7 +905,7 @@ public class MultiService {
     }
 
     @Transactional
-    public ImageResponseDTO tempImageList(ImageRequestDTO requestDTO, String username) {
+    public void tempImageList(ImageRequestDTO requestDTO, String username) {
         if (!requestDTO.getFile().isEmpty()) try {
             String path = ShoppingApplication.getOsType().getLoc();
 
@@ -905,11 +929,9 @@ public class MultiService {
                 Optional<FileSystem> fileSystem = fileSystemService.get(name1);
                 fileSystem.ifPresent(system -> urlList.add(system.getV()));
             }
-            return ImageResponseDTO.builder().urlList(urlList).build();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return null;
     }
 
 
@@ -979,15 +1001,17 @@ public class MultiService {
      */
 
     private ReviewResponseDTO getReview(Review review) {
-        String _username = review.getAuthor().getUsername();
-        Optional<FileSystem> _fileSystem = fileSystemService.get(ImageKey.USER.getKey(_username));
-        String url = null;
+        Optional<MultiKey> _multiKey = multiKeyService.get(ImageKey.REVIEW.getKey(review.getId().toString()));
+        List<String> urlList = new ArrayList<>();
+        if (_multiKey.isPresent())
+            for (String key : _multiKey.get().getVs()) {
+                Optional<FileSystem> _fileSystem = fileSystemService.get(key);
+                _fileSystem.ifPresent(fileSystem -> urlList.add(fileSystem.getV()));
+            }
 
-        if (_fileSystem.isPresent())
-            url = _fileSystem.get().getV();
 
         return ReviewResponseDTO.builder()
-                .url(url)
+                .urlList(urlList)
                 .createDate(this.dateTimeTransfer(review.getCreateDate()))
                 .modifyDate(this.dateTimeTransfer(review.getModifyDate()))
                 .review(review)
@@ -1038,7 +1062,26 @@ public class MultiService {
         }
 
         // 구매 기록이 있는 경우에만 리뷰를 저장
-        this.reviewService.save(user, reviewRequestDTO, product);
+        Review reviewKey = this.reviewService.save(user, reviewRequestDTO, product);
+
+        // 이미지 저장
+        Optional<MultiKey> _multiKey = multiKeyService.get(ImageKey.TEMP.getKey(username));
+        if (_multiKey.isPresent()) {
+            for (String keyName : _multiKey.get().getVs()) {
+                Optional<MultiKey> _reviewMulti = multiKeyService.get(ImageKey.REVIEW.getKey(reviewKey.getId().toString()));
+                Optional<FileSystem> _fileSystem = fileSystemService.get(keyName);
+                if (_reviewMulti.isEmpty()) {
+                    MultiKey multiKey = multiKeyService.save(ImageKey.REVIEW.getKey(reviewKey.getId().toString()), ImageKey.REVIEW.getKey(reviewKey.getId().toString()) + ".0");
+                    fileSystemService.save(multiKey.getVs().getLast(), _fileSystem.get().getV());
+                } else {
+                    multiKeyService.add(_reviewMulti.get(), ImageKey.REVIEW.getKey(reviewKey.getId().toString()) + "." + _reviewMulti.get().getVs().size());
+                    fileSystemService.save(_reviewMulti.get().getVs().getLast(), _fileSystem.get().getV());
+                }
+                String newFile = "/api/review" + "_" + reviewKey.getId() + "/";
+                this.fileMove(_fileSystem.get().getV(), newFile, _fileSystem.get());
+            }
+            multiKeyService.delete(_multiKey.get());
+        }
 
         // 리뷰 리스트를 가져와서 DTO로 변환하여 반환
         List<Review> reviewList = this.reviewService.getList(product);
@@ -1046,7 +1089,11 @@ public class MultiService {
             ReviewResponseDTO reviewResponseDTO = this.getReview(review);
             reviewResponseDTOList.add(reviewResponseDTO);
         }
+
+
+
         return reviewResponseDTOList;
+
     }
 
 
@@ -1225,11 +1272,11 @@ public class MultiService {
 
     /**
      * event
-     * */
+     */
 
 
     @Transactional
-    public EventResponseDTO createEvent (String username, EventRequestDTO eventRequestDTO) {
+    public EventResponseDTO createEvent(String username, EventRequestDTO eventRequestDTO) {
         SiteUser user = this.userService.get(username);
         Event event = this.eventService.saveEvent(user, eventRequestDTO);
         List<Long> productIdList = eventRequestDTO.getProductIdList();
@@ -1256,9 +1303,9 @@ public class MultiService {
 
     /**
      * function
-     * */
+     */
 
-    private Long dateTimeTransfer (LocalDateTime dateTime) {
+    private Long dateTimeTransfer(LocalDateTime dateTime) {
 
         if (dateTime == null) {
             return null;

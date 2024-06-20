@@ -13,12 +13,10 @@ import java.util.List;
 public class ImageResponseDTO {
 
     private String url;
-    private List<String> urlList;
 
 
     @Builder
-    public ImageResponseDTO(String url , List<String> urlList) {
+    public ImageResponseDTO(String url) {
         this.url = url;
-        this.urlList = urlList;
     }
 }
