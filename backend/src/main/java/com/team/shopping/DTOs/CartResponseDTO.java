@@ -25,7 +25,7 @@ public class CartResponseDTO {
 
     private int count;
 
-    private List<OptionResponseDTO> optionResponseDTOList;
+    private List<CartItemDetailResponseDTO> cartItemDetailResponseDTOList;
 
     private int productPrice;
 
@@ -38,14 +38,14 @@ public class CartResponseDTO {
     private Long createDate;
 
     @Builder
-    public CartResponseDTO (CartItem cartItem, List<OptionResponseDTO> optionResponseDTOList,
+    public CartResponseDTO (CartItem cartItem, List<CartItemDetailResponseDTO> cartItemDetailResponseDTOList,
                             Long totalPrice, Long createDate, Double discount, int discountPrice, String imageUrl) {
         this.cartItemId = cartItem.getId();
         this.authorName = cartItem.getProduct().getSeller().getName();
         this.productId = cartItem.getProduct().getId();
         this.productTitle = cartItem.getProduct().getTitle();
         this.count = cartItem.getCount();
-        this.optionResponseDTOList = optionResponseDTOList;
+        this.cartItemDetailResponseDTOList = cartItemDetailResponseDTOList;
         this.createDate = createDate;
         this.productPrice = cartItem.getProduct().getPrice();
         this.discount = discount;

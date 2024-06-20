@@ -23,7 +23,7 @@ public class PaymentProductDetailService {
         return this.paymentProductDetailRepository.save(PaymentProductDetail.builder()
                 .paymentProduct(paymentProduct)
                 .optionName(option.getName())
-                .optionCount(option.getCount())
+                .optionCount(1)
                 .optionPrice(option.getPrice())
                 .build());
     }

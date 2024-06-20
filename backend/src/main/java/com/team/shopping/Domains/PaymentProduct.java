@@ -25,6 +25,8 @@ public class PaymentProduct {
 
     private int price;
 
+    private Double discount;
+
     @Column(columnDefinition = "TEXT")
     private String description;
 
@@ -39,7 +41,8 @@ public class PaymentProduct {
     @Builder
     public PaymentProduct (PaymentLog paymentLog, Long productId,
                            String seller, int price, String description,
-                           String title, String brand, int count) {
+                           String title, String brand, int count,
+                           Double discount) {
 
         this.paymentLog = paymentLog;
         this.productId = productId;
@@ -49,6 +52,7 @@ public class PaymentProduct {
         this.title = title;
         this.brand = brand;
         this.count = count;
+        this.discount = discount;
 
     }
 

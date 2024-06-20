@@ -17,7 +17,7 @@ public class PaymentProductService {
         return this.paymentProductRepository.findByPaymentLog(paymentLog);
     }
 
-    public PaymentProduct save (PaymentLog paymentLog, Product product, CartItem cartItem) {
+    public PaymentProduct save (PaymentLog paymentLog, Product product, CartItem cartItem, Double discount) {
         return this.paymentProductRepository.save(PaymentProduct.builder()
                 .paymentLog(paymentLog)
                 .productId(product.getId())
@@ -27,6 +27,7 @@ public class PaymentProductService {
                 .title(product.getTitle())
                 .brand(product.getBrand())
                 .count(cartItem.getCount())
+                .discount(discount)
                 .build());
     }
 }
