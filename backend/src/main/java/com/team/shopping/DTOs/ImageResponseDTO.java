@@ -11,6 +11,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 public class ImageResponseDTO {
+
     private String url;
     private List<String> urlList;
 

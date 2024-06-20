@@ -21,6 +21,8 @@ public class ProductResponseDTO {
     private String middleCategoryName;
     private String categoryName;
     private int price;
+    private Double discount;
+    private int discountPrice;
     private String description;
     private String detail;
     private Long dateLimit;
@@ -42,7 +44,7 @@ public class ProductResponseDTO {
     @Builder
     public ProductResponseDTO(Product product, List<String> tagList, String url,
                               List<Review> reviewList, Double averageGrade, Map<String , Integer> numOfGrade,
-                              Long dateLimit, Long createDate, Long modifyDate) {
+                              Long dateLimit, Long createDate, Long modifyDate, Double discount, int discountPrice) {
 
         this.id = product.getId();
         this.authorUsername = product.getSeller().getUsername();
@@ -50,6 +52,8 @@ public class ProductResponseDTO {
         this.middleCategoryName = product.getCategory().getParent() != null ? product.getCategory().getParent().getName() : null;
         this.categoryName = product.getCategory().getName();
         this.price = product.getPrice();
+        this.discount = discount;
+        this.discountPrice = discountPrice;
         this.description = product.getDescription();
         this.detail = product.getDetail();
         this.dateLimit = dateLimit;

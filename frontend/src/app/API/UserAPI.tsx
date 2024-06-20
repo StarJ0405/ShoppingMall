@@ -130,3 +130,23 @@ export const deleteRecent = async (data: number) => {
     const response = await UserApi.delete('/api/recent', { headers: { 'RecentId': data } });
     return response.data;
 }
+
+export const getCartList = async () => {
+    const response = await UserApi.get('/api/cart/cartList');
+    return response.data;
+}
+interface cartProps {
+    productId: number;
+    optionIdList: number[];
+    count: number;
+}
+
+export const postCartList = async (data: cartProps) => {
+    const response = await UserApi.post('/api/cart/cartList', data);
+    return response.data;
+}
+
+export const deleteCartList = async (data: number) => {
+    const response = await UserApi.delete('/api/cart/cartList', { headers: { ProductId: data } });
+    return response.data;
+}

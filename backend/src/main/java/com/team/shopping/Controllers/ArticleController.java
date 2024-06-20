@@ -47,7 +47,8 @@ public class ArticleController {
     }
 
     @DeleteMapping
-    public ResponseEntity<?> deleteArticle(@RequestHeader("Authorization") String accessToken ,@RequestHeader("ArticleId") Long articleId)
+    public ResponseEntity<?> deleteArticle(@RequestHeader("Authorization") String accessToken,
+                                           @RequestHeader("ArticleId") Long articleId)
                                           {
 
         TokenRecord tokenRecord = this.multiService.checkToken(accessToken);

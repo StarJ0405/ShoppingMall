@@ -1,6 +1,7 @@
 package com.team.shopping.Domains;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -27,8 +28,15 @@ public class Event {
     private SiteUser creator;
 
     private LocalDateTime createDate;
+
     private LocalDateTime modifyDate;
 
-
-
+    @Builder
+    public Event (LocalDateTime startDate, LocalDateTime endDate, Double discount, SiteUser creator) {
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.discount = discount;
+        this.creator = creator;
+        this.createDate = LocalDateTime.now();
+    }
 }

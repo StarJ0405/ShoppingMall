@@ -9,9 +9,13 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class RecentResponseDTO {
+
     private Long recentId;
+  
     private Long productId;
+  
     private String url;
+
     private Long createDate;
 
     @Builder

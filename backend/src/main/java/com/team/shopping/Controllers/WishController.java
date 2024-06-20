@@ -18,7 +18,8 @@ public class WishController {
     private final MultiService multiService;
 
     @GetMapping("/wishList/check")
-    public ResponseEntity<?> wishCheck(@RequestHeader("Authorization") String accessToken, @RequestHeader("ProductId") Long product_id) {
+    public ResponseEntity<?> wishCheck(@RequestHeader("Authorization") String accessToken,
+                                       @RequestHeader("ProductId") Long product_id) {
         TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
         if (tokenRecord.isOK()) {
             String username = tokenRecord.username();
@@ -56,7 +57,7 @@ public class WishController {
     }
     @DeleteMapping("/wishList")
     public ResponseEntity<?> deleteToWishList(@RequestHeader("Authorization") String accessToken,
-                                              @RequestHeader("productId") Long productId) {
+                                              @RequestHeader("ProductId") Long productId) {
         TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
         try {
             if (tokenRecord.isOK()) {
@@ -71,7 +72,7 @@ public class WishController {
     }
     @DeleteMapping("/wishList/multi")
     public ResponseEntity<?> deleteMultipleToWishList (@RequestHeader("Authorization") String accessToken,
-                                                       @RequestHeader("productIdList") List<Long> productIdList) {
+                                                       @RequestHeader("ProductIdList") List<Long> productIdList) {
         TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
         try {
             if (tokenRecord.isOK()) {

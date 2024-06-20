@@ -62,6 +62,9 @@ public class MultiService {
     private final ArticleService articleService;
     private final RecentService recentService;
     private final MultiKeyService multiKeyService;
+    private final EventService eventService;
+    private final EventProductService eventProductService;
+
 
 
     /**
@@ -216,6 +219,62 @@ public class MultiService {
                 .modifyDate(this.dateTimeTransfer(siteUser.getModifyDate()))
                 .name(siteUser.getName())
                 .build();
+    }
+
+    /**
+     * address
+     * */
+
+    @Transactional
+    public List<AddressResponseDTO> getAddressList (String username) {
+        SiteUser user = this.userService.get(username);
+        List<Address> addressList = this.addressService.getList(user);
+        List<AddressResponseDTO> addressResponseDTOList = new ArrayList<>();
+
+        for (Address address : addressList) {
+            addressResponseDTOList.add(AddressResponseDTO.builder()
+                    .address(address)
+                    .build());
+        }
+        return addressResponseDTOList;
+    }
+
+    @Transactional
+    public AddressResponseDTO createAddress (String username, AddressRequestDTO addressRequestDTO) {
+        SiteUser user = this.userService.get(username);
+        Address address = this.addressService.saveAddress(user, addressRequestDTO);
+        return AddressResponseDTO.builder()
+                .address(address)
+                .build();
+    }
+
+    @Transactional
+    public AddressResponseDTO updateAddress (String username, AddressRequestDTO addressRequestDTO) {
+        SiteUser user = this.userService.get(username);
+        Address _address = this.addressService.get(addressRequestDTO.getAddressId());
+        if (!username.equals(_address.getUser().getUsername()) && !user.getRole().equals(UserRole.ADMIN)) {
+            throw new NoSuchElementException("not role");
+        }
+        else {
+            Address address = this.addressService.updateAddress(addressRequestDTO);
+            return AddressResponseDTO.builder()
+                .address(address)
+                .build();
+        }
+    }
+
+    @Transactional
+    public void deleteAddress (String username, List<Long> addressIdList) {
+        SiteUser user = this.userService.get(username);
+        for (Long addressId : addressIdList) {
+            Address address = this.addressService.get(addressId);
+            if (!username.equals(address.getUser().getUsername()) && !user.getRole().equals(UserRole.ADMIN)) {
+                throw new NoSuchElementException("not role");
+            }
+            else {
+                this.addressService.delete(address);
+            }
+        }
     }
 
 
@@ -606,6 +665,13 @@ public class MultiService {
         List<Review> reviewList = this.reviewService.getList(product);
         String url = _fileSystem.map(FileSystem::getV).orElse(null);
         Map<String, Integer> numOfGrade = new HashMap<>();
+        Event event = this.eventService.findByProduct(product);
+
+        Double discount = (event != null) ? event.getDiscount() : 0.0;
+        double discountPrice = (event != null) ? product.getPrice() * (1 - discount / 100) : product.getPrice();
+        discountPrice = Math.round(discountPrice * 10) / 10.0;
+
+        int roundedDiscountPrice = (int) Math.round(discountPrice);
 
         numOfGrade.put("0", 0);
         numOfGrade.put("0.5~1", 0);
@@ -646,6 +712,8 @@ public class MultiService {
                 .product(product)
                 .tagList(tagList)
                 .url(url)
+                .discount(discount)
+                .discountPrice(roundedDiscountPrice)
                 .dateLimit(this.dateTimeTransfer(product.getDateLimit()))
                 .createDate(this.dateTimeTransfer(product.getCreateDate()))
                 .modifyDate(this.dateTimeTransfer(product.getModifyDate()))
@@ -872,7 +940,7 @@ public class MultiService {
         for (Category child : parentCategory.getChildren()) {
             childrenDTOList.add(getCategoryWithChildren(child));
         }
-        return CategoryResponseDTO.builder().id(parentCategory.getId()).parent_name(parentCategory.getParent() != null ? parentCategory.getParent().getName() : null).name(parentCategory.getName()).categoryResponseDTOList(childrenDTOList).build();
+        return CategoryResponseDTO.builder().id(parentCategory.getId()).parentName(parentCategory.getParent() != null ? parentCategory.getParent().getName() : null).name(parentCategory.getName()).categoryResponseDTOList(childrenDTOList).build();
     }
 
     /**
@@ -1124,8 +1192,43 @@ public class MultiService {
         return new PageImpl<>(productResponseDTOList, pageable, productPage.getTotalElements());
     }
 
+    /**
+     * event
+     * */
 
-    private Long dateTimeTransfer(LocalDateTime dateTime) {
+
+    @Transactional
+    public EventResponseDTO createEvent (String username, EventRequestDTO eventRequestDTO) {
+        SiteUser user = this.userService.get(username);
+        Event event = this.eventService.saveEvent(user, eventRequestDTO);
+        List<Long> productIdList = eventRequestDTO.getProductIdList();
+        List<ProductResponseDTO> productResponseDTOList = new ArrayList<>();
+        if (user.getRole().equals(UserRole.USER)) {
+            throw new IllegalArgumentException("not role");
+        }
+        for (Long productId : productIdList) {
+            Product product = this.productService.getProduct(productId);
+            this.eventProductService.saveEventProduct(event, product);
+            ProductResponseDTO productResponseDTO = this.getProduct(product);
+            productResponseDTOList.add(productResponseDTO);
+        }
+        return EventResponseDTO.builder()
+                .startDate(this.dateTimeTransfer(event.getStartDate()))
+                .endDate(this.dateTimeTransfer(event.getEndDate()))
+                .productResponseDTOList(productResponseDTOList)
+                .user(user)
+                .event(event)
+                .createDate(this.dateTimeTransfer(event.getCreateDate()))
+                .modifyDate(this.dateTimeTransfer(event.getModifyDate()))
+                .build();
+    }
+
+    /**
+     * function
+     * */
+
+    private Long dateTimeTransfer (LocalDateTime dateTime) {
+
         if (dateTime == null) {
             return null;
         }

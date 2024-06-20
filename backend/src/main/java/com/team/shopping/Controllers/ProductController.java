@@ -58,7 +58,7 @@ public class ProductController {
     }
 
     @GetMapping("/latest")
-    public ResponseEntity<?> latestProductList(@RequestHeader("page") int page){
+    public ResponseEntity<?> latestProductList(@RequestHeader("Page") int page){
         try {
             Page<ProductResponseDTO> productResponseDTOList = multiService.getLatestList(page);
 
