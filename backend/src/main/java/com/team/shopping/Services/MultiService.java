@@ -1098,7 +1098,6 @@ public class MultiService {
         }
 
 
-
         return reviewResponseDTOList;
 
     }
@@ -1222,9 +1221,12 @@ public class MultiService {
         List<Recent> recentList = recentService.getRecent(user);
         List<RecentResponseDTO> responseDTOList = new ArrayList<>();
         for (Recent recent : recentList) {
-            ProductResponseDTO responseDTO = getProduct(recent.getProduct().getId());
+            ProductResponseDTO responseDTO = this.getProduct(recent.getProduct().getId());
 
             responseDTOList.add(RecentResponseDTO.builder()
+                    .price(responseDTO.getPrice())
+                    .title(responseDTO.getTitle())
+                    .grade(responseDTO.getGrade())
                     .recentId(recent.getId())
                     .productId(responseDTO.getId())
                     .url(responseDTO.getUrl())
