@@ -11,5 +11,5 @@ import java.util.List;
 @Repository
 public interface CartItemRepository extends JpaRepository<CartItem, Long> {
     List<CartItem> findAllByUserOrderByCreateDateDesc(SiteUser user);
-    CartItem findByUserAndProduct(SiteUser user, Product product);
+    List<CartItem> findByUserAndProduct(SiteUser user, Product product);
 }
