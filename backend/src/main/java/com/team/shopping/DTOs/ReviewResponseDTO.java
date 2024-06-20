@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -30,8 +32,10 @@ public class ReviewResponseDTO {
 
     private String profileUrl;
 
+    private List<String> urlList;
+
     @Builder
-    public ReviewResponseDTO (SiteUser user, Review review, String profileUrl,
+    public ReviewResponseDTO (SiteUser user, Review review, List<String> urlList, String profileUrl,
                               Long createDate, Long modifyDate) {
         this.id = review.getId();
         this.nickname = user.getNickname();
@@ -42,5 +46,7 @@ public class ReviewResponseDTO {
         this.createDate = createDate;
         this.modifyDate = modifyDate;
         this.profileUrl = profileUrl;
+        this.urlList = urlList;
+
     }
 }

@@ -1,6 +1,7 @@
 package com.team.shopping.Domains;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -21,5 +22,12 @@ public class MultiKey {
     @Column(length = 50)
     private String k;
 
-    private List<String> vs = new ArrayList<>();
+    private List<String> vs;
+
+
+    @Builder
+    public MultiKey(String k, List<String> vs) {
+        this.k = k;
+        this.vs = vs;
+    }
 }
