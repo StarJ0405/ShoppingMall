@@ -8,6 +8,8 @@ import com.team.shopping.Repositories.EventRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class EventService {
@@ -27,7 +29,11 @@ public class EventService {
                 .build());
     }
 
-    public Event findByProduct (Product product) {
+    public void startEvent () {
+
+    }
+
+    public List<Event> findByProduct (Product product) {
         return this.eventRepository.findByProduct(product);
     }
 
