@@ -19,7 +19,7 @@ public class PaymentLogResponseDTO {
 
     private List<PaymentProductResponseDTO> paymentProductResponseDTOList;
 
-    private int totalPrice;
+    private Long totalPrice;
 
     private Long paymentDate;
 
@@ -38,7 +38,7 @@ public class PaymentLogResponseDTO {
     private int  trackingNumber;
 
     @Builder
-    public PaymentLogResponseDTO (int totalPrice, PaymentLog paymentLog,
+    public PaymentLogResponseDTO (Long totalPrice, PaymentLog paymentLog,
                                   List<PaymentProductResponseDTO> paymentProductResponseDTOList, Long paymentDate) {
         this.paymentLogId = paymentLog.getId();
         this.paymentStatus = paymentLog.getPaymentStatus().getStatus();

@@ -81,12 +81,12 @@ public class CartController {
 
     @DeleteMapping("/cartList")
     public ResponseEntity<?> deleteToCartList (@RequestHeader("Authorization") String accessToken,
-                                               @RequestHeader("ProductId") Long productId) {
+                                               @RequestHeader("CartItemId") Long cartItemId) {
         TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
         try {
             if (tokenRecord.isOK()) {
                 String username = tokenRecord.username();
-                List<CartResponseDTO> cartResponseDTOList = this.multiService.deleteToCart(username, productId);
+                List<CartResponseDTO> cartResponseDTOList = this.multiService.deleteToCart(username, cartItemId);
                 return tokenRecord.getResponseEntity(cartResponseDTOList);
             }
         }catch (IllegalArgumentException e) {
@@ -97,12 +97,12 @@ public class CartController {
 
     @DeleteMapping("/cartList/multi")
     public ResponseEntity<?> deleteMultiToCartList(@RequestHeader("Authorization") String accessToken,
-                                                   @RequestHeader("ProductIdList") List<Long> productIdList) {
+                                                   @RequestHeader("CartItemIdList") List<Long> cartItemIdList) {
         TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
         try {
             if (tokenRecord.isOK()) {
                 String username = tokenRecord.username();
-                List<CartResponseDTO> cartResponseDTOList = this.multiService.deleteMultipleToCart(username, productIdList);
+                List<CartResponseDTO> cartResponseDTOList = this.multiService.deleteMultipleToCart(username, cartItemIdList);
                 return tokenRecord.getResponseEntity(cartResponseDTOList);
             }
         }catch (IllegalArgumentException e) {
