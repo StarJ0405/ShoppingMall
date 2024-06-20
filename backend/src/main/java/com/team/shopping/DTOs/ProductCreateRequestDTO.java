@@ -25,5 +25,6 @@ public class ProductCreateRequestDTO {
     private String brand;
     private List<String> tagList;
     private String url;
+    private List<String> urlList;
     private List<OptionListRequestDTO> optionLists;
 }
