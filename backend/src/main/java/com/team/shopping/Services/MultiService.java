@@ -347,6 +347,13 @@ public class MultiService {
      * cart
      */
 
+    private CartResponseDTO createCartResponseDTO(CartItem cartItem) {
+        List<CartItemDetail> cartItemDetails = this.cartItemDetailService.getList(cartItem);
+        Double discount = this.getProductDiscount(cartItem.getProduct());
+        int discountPrice = this.getProductDiscountPrice(cartItem.getProduct());
+        return DTOConverter.toCartResponseDTO(cartItem, cartItemDetails, discount, discountPrice);
+    }
+
     @Transactional
     public List<CartResponseDTO> getCart(String username) {
         SiteUser user = this.userService.get(username);
@@ -358,8 +365,7 @@ public class MultiService {
                 this.cartItemDetailService.deleteByCartItem(item);
                 this.cartItemService.delete(item);
             }
-            List<CartItemDetail> cartItemDetails = this.cartItemDetailService.getList(item);
-            responseDTOList.add(DTOConverter.toCartResponseDTO(item, cartItemDetails));
+            responseDTOList.add(this.createCartResponseDTO(item));
         }
         return responseDTOList;
     }
@@ -370,11 +376,11 @@ public class MultiService {
         List<CartItem> cartItemList = this.cartItemService.getCartItemList(user);
         List<CartResponseDTO> cartResponseDTOList = new ArrayList<>();
 
-        // cartItemIdList에 포함된 카트 아이템 ID와 일치하는 카트 아이템들만 선택하여 처리
+        Set<Long> cartItemIdSet = new HashSet<>(cartItemIdList);
+
         for (CartItem cartItem : cartItemList) {
-            if (cartItemIdList.contains(cartItem.getId())) {
-                List<CartItemDetail> cartItemDetails = this.cartItemDetailService.getList(cartItem);
-                cartResponseDTOList.add(DTOConverter.toCartResponseDTO(cartItem, cartItemDetails));
+            if (cartItemIdSet.contains(cartItem.getId())) {
+                cartResponseDTOList.add(this.createCartResponseDTO(cartItem));
             }
         }
         return cartResponseDTOList;
@@ -384,56 +390,81 @@ public class MultiService {
     public List<CartResponseDTO> addToCart(String username, CartRequestDTO cartRequestDTO) {
         SiteUser user = this.userService.get(username);
         Product product = this.productService.getProduct(cartRequestDTO.getProductId());
-        CartItem cartItem = this.cartItemService.getCartItem(user, product);
+        List<CartItem> cartItemList = this.cartItemService.getCartItem(user, product);
 
-        if (cartItem != null) {
-            cartItem.updateCount(cartItem.getCount() + cartRequestDTO.getCount());
-            this.cartItemService.save(cartItem);
-        } else {
-            cartItem = this.cartItemService.addToCart(user, product, cartRequestDTO.getCount());
-        }
+        List<CartResponseDTO> responseDTOList = new ArrayList<>();
 
-        List<Options> options = this.optionsService.getOptionsList(cartRequestDTO.getOptionIdList());
-        List<CartItemDetail> cartItemDetailList = this.cartItemDetailService.getList(cartItem);
+        boolean updated = false;
 
-        for (Options option : options) {
-            if (option.getCount() <= 0) {
-                throw new NoSuchElementException("option count 0");
+        if (cartItemList.isEmpty()) {
+            CartItem cartItem = this.cartItemService.addToCart(user, product, cartRequestDTO.getCount());
+            List<Options> options = this.optionsService.getOptionsList(cartRequestDTO.getOptionIdList());
+            for (Options option : options) {
+                if (option.getCount() <= 0) {
+                    throw new NoSuchElementException("option count 0");
+                } else {
+                    this.cartItemDetailService.saveCartItemDetail(cartItem, option);
+                }
             }
+        } else {
+            for (CartItem cartItem : cartItemList) {
+                List<CartItemDetail> cartItemDetailList = this.cartItemDetailService.getList(cartItem);
+                List<Long> cartItemOptionIds = new ArrayList<>();
+                for (CartItemDetail detail : cartItemDetailList) {
+                    cartItemOptionIds.add(detail.getOptions().getId());
+                }
+                Collections.sort(cartItemOptionIds);
 
-            boolean found = false;
-            for (CartItemDetail cartItemDetail : cartItemDetailList) {
-                if (cartItemDetail.getOptions().getId().equals(option.getId())) {
-                    cartItemDetail.getOptions().setCount(cartItemDetail.getOptions().getCount());
-                    this.cartItemDetailService.save(cartItemDetail);
-                    found = true;
+                if (isOptionListEqual(cartItemOptionIds, cartRequestDTO.getOptionIdList())) {
+                    cartItem.updateCount(cartItem.getCount() + cartRequestDTO.getCount());
+                    this.cartItemService.save(cartItem);
+                    updated = true;
                     break;
                 }
             }
+        }
 
-            if (!found) {
-                this.cartItemDetailService.saveCartItemDetail(cartItem, option);
+        if (!updated) {
+            CartItem cartItem = this.cartItemService.addToCart(user, product, cartRequestDTO.getCount());
+            List<Options> options = this.optionsService.getOptionsList(cartRequestDTO.getOptionIdList());
+            for (Options option : options) {
+                if (option.getCount() <= 0) {
+                    throw new NoSuchElementException("option count 0");
+                } else {
+                    this.cartItemDetailService.saveCartItemDetail(cartItem, option);
+                }
             }
         }
 
-        List<CartResponseDTO> responseDTOList = new ArrayList<>();
-        List<CartItem> cartItems = this.cartItemService.getCartItemList(user);
-
-        for (CartItem item : cartItems) {
-            List<CartItemDetail> cartItemDetails = this.cartItemDetailService.getList(item);
-            responseDTOList.add(DTOConverter.toCartResponseDTO(item, cartItemDetails));
+        List<CartItem> updatedCartItems = this.cartItemService.getCartItemList(user);
+        for (CartItem item : updatedCartItems) {
+            responseDTOList.add(this.createCartResponseDTO(item));
         }
 
         return responseDTOList;
     }
 
+    private boolean isOptionListEqual(List<Long> list1, List<Long> list2) {
+        if (list1.size() != list2.size()) {
+            return false;
+        }
+        Collections.sort(list1);
+        Collections.sort(list2);
+        for (int i = 0; i < list1.size(); i++) {
+            if (!list1.get(i).equals(list2.get(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     @Transactional
     public List<CartResponseDTO> updateToCart(String username, CartRequestDTO cartRequestDTO) {
         SiteUser user = this.userService.get(username);
-        Product product = this.productService.getProduct(cartRequestDTO.getProductId());
-        CartItem cartItem = this.cartItemService.getCartItem(user, product);
+        CartItem cartItem = this.cartItemService.get(cartRequestDTO.getCartItemId());
+
         cartItem.updateCount(cartRequestDTO.getCount());
-        if (cartItem.getCount() > product.getRemain()) {
+        if (cartItem.getCount() > cartItem.getProduct().getRemain()) {
             throw new IllegalArgumentException("a lot your item count more than product remain");
         } else {
             this.cartItemService.save(cartItem);
@@ -442,55 +473,49 @@ public class MultiService {
             List<CartResponseDTO> responseDTOList = new ArrayList<>();
 
             for (CartItem item : cartItems) {
-                List<CartItemDetail> cartItemDetails = this.cartItemDetailService.getList(item);
-                responseDTOList.add(DTOConverter.toCartResponseDTO(item, cartItemDetails));
+                responseDTOList.add(this.createCartResponseDTO(item));
             }
-
             return responseDTOList;
         }
     }
 
 
     @Transactional
-    public List<CartResponseDTO> deleteToCart(String username, Long productId) {
+    public List<CartResponseDTO> deleteToCart(String username, Long cartItemId) {
         SiteUser user = this.userService.get(username);
-        Product product = this.productService.getProduct(productId);
-        CartItem cartItem = this.cartItemService.getCartItem(user, product);
+        CartItem cartItem = this.cartItemService.get(cartItemId);
         if (cartItem != null) {
             this.cartItemDetailService.deleteByCartItem(cartItem);
             this.cartItemService.delete(cartItem);
         } else {
-            throw new IllegalArgumentException("CartItem not found for user: " + username + " and product: " + productId);
+            throw new IllegalArgumentException("CartItem not found for user: " + username);
         }
 
         List<CartResponseDTO> responseDTOList = new ArrayList<>();
         List<CartItem> cartItems = this.cartItemService.getCartItemList(user);
         for (CartItem item : cartItems) {
-            List<CartItemDetail> cartItemDetails = this.cartItemDetailService.getList(item);
-            responseDTOList.add(DTOConverter.toCartResponseDTO(item, cartItemDetails));
+            responseDTOList.add(this.createCartResponseDTO(item));
         }
         return responseDTOList;
     }
 
     @Transactional
-    public List<CartResponseDTO> deleteMultipleToCart(String username, List<Long> productIdList) {
+    public List<CartResponseDTO> deleteMultipleToCart(String username, List<Long> cartItemIdList) {
         SiteUser user = this.userService.get(username);
-        for (Long productId : productIdList) {
-            Product product = this.productService.getProduct(productId);
-            CartItem cartItem = this.cartItemService.getCartItem(user, product);
+        for (Long cartItemId : cartItemIdList) {
+            CartItem cartItem = this.cartItemService.get(cartItemId);
             if (cartItem != null) {
                 this.cartItemDetailService.deleteByCartItem(cartItem);
                 this.cartItemService.delete(cartItem);
             } else {
-                throw new IllegalArgumentException("CartItem not found for user: " + username + " and product: " + productId);
+                throw new IllegalArgumentException("CartItem not found for user: " + username);
             }
         }
 
         List<CartResponseDTO> responseDTOList = new ArrayList<>();
         List<CartItem> cartItems = this.cartItemService.getCartItemList(user);
         for (CartItem item : cartItems) {
-            List<CartItemDetail> cartItemDetails = this.cartItemDetailService.getList(item);
-            responseDTOList.add(DTOConverter.toCartResponseDTO(item, cartItemDetails));
+            responseDTOList.add(this.createCartResponseDTO(item));
         }
         return responseDTOList;
     }
@@ -664,14 +689,9 @@ public class MultiService {
         Optional<FileSystem> _fileSystem = fileSystemService.get(ImageKey.PRODUCT.getKey(product.getId().toString()));
         List<Review> reviewList = this.reviewService.getList(product);
         String url = _fileSystem.map(FileSystem::getV).orElse(null);
+        double totalGrade = 0.0;
         Map<String, Integer> numOfGrade = new HashMap<>();
-        Event event = this.eventService.findByProduct(product);
 
-        Double discount = (event != null) ? event.getDiscount() : 0.0;
-        double discountPrice = (event != null) ? product.getPrice() * (1 - discount / 100) : product.getPrice();
-        discountPrice = Math.round(discountPrice * 10) / 10.0;
-
-        int roundedDiscountPrice = (int) Math.round(discountPrice);
 
         numOfGrade.put("0", 0);
         numOfGrade.put("0.5~1", 0);
@@ -680,7 +700,6 @@ public class MultiService {
         numOfGrade.put("3.5~4", 0);
         numOfGrade.put("4.5~5", 0);
 
-        Double totalGrade = 0.0;
         for (Review review : reviewList) {
             double grade = review.getGrade();
             totalGrade += grade;
@@ -706,6 +725,8 @@ public class MultiService {
         } else {
             averageGrade = Math.round(averageGrade * 10) / 10.0;
         }
+        Double discount = this.getProductDiscount(product);
+        int discountPrice = this.getProductDiscountPrice(product);
 
         return ProductResponseDTO
                 .builder()
@@ -713,7 +734,7 @@ public class MultiService {
                 .tagList(tagList)
                 .url(url)
                 .discount(discount)
-                .discountPrice(roundedDiscountPrice)
+                .discountPrice(discountPrice)
                 .dateLimit(this.dateTimeTransfer(product.getDateLimit()))
                 .createDate(this.dateTimeTransfer(product.getCreateDate()))
                 .modifyDate(this.dateTimeTransfer(product.getModifyDate()))
@@ -1241,6 +1262,22 @@ public class MultiService {
         }
         LocalDateTime dateTime = date.atStartOfDay();
         return dateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+    }
+
+    private Integer getProductDiscountPrice (Product product) {
+        Event event = this.eventService.findByProduct(product);
+
+        double discount = (event != null) ? event.getDiscount() : 0.0;
+        double discountPrice = (event != null) ? product.getPrice() * (1 - discount / 100) : product.getPrice();
+        discountPrice = Math.round(discountPrice * 10) / 10.0;
+
+        return (int) Math.round(discountPrice);
+    }
+
+    private Double getProductDiscount (Product product) {
+        Event event = this.eventService.findByProduct(product);
+
+        return (event != null) ? event.getDiscount() : 0.0;
     }
 }
 

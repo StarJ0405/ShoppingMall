@@ -49,7 +49,7 @@ public class CartItemService {
         }
     }
 
-    public CartItem getCartItem(SiteUser user, Product product) {
+    public List<CartItem> getCartItem(SiteUser user, Product product) {
         return this.cartItemRepository.findByUserAndProduct(user, product);
     }
 

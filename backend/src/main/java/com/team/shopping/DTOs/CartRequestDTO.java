@@ -7,6 +7,8 @@ import java.util.List;
 @Getter
 public class CartRequestDTO {
 
+    private Long cartItemId;
+
     private Long productId;
 
     private List<Long> optionIdList;
