@@ -13,7 +13,8 @@ public class DTOConverter {
         return new OptionResponseDTO(options);
     }
 
-    public static CartResponseDTO toCartResponseDTO(CartItem cartItem, List<CartItemDetail> cartItemDetails, Double discount, int discountPrice) {
+    public static CartResponseDTO toCartResponseDTO(CartItem cartItem, List<CartItemDetail> cartItemDetails,
+                                                    Double discount, int discountPrice, String imageUrl) {
 
         LocalDateTime _createDate = cartItem.getCreateDate();
         Long createDate = dateTimeTransfer(_createDate);
@@ -34,6 +35,7 @@ public class DTOConverter {
                 .discountPrice(discountPrice)
                 .totalPrice(totalPrice)
                 .createDate(createDate)
+                .imageUrl(imageUrl)
                 .build();
     }
 

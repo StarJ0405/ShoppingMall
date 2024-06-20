@@ -347,7 +347,8 @@ public class MultiService {
         List<CartItemDetail> cartItemDetails = this.cartItemDetailService.getList(cartItem);
         Double discount = this.getProductDiscount(cartItem.getProduct());
         int discountPrice = this.getProductDiscountPrice(cartItem.getProduct());
-        return DTOConverter.toCartResponseDTO(cartItem, cartItemDetails, discount, discountPrice);
+        String url = this.getImageUrl(cartItem.getProduct());
+        return DTOConverter.toCartResponseDTO(cartItem, cartItemDetails, discount, discountPrice, url);
     }
 
     @Transactional
@@ -665,6 +666,11 @@ public class MultiService {
         }
     }
 
+    private String getImageUrl (Product product) {
+        Optional<FileSystem> _fileSystem = fileSystemService.get(ImageKey.PRODUCT.getKey(product.getId().toString()));
+        return _fileSystem.map(FileSystem::getV).orElse(null);
+    }
+
     @Transactional
     public ProductResponseDTO getProduct(Long productID) {
         Product product = productService.getProduct(productID);
@@ -676,9 +682,8 @@ public class MultiService {
 
     private ProductResponseDTO getProduct(Product product) {
         List<String> tagList = tagService.findByProduct(product);
-        Optional<FileSystem> _fileSystem = fileSystemService.get(ImageKey.PRODUCT.getKey(product.getId().toString()));
         List<Review> reviewList = this.reviewService.getList(product);
-        String url = _fileSystem.map(FileSystem::getV).orElse(null);
+        String url = this.getImageUrl(product);
         double totalGrade = 0.0;
         Map<String, Integer> numOfGrade = new HashMap<>();
 
