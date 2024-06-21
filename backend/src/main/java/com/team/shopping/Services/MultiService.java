@@ -140,28 +140,13 @@ public class MultiService {
     @Transactional
     public UserResponseDTO getProfile(String username) {
         SiteUser siteUser = this.userService.get(username);
-        if (siteUser == null)
-            throw new DataNotFoundException("유저가 없습니다.");
+        if (siteUser == null) throw new DataNotFoundException("유저가 없습니다.");
         Optional<FileSystem> _fileSystem = fileSystemService.get(ImageKey.USER.getKey(username));
         String url = null;
 
-        if (_fileSystem.isPresent())
-            url = _fileSystem.get().getV();
+        if (_fileSystem.isPresent()) url = _fileSystem.get().getV();
 
-        return UserResponseDTO.builder()
-                .username(siteUser.getUsername())
-                .gender(siteUser.getGender().toString())
-                .role(siteUser.getRole().toString())
-                .email(siteUser.getEmail())
-                .point(siteUser.getPoint())
-                .phoneNumber(siteUser.getPhoneNumber())
-                .nickname(siteUser.getNickname())
-                .birthday(this.dateTimeTransfer(siteUser.getBirthday()))
-                .createDate(this.dateTimeTransfer(siteUser.getCreateDate()))
-                .modifyDate(this.dateTimeTransfer(siteUser.getModifyDate()))
-                .name(siteUser.getName())
-                .url(url)
-                .build();
+        return UserResponseDTO.builder().username(siteUser.getUsername()).gender(siteUser.getGender().toString()).role(siteUser.getRole().toString()).email(siteUser.getEmail()).point(siteUser.getPoint()).phoneNumber(siteUser.getPhoneNumber()).nickname(siteUser.getNickname()).birthday(this.dateTimeTransfer(siteUser.getBirthday())).createDate(this.dateTimeTransfer(siteUser.getCreateDate())).modifyDate(this.dateTimeTransfer(siteUser.getModifyDate())).name(siteUser.getName()).url(url).build();
     }
 
     @Transactional
@@ -174,8 +159,7 @@ public class MultiService {
         // 삭제 or 동일하지 않는 경우만 진행
         if (_fileSystem.isPresent() && (newUserRequestDTO.getUrl() == null || !_fileSystem.get().getV().equals(newUserRequestDTO.getUrl()))) {
             File old = new File(path + _fileSystem.get().getV());
-            if (old.exists())
-                old.delete();
+            if (old.exists()) old.delete();
         }
         String newUrl = null;
         // 새로 생성
@@ -184,21 +168,10 @@ public class MultiService {
             Optional<FileSystem> _ordFileSystem = fileSystemService.get(ImageKey.TEMP.getKey(username));
             if (_ordFileSystem.isPresent()) {
                 newUrl = this.fileMove(newUserRequestDTO.getUrl(), newFile, _ordFileSystem.get());
-                if (newUrl != null)
-                    fileSystemService.save(ImageKey.USER.getKey(username), newUrl);
+                if (newUrl != null) fileSystemService.save(ImageKey.USER.getKey(username), newUrl);
             }
         }
-        return UserResponseDTO.builder()
-                .username(siteUser.getUsername())
-                .gender(siteUser.getGender().toString())
-                .email(siteUser.getEmail())
-                .point(siteUser.getPoint())
-                .phoneNumber(siteUser.getPhoneNumber())
-                .nickname(siteUser.getNickname())
-                .birthday(this.dateTimeTransfer(siteUser.getBirthday()))
-                .createDate(this.dateTimeTransfer(siteUser.getCreateDate()))
-                .modifyDate(this.dateTimeTransfer(siteUser.getModifyDate()))
-                .url(newUrl).name(siteUser.getName()).build();
+        return UserResponseDTO.builder().username(siteUser.getUsername()).gender(siteUser.getGender().toString()).email(siteUser.getEmail()).point(siteUser.getPoint()).phoneNumber(siteUser.getPhoneNumber()).nickname(siteUser.getNickname()).birthday(this.dateTimeTransfer(siteUser.getBirthday())).createDate(this.dateTimeTransfer(siteUser.getCreateDate())).modifyDate(this.dateTimeTransfer(siteUser.getModifyDate())).url(newUrl).name(siteUser.getName()).build();
     }
 
 
@@ -209,18 +182,7 @@ public class MultiService {
             throw new IllegalArgumentException("not match");
         SiteUser siteUser = userService.updatePassword(user, userRequestDTO.getNewPassword());
 
-        return UserResponseDTO.builder()
-                .username(siteUser.getUsername())
-                .gender(siteUser.getGender().toString())
-                .email(siteUser.getEmail())
-                .point(siteUser.getPoint())
-                .phoneNumber(siteUser.getPhoneNumber())
-                .nickname(siteUser.getNickname())
-                .birthday(this.dateTimeTransfer(siteUser.getBirthday()))
-                .createDate(this.dateTimeTransfer(siteUser.getCreateDate()))
-                .modifyDate(this.dateTimeTransfer(siteUser.getModifyDate()))
-                .name(siteUser.getName())
-                .build();
+        return UserResponseDTO.builder().username(siteUser.getUsername()).gender(siteUser.getGender().toString()).email(siteUser.getEmail()).point(siteUser.getPoint()).phoneNumber(siteUser.getPhoneNumber()).nickname(siteUser.getNickname()).birthday(this.dateTimeTransfer(siteUser.getBirthday())).createDate(this.dateTimeTransfer(siteUser.getCreateDate())).modifyDate(this.dateTimeTransfer(siteUser.getModifyDate())).name(siteUser.getName()).build();
     }
 
     /**
@@ -234,9 +196,7 @@ public class MultiService {
         List<AddressResponseDTO> addressResponseDTOList = new ArrayList<>();
 
         for (Address address : addressList) {
-            addressResponseDTOList.add(AddressResponseDTO.builder()
-                    .address(address)
-                    .build());
+            addressResponseDTOList.add(AddressResponseDTO.builder().address(address).build());
         }
         return addressResponseDTOList;
     }
@@ -245,9 +205,7 @@ public class MultiService {
     public AddressResponseDTO createAddress(String username, AddressRequestDTO addressRequestDTO) {
         SiteUser user = this.userService.get(username);
         Address address = this.addressService.saveAddress(user, addressRequestDTO);
-        return AddressResponseDTO.builder()
-                .address(address)
-                .build();
+        return AddressResponseDTO.builder().address(address).build();
     }
 
     @Transactional
@@ -258,9 +216,7 @@ public class MultiService {
             throw new NoSuchElementException("not role");
         } else {
             Address address = this.addressService.updateAddress(addressRequestDTO);
-            return AddressResponseDTO.builder()
-                    .address(address)
-                    .build();
+            return AddressResponseDTO.builder().address(address).build();
         }
     }
 
@@ -285,10 +241,8 @@ public class MultiService {
     public boolean checkWishList(String username, Long product_id) {
         SiteUser user = userService.get(username);
         Product product = productService.getProduct(product_id);
-        if (user == null || product == null)
-            return false;
-        else
-            return this.wishListService.get(user, product).isPresent();
+        if (user == null || product == null) return false;
+        else return this.wishListService.get(user, product).isPresent();
     }
 
     @Transactional
@@ -545,8 +499,7 @@ public class MultiService {
 
 
     @Transactional
-    public PaymentLogResponseDTO addPaymentLog(String username,
-                                               PaymentLogRequestDTO paymentLogRequestDTO) {
+    public PaymentLogResponseDTO addPaymentLog(String username, PaymentLogRequestDTO paymentLogRequestDTO) {
         SiteUser user = this.userService.get(username);
         Address address = this.addressService.get(paymentLogRequestDTO.getAddressId());
         List<CartItem> cartItemList = this.cartItemService.getList(paymentLogRequestDTO.getCartItemIdList());
@@ -700,7 +653,7 @@ public class MultiService {
             for (String keyName : _multiKey.get().getVs()) {
                 Optional<MultiKey> _productMulti = multiKeyService.get(ImageKey.PRODUCT.getKey(product.getId().toString()));
                 Optional<FileSystem> _fileSystem = fileSystemService.get(keyName);
-                if(_fileSystem.isPresent()) {
+                if (_fileSystem.isPresent()) {
                     String newFile = "/api/product" + "_" + product.getId() + "/content/";
                     String newUrl = this.fileMove(_fileSystem.get().getV(), newFile, _fileSystem.get());
                     if (_productMulti.isEmpty()) {
@@ -710,10 +663,10 @@ public class MultiService {
                         multiKeyService.add(_productMulti.get(), ImageKey.PRODUCT.getKey(product.getId().toString()) + "." + _productMulti.get().getVs().size());
                         fileSystemService.save(_productMulti.get().getVs().getLast(), newUrl);
                     }
-                    detail = detail.replace(_fileSystem.get().getV(),newUrl);
+                    detail = detail.replace(_fileSystem.get().getV(), newUrl);
                 }
             }
-            productService.Update(product,detail);
+            productService.Update(product, detail);
             multiKeyService.delete(_multiKey.get());
         }
     }
@@ -862,8 +815,7 @@ public class MultiService {
             Files.createDirectories(newPath.getParent());
             Files.move(tempPath, newPath);
             File file = tempPath.toFile();
-            if (file.exists())
-                file.delete();
+            if (file.exists()) file.delete();
             fileSystemService.delete(fileSystem);
             return newUrl + tempPath.getFileName();
         } catch (IOException e) {
@@ -879,8 +831,7 @@ public class MultiService {
             if (_fileSystem.isPresent()) {
                 FileSystem fileSystem = _fileSystem.get();
                 File file = new File(path + fileSystem.getV());
-                if (file.exists())
-                    file.delete();
+                if (file.exists()) file.delete();
             }
             UUID uuid = UUID.randomUUID();
             String fileLoc = "/api/user" + "_" + username + "/temp/" + uuid + "." + requestDTO.getFile().getContentType().split("/")[1];
@@ -948,8 +899,7 @@ public class MultiService {
         SiteUser siteUser = userService.get(username);
         if (siteUser.getRole().equals(UserRole.ADMIN)) {
             Category category = categoryService.get(id);
-            if (category != null)
-                categoryService.deleteCategory(category);
+            if (category != null) categoryService.deleteCategory(category);
         }
     }
 
@@ -983,12 +933,7 @@ public class MultiService {
         for (Category child : parentCategory.getChildren()) {
             childrenDTOList.add(getCategoryWithChildren(child));
         }
-        return CategoryResponseDTO.builder()
-                .id(parentCategory.getId())
-                .parentName(parentCategory.getParent() != null ? parentCategory.getParent().getName() : null)
-                .name(parentCategory.getName())
-                .categoryResponseDTOList(childrenDTOList)
-                .build();
+        return CategoryResponseDTO.builder().id(parentCategory.getId()).parentName(parentCategory.getParent() != null ? parentCategory.getParent().getName() : null).name(parentCategory.getName()).categoryResponseDTOList(childrenDTOList).build();
     }
 
     /**
@@ -999,16 +944,9 @@ public class MultiService {
         String _username = review.getAuthor().getUsername();
         Optional<FileSystem> _fileSystem = fileSystemService.get(ImageKey.USER.getKey(_username));
         String profileUrl = null;
-        if (_fileSystem.isPresent())
-            profileUrl = _fileSystem.get().getV();
+        if (_fileSystem.isPresent()) profileUrl = _fileSystem.get().getV();
 
-        return ReviewResponseDTO.builder()
-                .profileUrl(profileUrl)
-                .createDate(this.dateTimeTransfer(review.getCreateDate()))
-                .modifyDate(this.dateTimeTransfer(review.getModifyDate()))
-                .review(review)
-                .user(review.getAuthor())
-                .build();
+        return ReviewResponseDTO.builder().profileUrl(profileUrl).createDate(this.dateTimeTransfer(review.getCreateDate())).modifyDate(this.dateTimeTransfer(review.getModifyDate())).review(review).user(review.getAuthor()).build();
     }
 
     @Transactional
@@ -1172,12 +1110,7 @@ public class MultiService {
     }
 
     private ArticleResponseDTO getArticleResponseDTO(Article article) {
-        return ArticleResponseDTO.builder()
-                .article(article)
-                .siteUser(article.getAuthor())
-                .createDate(this.dateTimeTransfer(article.getCreateDate()))
-                .modifyDate(this.dateTimeTransfer(article.getModifyDate()))
-                .build();
+        return ArticleResponseDTO.builder().article(article).siteUser(article.getAuthor()).createDate(this.dateTimeTransfer(article.getCreateDate())).modifyDate(this.dateTimeTransfer(article.getModifyDate())).build();
     }
 
     /**
@@ -1196,8 +1129,8 @@ public class MultiService {
                 if (recentList.size() >= 10) {
                     Recent recent = recentList.getLast();
                     this.recentService.delete(recent);
-                    recentService.save(product, user);
                 }
+                recentService.save(product, user);
             }
         }
     }
@@ -1210,15 +1143,7 @@ public class MultiService {
         for (Recent recent : recentList) {
             ProductResponseDTO responseDTO = this.getProduct(recent.getProduct().getId());
 
-            responseDTOList.add(RecentResponseDTO.builder()
-                    .price(responseDTO.getPrice())
-                    .title(responseDTO.getTitle())
-                    .grade(responseDTO.getGrade())
-                    .recentId(recent.getId())
-                    .productId(responseDTO.getId())
-                    .url(responseDTO.getUrl())
-                    .createDate(responseDTO.getCreateDate())
-                    .build());
+            responseDTOList.add(RecentResponseDTO.builder().price(responseDTO.getPrice()).title(responseDTO.getTitle()).grade(responseDTO.getGrade()).recentId(recent.getId()).productId(responseDTO.getId()).url(responseDTO.getUrl()).createDate(responseDTO.getCreateDate()).build());
         }
         return responseDTOList;
     }
@@ -1228,8 +1153,7 @@ public class MultiService {
     public void deleteRecent(Long recentId, String username) {
         Optional<Recent> _recent = recentService.getRecentId(recentId);
         SiteUser user = userService.get(username);
-        if (_recent.isPresent() && _recent.get().getUser().equals(user))
-            this.recentService.delete(_recent.get());
+        if (_recent.isPresent() && _recent.get().getUser().equals(user)) this.recentService.delete(_recent.get());
     }
 
     /**
@@ -1318,8 +1242,7 @@ public class MultiService {
         }
 
         for (Long productId : productIdList) {
-            boolean exists = eventProductList.stream()
-                    .anyMatch(ep -> ep.getProduct().getId().equals(productId));
+            boolean exists = eventProductList.stream().anyMatch(ep -> ep.getProduct().getId().equals(productId));
             if (!exists) {
                 Product product = this.productService.getProduct(productId);
                 this.eventProductService.saveEventProduct(_event, product);
@@ -1330,9 +1253,10 @@ public class MultiService {
         Event updatedEvent = this.eventService.updateEvent(_event, eventRequestDTO);
         return this.getEventDTO(updatedEvent, productResponseDTOList, user);
     }
+
     // 초 분 시 일 월 주
     @Scheduled(cron = "0 0 * * * *")
-    public void deleteEvent () {
+    public void deleteEvent() {
 
         LocalDateTime now = LocalDateTime.now();
         List<Event> eventList = this.eventService.findByEndDateAfter(now);
@@ -1347,15 +1271,7 @@ public class MultiService {
     }
 
     private EventResponseDTO getEventDTO(Event event, List<ProductResponseDTO> productResponseDTOList, SiteUser user) {
-        return EventResponseDTO.builder()
-                .startDate(this.dateTimeTransfer(event.getStartDate()))
-                .endDate(this.dateTimeTransfer(event.getEndDate()))
-                .productResponseDTOList(productResponseDTOList)
-                .user(user)
-                .event(event)
-                .createDate(this.dateTimeTransfer(event.getCreateDate()))
-                .modifyDate(this.dateTimeTransfer(event.getModifyDate()))
-                .build();
+        return EventResponseDTO.builder().startDate(this.dateTimeTransfer(event.getStartDate())).endDate(this.dateTimeTransfer(event.getEndDate())).productResponseDTOList(productResponseDTOList).user(user).event(event).createDate(this.dateTimeTransfer(event.getCreateDate())).modifyDate(this.dateTimeTransfer(event.getModifyDate())).build();
     }
 
     /**

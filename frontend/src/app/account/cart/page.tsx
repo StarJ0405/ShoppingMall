@@ -1,6 +1,6 @@
 'use client'
 
-import { deleteCartList, getCartList, getRecent, getUser } from '@/app/API/UserAPI';
+import { deleteCartList, getCartList, getRecent, getUser, updateCartList } from '@/app/API/UserAPI';
 import Main from '@/app/Global/Layout/MainLayout';
 import { redirect } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -21,8 +21,8 @@ export default function Page() {
                         .then(r => setRecentList(r))
                         .catch(e => console.log(e));
                     getCartList()
-                        // .then(r => setCartList(r))
-                        .then(r => { setCartList(r); console.log(r) })
+                        .then(r => setCartList(r))
+                        // .then(r => { setCartList(r); console.log(r) })
                         .catch(e => console.log(e));
                 })
                 .catch(e => console.log(e));
@@ -78,15 +78,20 @@ export default function Page() {
                                     <img src={cart?.productUrl ? cart.productUrl : '/empty_product.png'} className='w-[120px] h-[120px] mr-2' />
                                     <div className='flex flex-col items-start'>
                                         <a className='hover:underline' href={'/product/' + cart.productId}>{cart.productTitle}</a>
-                                        {(cart?.optionResponseDTOList as any[]).map((option, index) => <label key={index}>{option.optionName}</label>)}
-                                        <input className='input input-info input-sm w-[124px]' type='number' defaultValue={cart.count} onChange={() => { }} min={1} />
+                                        {(cart?.cartItemDetailResponseDTOList as any[]).map((option, index) => <label key={index}>{option.optionName}</label>)}
+                                        <input className='input input-info input-sm w-[124px]' type='number' defaultValue={cart.count} onChange={(e) => updateCartList(cart.cartItemId,Number(e.target.value)).then(r=>setCartList(r)).catch(error=>{
+                                            if(error.response.status==403 && (error.response.data!="")){
+                                                alert(error.response.data);
+                                                e.target.value=cart.remain;                                                
+                                            }
+                                        })} min={1}/>
                                     </div>
                                 </td>
                                 <td>{cart?.totalPrice.toLocaleString('ko-kr', { maximumFractionDigits: 0 })}원</td>
                                 <td >
                                     <div className='flex'>
                                         <label className='w-[166px]'>무료배송</label>
-                                        <button className='w-[24px]' onClick={() => { deleteCartList(cart.productId).then(r => setCartList(r)).catch(e => console.log(e)) }}>X</button>
+                                        <button className='w-[24px]' onClick={() => { deleteCartList(cart.cartItemId).then(r => setCartList(r)).catch(e => console.log(e)) }}>X</button>
                                     </div>
                                 </td>
                             </tr>)}
