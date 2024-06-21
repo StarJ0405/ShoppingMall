@@ -23,10 +23,10 @@ UserApi.interceptors.response.use((response) => {
 }, async (error) => {
     const originalRequest = error.config;
     if (!originalRequest._retry)
-        if (error.response.status === 401 && (error.response.data == '' || error.response.data==null)) {
+        if (error.response.status === 401 && (error.response.data == '' || error.response.data == null)) {
             await refreshAccessToken();
             return UserApi(originalRequest);
-        } else if (error.response.status === 403 && (error.response.data == '' || error.response.data==null)) {
+        } else if (error.response.status === 403 && (error.response.data == '' || error.response.data == null)) {
             localStorage.clear();
             window.location.href = '/account/login';
             return;
@@ -109,7 +109,7 @@ export const productRegist = async (data: productProps) => {
     const response = await UserApi.post('/api/product', data);
     return response.data;
 }
-export const deleteImage = async()=>{
+export const deleteImage = async () => {
     const response = await UserApi.delete('/api/image');
     return response.data;
 }
@@ -121,7 +121,7 @@ export const saveImage = async (data: any) => {
     });
     return response.data;
 }
-export const saveImageList = async (data:any)=>{
+export const saveImageList = async (data: any) => {
     const response = await UserApi.post('/api/image/list', data, {
         headers: {
             'Content-Type': 'multipart/form-data'
@@ -129,7 +129,7 @@ export const saveImageList = async (data:any)=>{
     });
     return response.data;
 }
-export const deleteImageList = async()=>{
+export const deleteImageList = async () => {
     const response = await UserApi.delete('/api/image/list');
     return response.data;
 }
@@ -166,7 +166,33 @@ export const deleteCartList = async (data: number) => {
     return response.data;
 }
 
-export const updateCartList = async(id:number, count:number)=>{
-    const response = await UserApi.put('/api/cart/cartList',{cartItemId:id,count:count})
+export const updateCartList = async (id: number, count: number) => {
+    const response = await UserApi.put('/api/cart/cartList', { cartItemId: id, count: count })
+    return response.data;
+}
+interface addressProps {
+    title: string;
+    recipient: string;
+    phoneNumber: string;
+    mainAddress: string;
+    addressDetail: string;
+    postNumber: number;
+    deliveryMessage: string;
+}
+export const postAddress = async (data: addressProps) => {
+    const response = await UserApi.post('/api/address', data);
+    return response.data;
+}
+export const getAddress = async () => {
+    const response = await UserApi.get('/api/address');
+    return response.data;
+}
+
+export const deleteAddress = async (numbers: number[]) => {
+    const response = await UserApi.delete('/api/address', { headers: { AddressIdList: numbers as any } })
+    return response.data;
+}
+export const updateAddress = async (id: number, data: addressProps) => {
+    const response = await UserApi.put('/api/address', { addressId: id, ...data });
     return response.data;
 }
