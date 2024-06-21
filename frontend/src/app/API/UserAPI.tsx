@@ -118,6 +118,14 @@ export const saveImage = async (data: any) => {
     });
     return response.data;
 }
+export const saveImageList = async (data:any)=>{
+    const response = await UserApi.post('/api/image/list', data, {
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        }
+    });
+    return response.data;
+}
 export const getRecent = async () => {
     const response = await UserApi.get('/api/recent');
     return response.data;
