@@ -23,10 +23,10 @@ UserApi.interceptors.response.use((response) => {
 }, async (error) => {
     const originalRequest = error.config;
     if (!originalRequest._retry)
-        if (error.response.status === 401) {
+        if (error.response.status === 401 && (error.response.data == '' || error.response.data==null)) {
             await refreshAccessToken();
             return UserApi(originalRequest);
-        } else if (error.response.status === 403) {
+        } else if (error.response.status === 403 && (error.response.data == '' || error.response.data==null)) {
             localStorage.clear();
             window.location.href = '/account/login';
             return;
@@ -155,6 +155,11 @@ export const postCartList = async (data: cartProps) => {
 }
 
 export const deleteCartList = async (data: number) => {
-    const response = await UserApi.delete('/api/cart/cartList', { headers: { ProductId: data } });
+    const response = await UserApi.delete('/api/cart/cartList', { headers: { cartItemId: data } });
+    return response.data;
+}
+
+export const updateCartList = async(id:number, count:number)=>{
+    const response = await UserApi.put('/api/cart/cartList',{cartItemId:id,count:count})
     return response.data;
 }

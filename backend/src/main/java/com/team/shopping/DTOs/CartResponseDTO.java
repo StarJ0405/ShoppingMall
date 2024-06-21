@@ -36,10 +36,11 @@ public class CartResponseDTO {
     private Long totalPrice;
 
     private Long createDate;
+    private int remain;
 
     @Builder
-    public CartResponseDTO (CartItem cartItem, List<CartItemDetailResponseDTO> cartItemDetailResponseDTOList,
-                            Long totalPrice, Long createDate, Double discount, int discountPrice, String imageUrl) {
+    public CartResponseDTO(CartItem cartItem, List<CartItemDetailResponseDTO> cartItemDetailResponseDTOList,
+                           Long totalPrice, Long createDate, Double discount, int discountPrice, String imageUrl) {
         this.cartItemId = cartItem.getId();
         this.authorName = cartItem.getProduct().getSeller().getName();
         this.productId = cartItem.getProduct().getId();
@@ -52,6 +53,7 @@ public class CartResponseDTO {
         this.discountPrice = discountPrice;
         this.totalPrice = totalPrice;
         this.imageUrl = imageUrl;
+        this.remain = cartItem.getProduct().getRemain();
     }
 
 }

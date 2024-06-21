@@ -70,6 +70,7 @@ export default function Page(props: pageProps) {
             postWish(product.id);
         setLove(!love);
     }
+    
     return <Main user={user} recentList={recentList} setRecentList={setRecentList}>
         <div className='flex flex-col w-[1240px] min-h-[670px]'>
             <div className='text-sm flex'>
@@ -252,9 +253,9 @@ export default function Page(props: pageProps) {
                         </tbody>
                     </table> */}
                 </div>
-                <div className='w-[300px] h-full ml-[60px] relative'>
+                <div className='w-[300px] h-full ml-[60px] relative' >
                     <div className='fixed'>
-                        {
+                        {(product.optionListResponseDTOList as any[])?.map((list,index)=><div key={index}>{list.name}</div>)
 
                         }
                     </div>
