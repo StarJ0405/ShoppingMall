@@ -1,6 +1,6 @@
 'use client'
 import { getCategories } from '@/app/API/NonUserAPI';
-import { getRecent, getUser, productRegist, saveImage } from '@/app/API/UserAPI';
+import { getRecent, getUser, productRegist, saveImage, saveImageList } from '@/app/API/UserAPI';
 import Main from '@/app/Global/Layout/MainLayout';
 import Modal from '@/app/Global/Modal';
 import { redirect } from 'next/navigation';
@@ -54,7 +54,7 @@ export default function Page() {
             try {
                 const formData = new FormData();
                 formData.append('file', file as any);
-                const imgUrl = (await saveImage(formData)).url;
+                const imgUrl = (await saveImageList(formData)).url;
                 const editor = (quillInstance?.current as any).getEditor();
                 const range = editor.getSelection();
                 editor.insertEmbed(range.index, 'image', imgUrl);
@@ -291,6 +291,7 @@ export default function Page() {
                                 onChange={(e: any) => setDetail(e)}
                                 modules={modules}
                                 theme="snow"
+                                className='w-full'
                                 placeholder="내용을 입력해주세요."
                             />
                         </td>

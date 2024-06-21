@@ -30,8 +30,9 @@ public class ReviewResponseDTO {
 
     private String profileUrl;
 
+
     @Builder
-    public ReviewResponseDTO (SiteUser user, Review review, String profileUrl,
+    public ReviewResponseDTO (SiteUser user, Review review,  String profileUrl,
                               Long createDate, Long modifyDate) {
         this.id = review.getId();
         this.nickname = user.getNickname();

@@ -694,26 +694,32 @@ public class MultiService {
                 }
             }
         }
+        String detail = product.getDetail();
         Optional<MultiKey> _multiKey = multiKeyService.get(ImageKey.TEMP.getKey(username));
         if (_multiKey.isPresent()) {
             for (String keyName : _multiKey.get().getVs()) {
                 Optional<MultiKey> _productMulti = multiKeyService.get(ImageKey.PRODUCT.getKey(product.getId().toString()));
                 Optional<FileSystem> _fileSystem = fileSystemService.get(keyName);
-                if (_productMulti.isEmpty()) {
-                    MultiKey multiKey = multiKeyService.save(ImageKey.PRODUCT.getKey(product.getId().toString()), ImageKey.PRODUCT.getKey(product.getId().toString()) + ".0");
-                    fileSystemService.save(multiKey.getVs().getLast(), _fileSystem.get().getV());
-                } else {
-                    multiKeyService.add(_productMulti.get(), ImageKey.PRODUCT.getKey(product.getId().toString()) + "." + _productMulti.get().getVs().size());
-                    fileSystemService.save(_productMulti.get().getVs().getLast(), _fileSystem.get().getV());
+                if(_fileSystem.isPresent()) {
+                    String newFile = "/api/product" + "_" + product.getId() + "/content/";
+                    String newUrl = this.fileMove(_fileSystem.get().getV(), newFile, _fileSystem.get());
+                    if (_productMulti.isEmpty()) {
+                        MultiKey multiKey = multiKeyService.save(ImageKey.PRODUCT.getKey(product.getId().toString()), ImageKey.PRODUCT.getKey(product.getId().toString()) + ".0");
+                        fileSystemService.save(multiKey.getVs().getLast(), newUrl);
+                    } else {
+                        multiKeyService.add(_productMulti.get(), ImageKey.PRODUCT.getKey(product.getId().toString()) + "." + _productMulti.get().getVs().size());
+                        fileSystemService.save(_productMulti.get().getVs().getLast(), newUrl);
+                    }
+                    detail = detail.replace(_fileSystem.get().getV(),newUrl);
                 }
-                String newFile = "/api/product" + "_" + product.getId() + "/";
-                this.fileMove(_fileSystem.get().getV(), newFile, _fileSystem.get());
             }
+            productService.Update(product,detail);
             multiKeyService.delete(_multiKey.get());
         }
     }
 
-    private String getImageUrl (Product product) {
+
+    private String getImageUrl(Product product) {
         Optional<FileSystem> _fileSystem = fileSystemService.get(ImageKey.PRODUCT.getKey(product.getId().toString()));
         return _fileSystem.map(FileSystem::getV).orElse(null);
     }
@@ -737,6 +743,7 @@ public class MultiService {
 
         Map<String, Integer> numOfGrade = (Map<String, Integer>) gradeCalculate.get("numOfGrade");
         Double averageGrade = (Double) gradeCalculate.get("averageGrade");
+
 
         Double discount = this.getProductDiscount(product);
         int discountPrice = this.getProductDiscountPrice(product, discount);
@@ -891,7 +898,7 @@ public class MultiService {
     }
 
     @Transactional
-    public void tempImageList(ImageRequestDTO requestDTO, String username) {
+    public ImageResponseDTO tempImageList(ImageRequestDTO requestDTO, String username) {
         if (!requestDTO.getFile().isEmpty()) try {
             String path = ShoppingApplication.getOsType().getLoc();
 
@@ -915,9 +922,11 @@ public class MultiService {
                 Optional<FileSystem> fileSystem = fileSystemService.get(name1);
                 fileSystem.ifPresent(system -> urlList.add(system.getV()));
             }
+            return ImageResponseDTO.builder().url(fileLoc).build();
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return null;
     }
 
 
@@ -975,11 +984,11 @@ public class MultiService {
             childrenDTOList.add(getCategoryWithChildren(child));
         }
         return CategoryResponseDTO.builder()
-          .id(parentCategory.getId())
-          .parentName(parentCategory.getParent() != null ? parentCategory.getParent().getName() : null)
-          .name(parentCategory.getName())
-          .categoryResponseDTOList(childrenDTOList)
-          .build();
+                .id(parentCategory.getId())
+                .parentName(parentCategory.getParent() != null ? parentCategory.getParent().getName() : null)
+                .name(parentCategory.getName())
+                .categoryResponseDTOList(childrenDTOList)
+                .build();
     }
 
     /**
@@ -993,17 +1002,8 @@ public class MultiService {
         if (_fileSystem.isPresent())
             profileUrl = _fileSystem.get().getV();
 
-        Optional<MultiKey> _multiKey = multiKeyService.get(ImageKey.REVIEW.getKey(review.getId().toString()));
-        List<String> urlList = new ArrayList<>();
-        if (_multiKey.isPresent())
-            for (String key : _multiKey.get().getVs()) {
-                Optional<FileSystem> _reviewFileSystem = fileSystemService.get(key);
-                _reviewFileSystem.ifPresent(fileSystem -> urlList.add(fileSystem.getV()));
-            }
-      
         return ReviewResponseDTO.builder()
                 .profileUrl(profileUrl)
-                .urlList(urlList)
                 .createDate(this.dateTimeTransfer(review.getCreateDate()))
                 .modifyDate(this.dateTimeTransfer(review.getModifyDate()))
                 .review(review)
@@ -1189,14 +1189,16 @@ public class MultiService {
         Product product = productService.getProduct(productId);
         if (user != null && product != null) {
             Optional<Recent> _recent = recentService.checkRecent(product, user);
-            if (_recent.isPresent())
-                this.recentService.delete(_recent.get());
-            List<Recent> recentList = recentService.getRecent(user);
-            if (recentList.size() >= 10) {
-                Recent recent = recentList.get(9);
-                this.recentService.delete(recent);
+            if (_recent.isPresent()) {
+                this.recentService.update(_recent.get());
+            } else {
+                List<Recent> recentList = recentService.getRecent(user);
+                if (recentList.size() >= 10) {
+                    Recent recent = recentList.getLast();
+                    this.recentService.delete(recent);
+                    recentService.save(product, user);
+                }
             }
-            recentService.save(product, user);
         }
     }
 
@@ -1286,7 +1288,7 @@ public class MultiService {
             ProductResponseDTO productResponseDTO = this.getProduct(product);
             productResponseDTOList.add(productResponseDTO);
         }
-        return this.getEventDTO(event,productResponseDTOList, user);
+        return this.getEventDTO(event, productResponseDTOList, user);
     }
 
     @Transactional
@@ -1328,9 +1330,10 @@ public class MultiService {
         Event updatedEvent = this.eventService.updateEvent(_event, eventRequestDTO);
         return this.getEventDTO(updatedEvent, productResponseDTOList, user);
     }
-
-    @Scheduled(cron = "0 0 0 * * *")
+    // 초 분 시 일 월 주
+    @Scheduled(cron = "0 0 * * * *")
     public void deleteEvent () {
+
         LocalDateTime now = LocalDateTime.now();
         List<Event> eventList = this.eventService.findByEndDateAfter(now);
 
@@ -1343,7 +1346,7 @@ public class MultiService {
         }
     }
 
-    private EventResponseDTO getEventDTO (Event event, List<ProductResponseDTO> productResponseDTOList, SiteUser user) {
+    private EventResponseDTO getEventDTO(Event event, List<ProductResponseDTO> productResponseDTOList, SiteUser user) {
         return EventResponseDTO.builder()
                 .startDate(this.dateTimeTransfer(event.getStartDate()))
                 .endDate(this.dateTimeTransfer(event.getEndDate()))
@@ -1375,7 +1378,7 @@ public class MultiService {
         return dateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
     }
 
-    private Integer getProductDiscountPrice (Product product, Double discount) {
+    private Integer getProductDiscountPrice(Product product, Double discount) {
         if (discount < 0.0) {
             discount = 0.0;
         }

@@ -7,6 +7,7 @@ import com.team.shopping.Repositories.RecentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,5 +38,10 @@ public class RecentService {
 
     public Optional<Recent> getRecentId(Long recentId) {
         return recentRepository.findRecentId(recentId);
+    }
+
+    public void update(Recent recent) {
+        recent.setCreateDate(LocalDateTime.now());
+        recentRepository.save(recent);
     }
 }

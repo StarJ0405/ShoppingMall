@@ -48,6 +48,7 @@ public class ProductResponseDTO {
                               Long dateLimit, Long createDate, Long modifyDate, Double discount,
                               int discountPrice, List<OptionListResponseDTO> optionListResponseDTOList) {
 
+
         this.id = product.getId();
         this.authorUsername = product.getSeller().getUsername();
         this.topCategoryName = product.getCategory().getParent() != null && product.getCategory().getParent().getParent() != null ? product.getCategory().getParent().getParent().getName() : null;
@@ -74,5 +75,6 @@ public class ProductResponseDTO {
         this.grade = averageGrade;
         this.numOfGrade = numOfGrade;
         this.optionListResponseDTOList = optionListResponseDTOList;
+
     }
 }
