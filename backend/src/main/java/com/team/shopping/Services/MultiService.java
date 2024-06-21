@@ -205,7 +205,9 @@ public class MultiService {
     public AddressResponseDTO createAddress(String username, AddressRequestDTO addressRequestDTO) {
         SiteUser user = this.userService.get(username);
         Address address = this.addressService.saveAddress(user, addressRequestDTO);
-        return AddressResponseDTO.builder().address(address).build();
+        return AddressResponseDTO.builder()
+                .address(address)
+                .build();
     }
 
     @Transactional
@@ -501,7 +503,6 @@ public class MultiService {
     @Transactional
     public PaymentLogResponseDTO addPaymentLog(String username, PaymentLogRequestDTO paymentLogRequestDTO) {
         SiteUser user = this.userService.get(username);
-        Address address = this.addressService.get(paymentLogRequestDTO.getAddressId());
         List<CartItem> cartItemList = this.cartItemService.getList(paymentLogRequestDTO.getCartItemIdList());
 
         // 장바구니 항목이 없는 경우 예외 처리
@@ -525,7 +526,7 @@ public class MultiService {
         }
 
         // 결제 로그 생성
-        PaymentLog paymentLog = this.paymentLogService.save(user, address);
+        PaymentLog paymentLog = this.paymentLogService.save(user, paymentLogRequestDTO);
 
         for (CartItem cartItem : cartItemList) {
             Product product = cartItem.getProduct();

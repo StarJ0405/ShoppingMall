@@ -13,6 +13,16 @@ public class PaymentLogRequestDTO {
 
     private List<Long> cartItemIdList;
 
-    private Long addressId;
+    private String recipient;
+
+    private String phoneNumber;
+
+    private String mainAddress;
+
+    private String addressDetail;
+
+    private int postNumber;
+
+    private String deliveryMessage;
 
 }
