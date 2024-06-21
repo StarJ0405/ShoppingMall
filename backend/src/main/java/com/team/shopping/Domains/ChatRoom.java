@@ -26,6 +26,4 @@ public class ChatRoom {
     private LocalDateTime createDate;
 
     private LocalDateTime modifyDate;
-
-
 }
