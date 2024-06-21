@@ -1,6 +1,6 @@
 package com.team.shopping.Services.Module;
 
-import com.team.shopping.Domains.Address;
+import com.team.shopping.DTOs.PaymentLogRequestDTO;
 import com.team.shopping.Domains.PaymentLog;
 import com.team.shopping.Domains.SiteUser;
 import com.team.shopping.Enums.PaymentStatus;
@@ -17,18 +17,18 @@ public class PaymentLogService {
 
     private final PaymentLogRepository paymentLogRepository;
 
-    public PaymentLog save (SiteUser user, Address address) {
+    public PaymentLog save (SiteUser user, PaymentLogRequestDTO paymentLogRequestDTO) {
         return this.paymentLogRepository.save(PaymentLog.builder()
                 .user(user)
                 .info("Payment info for user " + user.getUsername())
                 .createDate(LocalDateTime.now())
                 .paymentStatus(PaymentStatus.WAITING_DEPOSIT)
-                .recipient(address.getRecipient())
-                .phoneNumber(address.getPhoneNumber())
-                .mainAddress(address.getMainAddress())
-                .addressDetail(address.getAddressDetail())
-                .postNumber(address.getPostNumber())
-                .deliveryMessage(address.getDeliveryMessage())
+                .recipient(paymentLogRequestDTO.getRecipient())
+                .phoneNumber(paymentLogRequestDTO.getPhoneNumber())
+                .mainAddress(paymentLogRequestDTO.getMainAddress())
+                .addressDetail(paymentLogRequestDTO.getAddressDetail())
+                .postNumber(paymentLogRequestDTO.getPostNumber())
+                .deliveryMessage(paymentLogRequestDTO.getDeliveryMessage())
                 .build());
     }
 
