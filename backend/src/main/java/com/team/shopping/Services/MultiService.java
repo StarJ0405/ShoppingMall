@@ -574,7 +574,7 @@ public class MultiService {
 
     /**
      * option
-     * */
+     */
 
     public List<OptionListResponseDTO> getOptionListResponseDTOList(Product product) {
         List<OptionListResponseDTO> optionListResponseDTOList = new ArrayList<>();
@@ -824,6 +824,18 @@ public class MultiService {
     }
 
     @Transactional
+    public void deleteTempImage(String username) {
+        Optional<FileSystem> _fileSystem = fileSystemService.get(ImageKey.TEMP.getKey(username));
+        if (_fileSystem.isPresent()) {
+            String path = ShoppingApplication.getOsType().getLoc();
+            FileSystem fileSystem = _fileSystem.get();
+            File file = new File(path + fileSystem.getV());
+            if (file.exists()) file.delete();
+            fileSystemService.delete(_fileSystem.get());
+        }
+    }
+
+    @Transactional
     public ImageResponseDTO tempUpload(ImageRequestDTO requestDTO, String username) {
         if (!requestDTO.getFile().isEmpty()) try {
             String path = ShoppingApplication.getOsType().getLoc();
@@ -847,7 +859,23 @@ public class MultiService {
         }
         return null;
     }
-
+    @Transactional
+    public void deleteTempImageList(String username){
+        String path = ShoppingApplication.getOsType().getLoc();
+        Optional<MultiKey> _multiKey = multiKeyService.get(ImageKey.TEMP.getKey(username));
+        if(_multiKey.isPresent()){
+            for(String key : _multiKey.get().getVs()){
+                Optional<FileSystem> _fileSystem = fileSystemService.get(key);
+                if (_fileSystem.isPresent()) {
+                    FileSystem fileSystem = _fileSystem.get();
+                    File file = new File(path + fileSystem.getV());
+                    if (file.exists()) file.delete();
+                    fileSystemService.delete(_fileSystem.get());
+                }
+            }
+            multiKeyService.delete(_multiKey.get());
+        }
+    }
     @Transactional
     public ImageResponseDTO tempImageList(ImageRequestDTO requestDTO, String username) {
         if (!requestDTO.getFile().isEmpty()) try {

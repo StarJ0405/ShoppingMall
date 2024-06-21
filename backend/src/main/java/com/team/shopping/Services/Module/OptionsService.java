@@ -6,6 +6,7 @@ import com.team.shopping.Repositories.OptionsRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -14,15 +15,15 @@ public class OptionsService {
 
     private final OptionsRepository optionsRepository;
 
-    public List<Options> getOptionsList (List<Long> optionIdList) {
-        return this.optionsRepository.findAllById(optionIdList);
+    public List<Options> getOptionsList(List<Long> optionIdList) {
+        return optionIdList != null ? this.optionsRepository.findAllById(optionIdList) : new ArrayList<>();
     }
 
-    public List<Options> getList (OptionList optionList) {
+    public List<Options> getList(OptionList optionList) {
         return this.optionsRepository.findByOptionList(optionList);
     }
 
-    public Options getOption (Long optionId) {
+    public Options getOption(Long optionId) {
         return this.optionsRepository.findById(optionId).orElseThrow();
     }
 
@@ -31,13 +32,14 @@ public class OptionsService {
             count = 1;
         }
         optionsRepository.save(Options.builder()
-                        .count(count)
-                        .name(name)
-                        .price(price)
-                        .optionList(optionList)
+                .count(count)
+                .name(name)
+                .price(price)
+                .optionList(optionList)
                 .build());
     }
-    public Options save (Options options) {
+
+    public Options save(Options options) {
         return this.optionsRepository.save(options);
     }
 }

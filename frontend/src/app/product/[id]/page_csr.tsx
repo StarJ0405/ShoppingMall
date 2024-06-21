@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react';
 import Main from '@/app/Global/Layout/MainLayout';
-import { checkWish, deleteWish, getUser, postRecent, postWish } from '@/app/API/UserAPI';
+import { checkWish, deleteWish, getUser, postCartList, postRecent, postWish } from '@/app/API/UserAPI';
 import DropDown, { Direcion } from '@/app/Global/DropDown';
 import { MonthDate } from '@/app/Global/Method';
 import { getReviews } from '@/app/API/NonUserAPI';
@@ -33,9 +33,9 @@ export default function Page(props: pageProps) {
     const grade3 = product?.numOfGrade['2.5~3'];
     const grade4 = product?.numOfGrade['3.5~4'];
     const grade5 = product?.numOfGrade['4.5~5'];
-    const [options,setOptions] = useState(null as unknown as any[])
-    const [option,setOption] = useState(null as any);
-
+    const [options, setOptions] = useState(null as unknown as number[])
+    const [option, setOption] = useState(-1);
+    const [count, setCount] = useState(product?.remain >= 1 ? 1 : product?.remain);
     useEffect(() => {
         if (ACCESS_TOKEN)
             getUser()
@@ -45,8 +45,8 @@ export default function Page(props: pageProps) {
                         .then(r => setLove(r))
                         .catch(e => console.log(e));
                     postRecent(product.id)
-                        .then(r => setRecentList(r)
-                        ).catch(e => console.log(e));
+                        .then(r => setRecentList(r))
+                        .catch(e => console.log(e));
                 })
                 .catch(e => console.log(e));
     }, [ACCESS_TOKEN]);
@@ -70,7 +70,49 @@ export default function Page(props: pageProps) {
             postWish(product.id);
         setLove(!love);
     }
-    
+    function updateOptions() {
+        const options = [] as number[];
+        (product?.optionListResponseDTOList as any[])?.forEach(optionList => {
+            document.getElementsByName(optionList.optionListName).forEach((option) => {
+                if ((option as HTMLInputElement).checked && (option as HTMLInputElement)?.id.includes('§'))
+                    options.push(Number((option as HTMLInputElement)?.id.split('§')[1]));
+            })
+        });
+        setOptions(options);
+
+        const count = (document.getElementById('count') as HTMLInputElement);
+        let value = Number(count.value);
+        let max = product.remain;
+        (product?.optionListResponseDTOList as any[])?.forEach(optionList => {
+            (optionList.optionResponseDTOList as any[])?.forEach(option => {
+                if (options?.includes(option.optionId))
+                    max = max > option.optionRemain ? option.optionRemain : max;
+            })
+        });
+        value = value > max ? max : value;
+        count.value = value.toString();
+        setCount(value);
+    }
+    function getPrice() {
+        let optionPrice = 0;
+        (product?.optionListResponseDTOList as any[])?.forEach(optionList => {
+            (optionList.optionResponseDTOList as any[])?.forEach(option => {
+                if (options?.includes(option.optionId))
+                    optionPrice += option.optionPrice;
+            })
+        });
+        return product.price + optionPrice;
+    }
+    function getMax() {
+        let max = product.remain;
+        (product?.optionListResponseDTOList as any[])?.forEach(optionList => {
+            (optionList.optionResponseDTOList as any[])?.forEach(option => {
+                if (options?.includes(option.optionId))
+                    max = max > option.optionRemain ? option.optionRemain : max;
+            })
+        });
+        return max;
+    }
     return <Main user={user} recentList={recentList} setRecentList={setRecentList}>
         <div className='flex flex-col w-[1240px] min-h-[670px]'>
             <div className='text-sm flex'>
@@ -254,10 +296,39 @@ export default function Page(props: pageProps) {
                     </table> */}
                 </div>
                 <div className='w-[300px] h-full ml-[60px] relative' >
-                    <div className='fixed'>
-                        {(product.optionListResponseDTOList as any[])?.map((list,index)=><div key={index}>{list.name}</div>)
-
-                        }
+                    <div className='w-[300px] fixed h-[650px]'>
+                        <div className='h-[550px] overflow-y-scroll pr-1'>
+                            {(product.optionListResponseDTOList as any[])?.map((list, index) =>
+                                <div key={index} className={'border border-black mb-2'}>
+                                    <div className={'p-2 border-black cursor-pointer' + (option != index ? " " : " border-b")} onClick={() => {
+                                        if (option == index)
+                                            setOption(-1);
+                                        else
+                                            setOption(index);
+                                    }}>
+                                        {list.optionListName}
+                                    </div>
+                                    <div className={(option == index ? '' : ' hidden')}>
+                                        <div className={'flex relative flex-col mt-2' + (typeof window !== "undefined" && (document?.getElementById(list.optionListName) as HTMLInputElement)?.checked ? " bg-red-500 text-white" : "")}>
+                                            <label className='mt-2 px-2'>{'옵션 미선택'}</label>
+                                            <input type='radio' id={list.optionListName} name={list.optionListName} className='opacity-0 z-1 absolute w-full h-full cursor-pointer' onChange={updateOptions} defaultChecked={true} />
+                                        </div>
+                                        {(list.optionResponseDTOList as any[])?.map((opt, opt_index) =>
+                                            <div key={opt_index} className={'h-full flex relative flex-col mt-2' + (options?.includes(opt.optionId) ? " bg-red-500 text-white" : "")}>
+                                                <label className='mt-2 px-2'>{opt.optionName}</label>
+                                                <label className='mt-2 px-4'><label className='font-bold'>{opt.optionPrice.toLocaleString('ko-kr')}</label> 원</label>
+                                                <input type='radio' id={list.optionListName + '§' + opt.optionId} name={list.optionListName} className='opacity-0 z-1 absolute w-full h-full cursor-pointer' onChange={updateOptions} />
+                                            </div>)}
+                                    </div>
+                                </div>)}
+                        </div>
+                        <div className='flex justify-between'>
+                            <label>총 <input type='number' id="count" className='[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none m-0 input input-sm min-w-[30px]' defaultValue={product?.remain >= 1 ? 1 : product?.remain} min={product?.remain >= 1 ? 1 : product?.remain} max={getMax()} onChange={(e) => { let value = Number(e.target.value); if (value > getMax()) value = getMax(); else if (value < 0) value = 0; e.target.value = value.toString(); setCount(value); }} />개</label>
+                            <label>{(getPrice() * count).toLocaleString('ko-kr')}원</label>
+                        </div>
+                        <button className='btn btn-error text-white w-full btn mt-2' onClick={() =>
+                            postCartList({ productId: product.id, optionIdList: options, count: count }).then(() => window.location.href = "/account/cart").catch(e => console.log(e))
+                        }>장바구니 담기</button>
                     </div>
                 </div>
             </div>

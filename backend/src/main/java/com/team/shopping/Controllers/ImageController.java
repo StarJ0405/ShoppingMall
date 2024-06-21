@@ -6,10 +6,7 @@ import com.team.shopping.Records.TokenRecord;
 import com.team.shopping.Services.MultiService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -18,8 +15,7 @@ public class ImageController {
     private final MultiService multiService;
 
     @PostMapping
-    public ResponseEntity<?> tempImage(@RequestHeader("Authorization") String accessToken,
-                                       ImageRequestDTO imageRequestDTO) {
+    public ResponseEntity<?> saveTempImage(@RequestHeader("Authorization") String accessToken, ImageRequestDTO imageRequestDTO) {
         TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
         if (tokenRecord.isOK()) {
             String username = tokenRecord.username();
@@ -29,14 +25,36 @@ public class ImageController {
         return tokenRecord.getResponseEntity();
     }
 
+    @DeleteMapping
+    public ResponseEntity<?> deleteTempImage(@RequestHeader("Authorization") String accessToken) {
+        TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
+        if (tokenRecord.isOK()) {
+            System.out.println("test");
+            String username = tokenRecord.username();
+            this.multiService.deleteTempImage(username);
+            return tokenRecord.getResponseEntity(true);
+        }
+        return tokenRecord.getResponseEntity();
+    }
+
     @PostMapping("/list")
-    public ResponseEntity<?> tempImageList(@RequestHeader("Authorization") String accessToken,
-                                       ImageRequestDTO imageRequestDTO) {
+    public ResponseEntity<?> tempImageList(@RequestHeader("Authorization") String accessToken, ImageRequestDTO imageRequestDTO) {
         TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
         if (tokenRecord.isOK()) {
             String username = tokenRecord.username();
             ImageResponseDTO imageResponseDTO = this.multiService.tempImageList(imageRequestDTO, username);
             return tokenRecord.getResponseEntity(imageResponseDTO);
+        }
+        return tokenRecord.getResponseEntity();
+    }
+
+    @DeleteMapping("/list")
+    public ResponseEntity<?> deleteTempImageList(@RequestHeader("Authorization") String accessToken) {
+        TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
+        if (tokenRecord.isOK()) {
+            String username = tokenRecord.username();
+            this.multiService.deleteTempImageList(username);
+            return tokenRecord.getResponseEntity(true);
         }
         return tokenRecord.getResponseEntity();
     }
