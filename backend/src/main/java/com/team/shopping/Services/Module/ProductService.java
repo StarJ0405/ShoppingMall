@@ -27,7 +27,10 @@ public class ProductService {
         return this.productRepository.findById(productId)
                 .orElseThrow(() -> new IllegalArgumentException("not found product"));
     }
-
+    public void Update(Product product, String detail){
+        product.setDetail(detail);
+        this.productRepository.save(product);
+    }
     public Product saveProduct(ProductCreateRequestDTO requestDTO, SiteUser user, Category category) {
         return this.productRepository.save(Product.builder()
                 .seller(user)

@@ -37,7 +37,6 @@ public class ProductResponseDTO {
     private Long createDate;
     private Long modifyDate;
     private String url;
-    private List<String> urlList;
     private Double grade;
     private int reviewSize;
     private Map<String , Integer> numOfGrade;
@@ -45,7 +44,7 @@ public class ProductResponseDTO {
     @Builder
     public ProductResponseDTO(Product product, List<String> tagList, String url,
                               List<Review> reviewList, Double averageGrade, Map<String , Integer> numOfGrade,
-                              Long dateLimit, Long createDate, Long modifyDate, Double discount, int discountPrice, List<String> urlList) {
+                              Long dateLimit, Long createDate, Long modifyDate, Double discount, int discountPrice) {
 
         this.id = product.getId();
         this.authorUsername = product.getSeller().getUsername();
@@ -72,6 +71,5 @@ public class ProductResponseDTO {
         this.reviewSize = reviewList.size();
         this.grade = averageGrade;
         this.numOfGrade = numOfGrade;
-        this.urlList = urlList;
     }
 }

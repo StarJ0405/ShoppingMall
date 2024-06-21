@@ -663,21 +663,26 @@ public class MultiService {
                 }
             }
         }
+        String detail = product.getDetail();
         Optional<MultiKey> _multiKey = multiKeyService.get(ImageKey.TEMP.getKey(username));
         if (_multiKey.isPresent()) {
             for (String keyName : _multiKey.get().getVs()) {
                 Optional<MultiKey> _productMulti = multiKeyService.get(ImageKey.PRODUCT.getKey(product.getId().toString()));
                 Optional<FileSystem> _fileSystem = fileSystemService.get(keyName);
-                if (_productMulti.isEmpty()) {
-                    MultiKey multiKey = multiKeyService.save(ImageKey.PRODUCT.getKey(product.getId().toString()), ImageKey.PRODUCT.getKey(product.getId().toString()) + ".0");
-                    fileSystemService.save(multiKey.getVs().getLast(), _fileSystem.get().getV());
-                } else {
-                    multiKeyService.add(_productMulti.get(), ImageKey.PRODUCT.getKey(product.getId().toString()) + "." + _productMulti.get().getVs().size());
-                    fileSystemService.save(_productMulti.get().getVs().getLast(), _fileSystem.get().getV());
+                if(_fileSystem.isPresent()) {
+                    String newFile = "/api/product" + "_" + product.getId() + "/content/";
+                    String newUrl = this.fileMove(_fileSystem.get().getV(), newFile, _fileSystem.get());
+                    if (_productMulti.isEmpty()) {
+                        MultiKey multiKey = multiKeyService.save(ImageKey.PRODUCT.getKey(product.getId().toString()), ImageKey.PRODUCT.getKey(product.getId().toString()) + ".0");
+                        fileSystemService.save(multiKey.getVs().getLast(), newUrl);
+                    } else {
+                        multiKeyService.add(_productMulti.get(), ImageKey.PRODUCT.getKey(product.getId().toString()) + "." + _productMulti.get().getVs().size());
+                        fileSystemService.save(_productMulti.get().getVs().getLast(), newUrl);
+                    }
+                    detail = detail.replace(_fileSystem.get().getV(),newUrl);
                 }
-                String newFile = "/api/product" + "_" + product.getId() + "/";
-                this.fileMove(_fileSystem.get().getV(), newFile, _fileSystem.get());
             }
+            productService.Update(product,detail);
             multiKeyService.delete(_multiKey.get());
         }
     }
@@ -707,13 +712,6 @@ public class MultiService {
         Map<String, Integer> numOfGrade = (Map<String, Integer>) gradeCalculate.get("numOfGrade");
         Double averageGrade = (Double) gradeCalculate.get("averageGrade");
 
-        Optional<MultiKey> _multiKey = multiKeyService.get(ImageKey.PRODUCT.getKey(product.getId().toString()));
-        List<String> urlList = new ArrayList<>();
-        if (_multiKey.isPresent())
-            for (String keyName : _multiKey.get().getVs()) {
-                Optional<FileSystem> _contentFileSystem = fileSystemService.get(keyName);
-                _contentFileSystem.ifPresent(fileSystem -> urlList.add(fileSystem.getV()));
-            }
 
         Double discount = this.getProductDiscount(product);
         int discountPrice = this.getProductDiscountPrice(product, discount);
@@ -728,7 +726,6 @@ public class MultiService {
                 .dateLimit(this.dateTimeTransfer(product.getDateLimit()))
                 .createDate(this.dateTimeTransfer(product.getCreateDate()))
                 .modifyDate(this.dateTimeTransfer(product.getModifyDate()))
-                .urlList(urlList)
                 .reviewList(reviewList)
                 .averageGrade(averageGrade)
                 .numOfGrade(numOfGrade)
@@ -972,17 +969,8 @@ public class MultiService {
         if (_fileSystem.isPresent())
             profileUrl = _fileSystem.get().getV();
 
-        Optional<MultiKey> _multiKey = multiKeyService.get(ImageKey.REVIEW.getKey(review.getId().toString()));
-        List<String> urlList = new ArrayList<>();
-        if (_multiKey.isPresent())
-            for (String key : _multiKey.get().getVs()) {
-                Optional<FileSystem> _reviewFileSystem = fileSystemService.get(key);
-                _reviewFileSystem.ifPresent(fileSystem -> urlList.add(fileSystem.getV()));
-            }
-
         return ReviewResponseDTO.builder()
                 .profileUrl(profileUrl)
-                .urlList(urlList)
                 .createDate(this.dateTimeTransfer(review.getCreateDate()))
                 .modifyDate(this.dateTimeTransfer(review.getModifyDate()))
                 .review(review)
