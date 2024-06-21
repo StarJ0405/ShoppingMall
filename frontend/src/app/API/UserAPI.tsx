@@ -101,7 +101,7 @@ interface productProps {
     receipt: string,
     a_s: string,
     brand: string,
-    productTagList: string[],
+    tagList: string[],
     url: string,
     optionLists: any
 }
@@ -109,7 +109,10 @@ export const productRegist = async (data: productProps) => {
     const response = await UserApi.post('/api/product', data);
     return response.data;
 }
-
+export const deleteImage = async()=>{
+    const response = await UserApi.delete('/api/image');
+    return response.data;
+}
 export const saveImage = async (data: any) => {
     const response = await UserApi.post('/api/image', data, {
         headers: {
@@ -124,6 +127,10 @@ export const saveImageList = async (data:any)=>{
             'Content-Type': 'multipart/form-data'
         }
     });
+    return response.data;
+}
+export const deleteImageList = async()=>{
+    const response = await UserApi.delete('/api/image/list');
     return response.data;
 }
 export const getRecent = async () => {
