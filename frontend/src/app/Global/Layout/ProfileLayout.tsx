@@ -6,10 +6,11 @@ interface pageInterface {
     user: any
     recentList: any[];
     setRecentList: (data: any) => void;
+    categories: any[];
 }
 export default function Profile(props: Readonly<pageInterface>) {
     const user = props?.user;
-    return <Main user={user} recentList={props.recentList} setRecentList={props.setRecentList}>
+    return <Main user={user} recentList={props.recentList} setRecentList={props.setRecentList} categories={props.categories}>
         <div className="flex flex-col w-[1240px]">
             <div className="flex w-full items-end">
                 <label className="font-bold text-2xl w-[185px]">나의 11번가</label>

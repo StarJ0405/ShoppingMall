@@ -8,5 +8,5 @@ export default async function Home({ params }: { params: any }) {
     const categories = await getCategories();
     const topCategory = categories.filter((cateogry:any) => cateogry.name == product.topCategoryName)[0]
     const middleCateogry =  topCategory?.categoryResponseDTOList.filter((category:any)=>category.name == product.middleCategoryName)[0];
-    return <Page product={product} seller={seller} topCategory={topCategory} middleCategory={middleCateogry}></Page>;
+    return <Page product={product} seller={seller} topCategory={topCategory} middleCategory={middleCateogry} categories={categories}></Page>;
 }

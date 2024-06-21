@@ -9,6 +9,7 @@ import { getReviews } from '@/app/API/NonUserAPI';
 interface pageProps {
     product: any;
     seller: any;
+    categories: any[]
     topCategory: any;
     middleCategory: any;
 }
@@ -113,7 +114,7 @@ export default function Page(props: pageProps) {
         });
         return max;
     }
-    return <Main user={user} recentList={recentList} setRecentList={setRecentList}>
+    return <Main user={user} recentList={recentList} setRecentList={setRecentList} categories={props.categories}>
         <div className='flex flex-col w-[1240px] min-h-[670px]'>
             <div className='text-sm flex'>
                 <label className='text-2xl font-bold'>{props.seller.nickname}</label>
