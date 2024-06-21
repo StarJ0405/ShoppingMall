@@ -13,6 +13,7 @@ interface pageInterface {
   user: any
   recentList: any[];
   setRecentList: (data: any) => void;
+  categories: any[];
 }
 
 export default function Main(props: Readonly<pageInterface>) {
@@ -24,6 +25,9 @@ export default function Main(props: Readonly<pageInterface>) {
   const [isSideOpen, setIsSideOpen] = useState(false);
   const [userHover, setUserHover] = useState(false);
   const [userHoverInterval, setUserHoverInterval] = useState(null as any);
+  const categories = props.categories
+  const [topCategoryHover, setTopCategoryHover] = useState(null as any);
+  const [topCategoryHoverInterval, setCategoryHoverInterval] = useState(null as any);
   function openUserHover() {
     clearInterval(userHoverInterval);
     setUserHover(true);
@@ -37,6 +41,16 @@ export default function Main(props: Readonly<pageInterface>) {
   function getDate(data: any) {
     const date = new Date(data);
     return date.getFullYear() + '.' + (date.getMonth() + 1) + '.' + date.getDate();
+  }
+  function openTopCategoryHover(category: any) {
+    clearInterval(topCategoryHoverInterval);
+    setTopCategoryHover(category);
+  }
+  function closeTopCategoryHover() {
+    if (topCategoryHoverInterval)
+      clearInterval(topCategoryHoverInterval);
+    const interval = setInterval(() => { setTopCategoryHover(null); clearInterval(interval) }, 500);
+    setCategoryHoverInterval(interval);
   }
   return (
     <main id='main' className={'min-h-screen flex flex-col items-center realtive ' + className}>
@@ -64,27 +78,32 @@ export default function Main(props: Readonly<pageInterface>) {
           {user ? <a href='/' onClick={e => { e.preventDefault(); localStorage.clear(); window.location.reload(); }} className='hover:text-red-500'>로그아웃</a> : <></>}
         </div>
       </DropDown>
-      <Side open={isSideOpen} onClose={() => setIsSideOpen(false)} className='px-2 py-4 w-[300px] left-0 top-0 h-full' outlineClassName='bg-opacity-5' escClose={true} outlineClose={true}>
-        <div className='flex justify-between items-center text-2xl font-bold'>
-          {user ?
-            <a href='' className='hover:underline'>{user?.nickname}</a>
-            :
-            <a href='/account/login' className='hover:underline'>로그인</a>
-          }
-          <button onClick={() => setIsSideOpen(false)}><img alt='x' src='/x.png' className='w-[24px] h-[24px]' /></button>
-        </div>
-        <div className='overflow-y-scroll h-full'>
-          <div className='mt-[20px] flex flex-col'>
-            <label className='text-xl font-bold'>카테고리</label>
-            <div className='pl-5 flex flex-col'>
-              <a href='' className='text-lg mt-1'>브랜드패션</a>
-              <a href='' className='text-lg mt-1'>트랜드패션</a>
+      <Side open={isSideOpen} onClose={() => setIsSideOpen(false)} className='pl-4 py-4 left-0 top-0 h-full flex' outlineClassName='bg-opacity-5' escClose={true} outlineClose={true}>
+        <div className='w-[300px]'>
+          <div className='flex justify-between items-center text-2xl font-bold'>
+            {user ?
+              <a href='' className='hover:underline'>{user?.nickname}</a>
+              :
+              <a href='/account/login' className='hover:underline'>로그인</a>
+            }
+            <button onClick={() => setIsSideOpen(false)}><img alt='x' src='/x.png' className='w-[24px] h-[24px] mr-6' /></button>
+          </div>
+          <div className='overflow-y-scroll h-full'>
+            <div className='mt-[20px] flex flex-col' onMouseLeave={() => closeTopCategoryHover()}>
+              <label className='text-xl font-bold'>카테고리</label>
+              <div className='flex flex-col'>
+                {categories?.map((category, index) => <div key={index} className='pl-5 text-lg mt-1 hover:bg-red-500 hover:text-white w-full h-full cursor-pointer' onMouseEnter={() => openTopCategoryHover(category)}>{category.name}</div>)}
+              </div>
             </div>
           </div>
-
-          <div className='mt-[20px] flex flex-col'>
-            <label className='text-xl font-bold'>주요서비스</label>
-          </div>
+        </div>
+        <div className={('flex flex-col justif w-[200px] h-full pl-4 overflow-y-scroll') + (topCategoryHover != null ? '' : ' hidden')} onMouseEnter={() => openTopCategoryHover(topCategoryHover)} onMouseLeave={() => closeTopCategoryHover()}>
+          {(topCategoryHover?.categoryResponseDTOList as any[])?.map((category, index) => <div key={index} className='flex flex-col mt-8'>
+            <label className='text-gray-500 text-lg font-bold'>{category.name}</label>
+            {(category.categoryResponseDTOList as any[])?.map((category, index) =>
+              <label key={index} className='hover:text-red-500 cursor-pointer my-1'>{category.name}</label>
+            )}
+          </div>)}
         </div>
       </Side>
       <Side open={isRecentOpen} onClose={() => setIsRecentOpen(false)} className='px-4 py-4 w-[400px] right-0 top-0 h-full' outlineClassName='bg-opacity-5' escClose={true} outlineClose={true}>
@@ -104,7 +123,7 @@ export default function Main(props: Readonly<pageInterface>) {
             <div className='relative w-[104px]'>
               <img onClick={() => window.location.href = '/product/' + recent.productId} src={recent?.url ? recent.url : '/empty_product.png'} className={'w-[104px] h-[104px] cursor-pointer ' + (hover == index ? ' border-2 border-black' : '')} onMouseEnter={() => setHover(index)} onMouseLeave={() => setHover(-1)} />
               <button className={'text-sm absolute font-bold right-0 top-0 text-white bg-black w-[14px] z-[1] text-center' + (hover != index ? ' hidden' : '')} onClick={() => {
-                deleteRecent(recent.recentId).then(r => {props.setRecentList(r); console.log(r)}).catch(e => console.log(e))
+                deleteRecent(recent.recentId).then(r => { props.setRecentList(r); console.log(r) }).catch(e => console.log(e))
               }} onMouseEnter={() => setHover(index)} onMouseLeave={() => setHover(-1)} >X</button>
             </div>
           </li>)}
@@ -119,7 +138,6 @@ export default function Main(props: Readonly<pageInterface>) {
           :
           <a href='/account/login' className='font-bold hover:underline'>로그인</a>
         }
-
       </nav>
       {props.children}
       <footer className='flex flex-col w-[1240px]'>
