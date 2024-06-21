@@ -192,9 +192,9 @@ public class MultiService {
         List<AddressResponseDTO> addressResponseDTOList = new ArrayList<>();
         List<Address> addressList = this.addressService.getList(user);
 
-        if (addressList.isEmpty()) {
-            throw new NoSuchElementException("not found addresses");
-        }
+//        if (addressList.isEmpty()) {
+//            throw new NoSuchElementException("not found addresses");
+//        }
 
         for (Address address : addressList) {
             addressResponseDTOList.add(AddressResponseDTO.builder()
