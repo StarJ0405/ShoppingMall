@@ -669,7 +669,7 @@ public class MultiService {
             for (String keyName : _multiKey.get().getVs()) {
                 Optional<MultiKey> _productMulti = multiKeyService.get(ImageKey.PRODUCT.getKey(product.getId().toString()));
                 Optional<FileSystem> _fileSystem = fileSystemService.get(keyName);
-                if(_fileSystem.isPresent()) {
+                if (_fileSystem.isPresent()) {
                     String newFile = "/api/product" + "_" + product.getId() + "/content/";
                     String newUrl = this.fileMove(_fileSystem.get().getV(), newFile, _fileSystem.get());
                     if (_productMulti.isEmpty()) {
@@ -679,10 +679,10 @@ public class MultiService {
                         multiKeyService.add(_productMulti.get(), ImageKey.PRODUCT.getKey(product.getId().toString()) + "." + _productMulti.get().getVs().size());
                         fileSystemService.save(_productMulti.get().getVs().getLast(), newUrl);
                     }
-                    detail = detail.replace(_fileSystem.get().getV(),newUrl);
+                    detail = detail.replace(_fileSystem.get().getV(), newUrl);
                 }
             }
-            productService.Update(product,detail);
+            productService.Update(product, detail);
             multiKeyService.delete(_multiKey.get());
         }
     }
@@ -1163,8 +1163,8 @@ public class MultiService {
                 if (recentList.size() >= 10) {
                     Recent recent = recentList.getLast();
                     this.recentService.delete(recent);
-                    recentService.save(product, user);
                 }
+                recentService.save(product, user);
             }
         }
     }
@@ -1297,9 +1297,10 @@ public class MultiService {
         Event updatedEvent = this.eventService.updateEvent(_event, eventRequestDTO);
         return this.getEventDTO(updatedEvent, productResponseDTOList, user);
     }
+
     // 초 분 시 일 월 주
     @Scheduled(cron = "0 0 * * * *")
-    public void deleteEvent () {
+    public void deleteEvent() {
 
         LocalDateTime now = LocalDateTime.now();
         List<Event> eventList = this.eventService.findByEndDateAfter(now);

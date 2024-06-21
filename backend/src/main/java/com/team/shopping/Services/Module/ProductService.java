@@ -6,6 +6,7 @@ import com.team.shopping.Domains.Product;
 import com.team.shopping.Domains.SiteUser;
 import com.team.shopping.Enums.Sorts;
 import com.team.shopping.Repositories.ProductRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,6 +24,7 @@ public class ProductService {
         return this.productRepository.save(product);
     }
 
+    @Transactional
     public Product getProduct (Long productId) {
         return this.productRepository.findById(productId)
                 .orElseThrow(() -> new IllegalArgumentException("not found product"));
