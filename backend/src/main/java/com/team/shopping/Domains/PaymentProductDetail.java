@@ -19,6 +19,8 @@ public class PaymentProductDetail {
     @ManyToOne(fetch = FetchType.LAZY)
     private PaymentProduct paymentProduct;
 
+    private String optionListName;
+
     private String optionName;
 
     private int optionCount;
@@ -27,7 +29,8 @@ public class PaymentProductDetail {
 
     @Builder
     public PaymentProductDetail (PaymentProduct paymentProduct, String optionName,
-                                 int optionCount, int optionPrice) {
+                                 int optionCount, int optionPrice, String optionListName) {
+        this.optionListName = optionListName;
         this.paymentProduct = paymentProduct;
         this.optionName = optionName;
         this.optionCount = optionCount;

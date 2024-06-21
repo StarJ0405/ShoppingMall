@@ -6,10 +6,16 @@ import com.team.shopping.Repositories.OptionListRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class OptionListService {
     private final OptionListRepository optionListRepository;
+
+    public List<OptionList> getList (Product product) {
+        return this.optionListRepository.findByProduct(product);
+    }
 
     public OptionList save(String name, Product product) {
         return optionListRepository.save(OptionList.builder()

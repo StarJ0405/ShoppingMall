@@ -18,6 +18,10 @@ public class OptionsService {
         return this.optionsRepository.findAllById(optionIdList);
     }
 
+    public List<Options> getList (OptionList optionList) {
+        return this.optionsRepository.findByOptionList(optionList);
+    }
+
     public Options getOption (Long optionId) {
         return this.optionsRepository.findById(optionId).orElseThrow();
     }

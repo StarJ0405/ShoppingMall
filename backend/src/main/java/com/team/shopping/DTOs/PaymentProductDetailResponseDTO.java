@@ -11,6 +11,8 @@ import lombok.Setter;
 @NoArgsConstructor
 public class PaymentProductDetailResponseDTO {
 
+    private String optionListName;
+
     private String optionName;
 
     private int optionCount;
@@ -19,6 +21,7 @@ public class PaymentProductDetailResponseDTO {
 
     @Builder
     public PaymentProductDetailResponseDTO(PaymentProductDetail paymentProductDetail) {
+        this.optionListName = paymentProductDetail.getOptionListName();
         this.optionName = paymentProductDetail.getOptionName();
         this.optionCount = paymentProductDetail.getOptionCount();
         this.optionPrice = paymentProductDetail.getOptionPrice();
