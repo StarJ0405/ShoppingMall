@@ -619,6 +619,37 @@ public class MultiService {
         return DTOConverter.toPaymentLogResponseDTO(paymentLog, paymentProductResponseDTOList);
     }
 
+    /**
+     * option
+     * */
+
+    public List<OptionListResponseDTO> getOptionListResponseDTOList(Product product) {
+        List<OptionListResponseDTO> optionListResponseDTOList = new ArrayList<>();
+        List<OptionList> optionLists = this.optionListService.getList(product);
+
+        for (OptionList optionList : optionLists) {
+            List<OptionResponseDTO> optionResponseDTOList = this.getOptionResponseDTOList(optionList);
+            optionListResponseDTOList.add(OptionListResponseDTO.builder()
+                    .optionResponseDTOList(optionResponseDTOList)
+                    .optionList(optionList)
+                    .build());
+        }
+        return optionListResponseDTOList;
+    }
+
+    private List<OptionResponseDTO> getOptionResponseDTOList(OptionList optionList) {
+        List<OptionResponseDTO> optionResponseDTOList = new ArrayList<>();
+        List<Options> optionsList = this.optionsService.getList(optionList);
+
+        for (Options options : optionsList) {
+            optionResponseDTOList.add(OptionResponseDTO.builder()
+                    .options(options)
+                    .build());
+        }
+
+        return optionResponseDTOList;
+    }
+
 
     /**
      * Product
@@ -708,6 +739,7 @@ public class MultiService {
         List<Review> reviewList = this.reviewService.getList(product);
         String url = this.getImageUrl(product);
         Map<String, Object> gradeCalculate = this.gradeCalculate(reviewList);
+        List<OptionListResponseDTO> optionListResponseDTOList = this.getOptionListResponseDTOList(product);
 
         Map<String, Integer> numOfGrade = (Map<String, Integer>) gradeCalculate.get("numOfGrade");
         Double averageGrade = (Double) gradeCalculate.get("averageGrade");
@@ -718,6 +750,7 @@ public class MultiService {
 
         return ProductResponseDTO
                 .builder()
+                .optionListResponseDTOList(optionListResponseDTOList)
                 .product(product)
                 .tagList(tagList)
                 .url(url)

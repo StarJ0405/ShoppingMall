@@ -26,6 +26,8 @@ public class QPaymentProductDetail extends EntityPathBase<PaymentProductDetail> 
 
     public final NumberPath<Integer> optionCount = createNumber("optionCount", Integer.class);
 
+    public final StringPath optionListName = createString("optionListName");
+
     public final StringPath optionName = createString("optionName");
 
     public final NumberPath<Integer> optionPrice = createNumber("optionPrice", Integer.class);
