@@ -1297,8 +1297,8 @@ public class MultiService {
         Event updatedEvent = this.eventService.updateEvent(_event, eventRequestDTO);
         return this.getEventDTO(updatedEvent, productResponseDTOList, user);
     }
-
-    @Scheduled(cron = "0 0 0 * * *")
+    // 초 분 시 일 월 주
+    @Scheduled(cron = "0 0 * * * *")
     public void deleteEvent () {
         LocalDateTime now = LocalDateTime.now();
         List<Event> eventList = this.eventService.findByEndDateAfter(now);

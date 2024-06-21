@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react';
 import Main from '@/app/Global/Layout/MainLayout';
-import { checkWish, deleteWish, getRecent, getUser, postRecent, postWish } from '@/app/API/UserAPI';
+import { checkWish, deleteWish, getUser, postRecent, postWish } from '@/app/API/UserAPI';
 import DropDown, { Direcion } from '@/app/Global/DropDown';
 import { MonthDate } from '@/app/Global/Method';
 import { getReviews } from '@/app/API/NonUserAPI';
@@ -33,6 +33,9 @@ export default function Page(props: pageProps) {
     const grade3 = product?.numOfGrade['2.5~3'];
     const grade4 = product?.numOfGrade['3.5~4'];
     const grade5 = product?.numOfGrade['4.5~5'];
+    const [options,setOptions] = useState(null as unknown as any[])
+    const [option,setOption] = useState(null as any);
+
     useEffect(() => {
         if (ACCESS_TOKEN)
             getUser()
@@ -251,7 +254,9 @@ export default function Page(props: pageProps) {
                 </div>
                 <div className='w-[300px] h-full ml-[60px] relative'>
                     <div className='fixed'>
+                        {
 
+                        }
                     </div>
                 </div>
             </div>
