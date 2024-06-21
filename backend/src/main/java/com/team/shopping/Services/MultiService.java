@@ -785,6 +785,24 @@ public class MultiService {
     }
 
     @Transactional
+    public List<ProductResponseDTO> getMyProductList(String username) {
+        SiteUser user = this.userService.get(username);
+        List<ProductResponseDTO> productResponseDTOList = new ArrayList<>();
+
+        if (user.getRole().equals(UserRole.USER)) {
+            throw new IllegalArgumentException("only Seller and ADMIN SERVICE");
+        }
+        List<Product> productList = this.productService.getMyList(user);
+        if (productList.isEmpty()) {
+            throw new NoSuchElementException("not found your list");
+        }
+        for (Product product : productList) {
+            productResponseDTOList.add(this.getProduct(product));
+        }
+        return productResponseDTOList;
+    }
+
+    @Transactional
     public void productQASave(String username, ProductQARequestDTO requestDTO) {
         SiteUser user = this.userService.get(username);
         Product product = productService.getProduct(requestDTO.getProductId());
@@ -1395,6 +1413,8 @@ public class MultiService {
 
         return result;
     }
+
+
 }
 
 
