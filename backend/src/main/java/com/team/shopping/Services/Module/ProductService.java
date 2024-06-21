@@ -52,7 +52,7 @@ public class ProductService {
     }
 
     public List<Product> getProductList() {
-        return productRepository.findAll();
+        return this.productRepository.findAll();
     }
 
     public void deleteProduct (Product product) {
@@ -60,13 +60,17 @@ public class ProductService {
     }
 
     public Page<Product> getLatestList(Pageable pageable) {
-        return productRepository.findAllPage(pageable);
+        return this.productRepository.findAllPage(pageable);
     }
 
     public Page<Product> searchByKeyword(Pageable pageable, String keyword, Sorts sorts) {
-        return productRepository.searchByKeyword(pageable, keyword, sorts);
+        return this.productRepository.searchByKeyword(pageable, keyword, sorts);
     }
     public Page<Product> categorySearchByTitle (Pageable pageable, String keyword, Sorts sorts, Long categoryId) {
-        return productRepository.findByTitleOrTagGroupByCategory(pageable, keyword,categoryId, sorts);
+        return this.productRepository.findByTitleOrTagGroupByCategory(pageable, keyword,categoryId, sorts);
+    }
+
+    public List<Product> getMyList(SiteUser user) {
+        return this.productRepository.findBySeller(user);
     }
 }
