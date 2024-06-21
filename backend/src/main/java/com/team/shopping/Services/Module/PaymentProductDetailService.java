@@ -21,6 +21,7 @@ public class PaymentProductDetailService {
 
     public PaymentProductDetail save (PaymentProduct paymentProduct, Options option) {
         return this.paymentProductDetailRepository.save(PaymentProductDetail.builder()
+                .optionListName(option.getOptionList().getName())
                 .paymentProduct(paymentProduct)
                 .optionName(option.getName())
                 .optionCount(1)

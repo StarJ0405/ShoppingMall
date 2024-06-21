@@ -15,7 +15,7 @@ public class OptionResponseDTO {
 
     private String optionName;
 
-    private int optionCount;
+    private int optionRemain;
 
     private int optionPrice;
 
@@ -23,7 +23,7 @@ public class OptionResponseDTO {
     public OptionResponseDTO (Options options) {
         this.optionId = options.getId();
         this.optionName = options.getName();
-        this.optionCount = options.getCount();
+        this.optionRemain = options.getCount();
         this.optionPrice = options.getPrice();
     }
 }
