@@ -74,7 +74,7 @@ export default function Main(props: Readonly<pageInterface>) {
           <a href='' className='hover:text-red-500'>취소/반품/교환</a>
           <a href='' className='hover:text-red-500'>고객센터</a>
           <a href='/account/profile' className='hover:text-red-500'>회원정보</a>
-          {user?.role == 'SELLER' ? <a href='/product/create' className='hover:text-red-500'>상품 등록</a> : <></>}
+          {user?.role == 'SELLER' || user?.role == 'ADMIN' ? <a href='/product/create' className='hover:text-red-500'>상품 등록</a> : <></>}
           {user ? <a href='/' onClick={e => { e.preventDefault(); localStorage.clear(); window.location.reload(); }} className='hover:text-red-500'>로그아웃</a> : <></>}
         </div>
       </DropDown>
