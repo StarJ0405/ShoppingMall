@@ -132,7 +132,7 @@ export default function Main(props: Readonly<pageInterface>) {
           <a href='/product/best' className='text-lg border-red-500 hover:border-b-2'>베스트</a>
         </div>
         {user ?
-          <a href='/account/profile/' className='font-bold hover:underline'>{user?.nickname}</a>
+          <div><a href='/account/profile/' className='font-bold hover:underline'>{user?.nickname}</a> <label className='text-red-500 font-bold'>{user?.point.toLocaleString('ko-kr')} P</label></div>
           :
           <a href='/account/login' className='font-bold hover:underline'>로그인</a>
         }

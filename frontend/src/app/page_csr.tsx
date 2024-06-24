@@ -24,7 +24,6 @@ export default function Page(props: pageProps) {
                 })
                 .catch(e => console.log(e));
     }, [ACCESS_TOKEN]);
-
     return <Main user={user} recentList={recentList} setRecentList={setRecentList} categories={props.categories}>
         <div className='w-full h-full flex justify-center'>
             <div className='flex flex-wrap w-[1240px]'>
