@@ -100,7 +100,7 @@ export default function Page(props: pageProps) {
                             {cartList?.map((cart, index) => <tr key={index} className='min-h-[104px]'>
                                 <td><input name="check" type="checkbox" id={index.toString()} onChange={e => select(e, cart.productPrice * cart.count, cart.discountPrice * cart.count)} /></td>
                                 <td className='flex items-center'>
-                                    <img src={cart?.productUrl ? cart.productUrl : '/empty_product.png'} className='w-[120px] h-[120px] mr-2' />
+                                    <img src={cart?.imageUrl ? cart.imageUrl : '/empty_product.png'} className='w-[120px] h-[120px] mr-2' />
                                     <div className='flex flex-col items-start'>
                                         <a className='hover:underline' href={'/product/' + cart.productId}>{cart.productTitle}</a>
                                         {(cart?.cartItemDetailResponseDTOList as any[]).map((option, index) => <label key={index}>{option.optionName}</label>)}
@@ -140,11 +140,15 @@ export default function Page(props: pageProps) {
                         <label className='text-xl font-bold'>결제 예정금액</label>
                         <div className='flex justify-between mt-2'>
                             <label>상품금액</label>
-                            <label>{price.toLocaleString('ko-kr', { maximumFractionDigits: 0 })}원</label>
+                            <label><label className='font-bold text-lg'>{price.toLocaleString('ko-kr', { maximumFractionDigits: 0 })}</label>원</label>
                         </div>
                         <div className='flex justify-between mt-2'>
                             <label>할인금액</label>
-                            <label className='text-red-500'>{discountedPrice.toLocaleString('ko-kr', { maximumFractionDigits: 0 })}원</label>
+                            <label className='text-red-500'><label className='font-bold text-lg'>{(discountedPrice - price).toLocaleString('ko-kr', { maximumFractionDigits: 0 })}</label>원</label>
+                        </div>
+                        <div className='flex justify-between mt-2'>
+                            <label className='text-red-500'>합계</label>
+                            <label className='text-red-500'><label className='font-bold text-2xl'>{(discountedPrice).toLocaleString('ko-kr', { maximumFractionDigits: 0 })}</label>원</label>
                         </div>
                         <button className='btn btn-error text-white mt-5 text-lg' onClick={order}>주문하기</button>
                     </div>
