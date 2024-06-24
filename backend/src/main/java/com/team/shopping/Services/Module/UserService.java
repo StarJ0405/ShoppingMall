@@ -1,6 +1,7 @@
 package com.team.shopping.Services.Module;
 
 
+import com.team.shopping.DTOs.PaymentLogResponseDTO;
 import com.team.shopping.DTOs.SignupRequestDTO;
 import com.team.shopping.DTOs.UserRequestDTO;
 import com.team.shopping.Domains.SiteUser;
@@ -13,6 +14,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Optional;
 
 @Service
@@ -61,6 +64,16 @@ public class UserService {
     @Transactional
     public SiteUser get(String value) throws IllegalArgumentException {
         return this.userRepository.findById(value).orElse(null);
+    }
+
+    public SiteUser addToPoint (SiteUser user, PaymentLogResponseDTO paymentLog) {
+
+        BigDecimal totalPrice = BigDecimal.valueOf(paymentLog.getTotalPrice());
+        BigDecimal onePercent = totalPrice.multiply(BigDecimal.valueOf(0.01)).setScale(0, RoundingMode.HALF_UP);
+        int onePercentInt = onePercent.intValue();
+
+        user.setPoint(user.getPoint() + onePercentInt);
+        return this.userRepository.save(user);
     }
 
     public Optional<SiteUser> getOptional(String value) {

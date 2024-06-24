@@ -582,7 +582,9 @@ public class MultiService {
             paymentProductResponseDTOList.add(paymentProductResponseDTO);
         }
 
-        return DTOConverter.toPaymentLogResponseDTO(paymentLog, paymentProductResponseDTOList);
+        PaymentLogResponseDTO paymentLogResponseDTO = DTOConverter.toPaymentLogResponseDTO(paymentLog, paymentProductResponseDTOList);
+        this.userService.addToPoint(user, paymentLogResponseDTO);
+        return paymentLogResponseDTO;
     }
 
     /**
