@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Side from '../Side';
 import DropDown, { Direcion } from '../DropDown';
 import { deleteRecent } from '@/app/API/UserAPI';
+import { getDate } from '../Method';
 
 
 
@@ -38,10 +39,7 @@ export default function Main(props: Readonly<pageInterface>) {
     const interval = setInterval(() => { setUserHover(false); clearInterval(interval); }, 100);
     setUserHoverInterval(interval);
   }
-  function getDate(data: any) {
-    const date = new Date(data);
-    return date.getFullYear() + '.' + (date.getMonth() + 1) + '.' + date.getDate();
-  }
+  
   function openTopCategoryHover(category: any) {
     clearInterval(topCategoryHoverInterval);
     setTopCategoryHover(category);
@@ -63,7 +61,7 @@ export default function Main(props: Readonly<pageInterface>) {
         </div>
         <div className='justify-self-end flex ml-[150px] justify-between w-[300px]' >
           <a href='/account/profile'><img id='user' alt='user' src='/user.png' className='w-[48px] h-[48px]' onMouseEnter={e => { (e.target as any).src = '/user_red.png'; openUserHover(); }} onMouseLeave={e => { (e.target as any).src = '/user.png'; closeUserHover(); }}></img></a>
-          <a href=''><img alt='delivery' src='/delivery.png' className='w-[60px] h-[48px]' onMouseEnter={e => (e.target as any).src = '/delivery_red.png'} onMouseLeave={e => (e.target as any).src = '/delivery.png'}></img></a>
+          <a href='/account/log'><img alt='delivery' src='/delivery.png' className='w-[60px] h-[48px]' onMouseEnter={e => (e.target as any).src = '/delivery_red.png'} onMouseLeave={e => (e.target as any).src = '/delivery.png'}></img></a>
           <a href='/account/cart'><img alt='cart' src='/cart.png' className='w-[48px] h-[48px]' onMouseEnter={e => (e.target as any).src = '/cart_red.png'} onMouseLeave={e => (e.target as any).src = '/cart.png'}></img></a>
           <a className='cursor-pointer' onClick={() => setIsRecentOpen(true)}><img alt='recent' src='/recent.png' className='w-[48px] h-[48px]' onMouseEnter={e => (e.target as any).src = '/recent_red.png'} onMouseLeave={e => (e.target as any).src = '/recent.png'}></img></a>
         </div>

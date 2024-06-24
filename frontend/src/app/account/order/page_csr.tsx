@@ -62,7 +62,7 @@ export default function Page(props: pageProps) {
             return;
         let list = [] as number[];
         ORDER?.forEach(order => list.push(order.cartItemId));
-        postPayment({ cartItemIdList: list, recipient: who, phoneNumber: phoneNumber, mainAddress: address, addressDetail: detail, postNumber: postNumber.toString().padStart(5, '0'), deliveryMessage: delivery }).then(() => window.location.href = "/")
+        postPayment({ cartItemIdList: list, recipient: who, phoneNumber: phoneNumber, mainAddress: address, addressDetail: detail, postNumber: postNumber.toString().padStart(5, '0'), deliveryMessage: delivery, used_point: point }).then(() => window.location.href = "/account/log")
     }
     return <Main categories={props.categories} recentList={recentList} setRecentList={setRecentList} user={user} >
         <div className='flex flex-col w-[1240px]'>
@@ -90,7 +90,7 @@ export default function Page(props: pageProps) {
                                 <div className="text-white bg-red-500 h-[37px] py-2 px-4">나의 배송지 관리</div>
                                 <div className="px-4 flex flex-col">
                                     <label className="font-bold text-sm mt-2">배송지 목록</label>
-                                    <div className="divider"></div>
+                                    <div className="divider divider-neutral"></div>
                                     <table className="text-xs text-center">
                                         <thead>
                                             <tr className="bg-gray-300">
@@ -156,12 +156,15 @@ export default function Page(props: pageProps) {
                         <label className="text-sm">상품수량 및 옵션변경은 상품상세 또는 장바구니에서 가능합니다.</label>
                     </div>
                     <div className="divider"></div>
-                    <div className="flex felx-col">
+                    <div className="flex flex-col">
                         {mounted && ORDER?.map((order, index) =>
                             <div key={index} className="flex mt-4">
                                 <img src={order?.imageUrl ? order?.imageUrl : '/empty_product.png'} className="w-[120px] h-[120px]" alt="order" />
                                 <div className="flex flex-col w-[376px] ml-2 justify-between pb-4">
                                     <a href={"/product/" + order?.productId} className="text-xl hover:underline">{order?.productTitle}</a>
+                                    {(order.cartItemDetailResponseDTOList as any[])?.map((option, index) => <label key={index}>{option?.optionName}</label>)
+
+                                    }
                                     <label><label className="font-bold text-blue-500">{MonthDate()}</label> 도착</label>
                                 </div>
                                 <label className="w-[90px] text-center">{order?.count}개</label>
@@ -182,7 +185,7 @@ export default function Page(props: pageProps) {
                     <div className="flex items-center mb-16">
                         <label className="text-lg font-bold">포인트</label>
                         <div className="flex border border-black ml-4 items-center px-2 ">
-                            <input type="number" className="input input-sm" defaultValue={0} min={0} max={user?.point} onChange={e => { let value = Number(e.target.value); if (value < 0) value = 0; else if (value > user?.point) value = user?.point; e.target.value = value?.toString(); setPoint(value);}} />
+                            <input type="number" className="input input-sm" defaultValue={0} min={0} max={user?.point} onChange={e => { let value = Number(e.target.value); if (value < 0) value = 0; else if (value > user?.point) value = user?.point; e.target.value = value?.toString(); setPoint(value); }} />
                             <label>원</label>
                         </div>
                         <label className="ml-4">사용가능<label className="text-red-500 font-bold ml-2">{user?.point.toLocaleString('ko-kr')}P</label></label>
@@ -200,11 +203,11 @@ export default function Page(props: pageProps) {
                         </div>
                         <div className='flex justify-between mt-2'>
                             <label>할인금액</label>
-                            <label className='text-red-500'><label className='font-bold text-lg'>{(discountedPrice - price-point).toLocaleString('ko-kr', { maximumFractionDigits: 0 })}</label>원</label>
+                            <label className='text-red-500'><label className='font-bold text-lg'>{(discountedPrice - price - point).toLocaleString('ko-kr', { maximumFractionDigits: 0 })}</label>원</label>
                         </div>
                         <div className='flex justify-between mt-2'>
                             <label className='text-red-500'>합계</label>
-                            <label className='text-red-500'><label className='font-bold text-2xl'>{(discountedPrice-point).toLocaleString('ko-kr', { maximumFractionDigits: 0 })}</label>원</label>
+                            <label className='text-red-500'><label className='font-bold text-2xl'>{(discountedPrice - point).toLocaleString('ko-kr', { maximumFractionDigits: 0 })}</label>원</label>
                         </div>
                         <button className='btn btn-error text-white mt-5 text-lg' onClick={pay}>결제하기</button>
                     </div>
