@@ -39,4 +39,10 @@ public class PaymentLogService {
     public void delete (PaymentLog paymentLog) {
         this.paymentLogRepository.delete(paymentLog);
     }
+
+    public PaymentLog usedPoint(PaymentLog paymentLog, Long useToPoint) {
+
+        paymentLog.setUsedPoint(useToPoint);
+        return this.paymentLogRepository.save(paymentLog);
+    }
 }

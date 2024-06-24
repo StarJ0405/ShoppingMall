@@ -26,7 +26,7 @@ public class UserResponseDTO {
 
     private String role;
 
-    private int point;
+    private Long point;
 
     private Long createDate;
 
@@ -40,7 +40,7 @@ public class UserResponseDTO {
 
     @Builder
     public UserResponseDTO (String username, String name, String email, String nickname,
-                            String phoneNumber, String gender, String role, int point,
+                            String phoneNumber, String gender, String role, Long point,
                             String url, Long createDate, Long modifyDate, Long birthday ) {
         this.username = username;
         this.name = name;

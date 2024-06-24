@@ -147,7 +147,20 @@ public class MultiService {
 
         if (_fileSystem.isPresent()) url = _fileSystem.get().getV();
 
-        return UserResponseDTO.builder().username(siteUser.getUsername()).gender(siteUser.getGender().toString()).role(siteUser.getRole().toString()).email(siteUser.getEmail()).point(siteUser.getPoint()).phoneNumber(siteUser.getPhoneNumber()).nickname(siteUser.getNickname()).birthday(this.dateTimeTransfer(siteUser.getBirthday())).createDate(this.dateTimeTransfer(siteUser.getCreateDate())).modifyDate(this.dateTimeTransfer(siteUser.getModifyDate())).name(siteUser.getName()).url(url).build();
+        return UserResponseDTO.builder()
+                .username(siteUser.getUsername())
+                .gender(siteUser.getGender().toString())
+                .role(siteUser.getRole().toString())
+                .email(siteUser.getEmail())
+                .point(siteUser.getPoint())
+                .phoneNumber(siteUser.getPhoneNumber())
+                .nickname(siteUser.getNickname())
+                .birthday(this.dateTimeTransfer(siteUser.getBirthday()))
+                .createDate(this.dateTimeTransfer(siteUser.getCreateDate()))
+                .modifyDate(this.dateTimeTransfer(siteUser.getModifyDate()))
+                .name(siteUser.getName())
+                .url(url)
+                .build();
     }
 
     @Transactional
@@ -417,6 +430,7 @@ public class MultiService {
 
     @Transactional
     public List<CartResponseDTO> updateToCart(String username, CartRequestDTO cartRequestDTO) {
+
         SiteUser user = this.userService.get(username);
         CartItem cartItem = this.cartItemService.get(cartRequestDTO.getCartItemId());
 
@@ -582,9 +596,24 @@ public class MultiService {
             paymentProductResponseDTOList.add(paymentProductResponseDTO);
         }
 
-        PaymentLogResponseDTO paymentLogResponseDTO = DTOConverter.toPaymentLogResponseDTO(paymentLog, paymentProductResponseDTOList);
+        Long _useToPoint = paymentLogRequestDTO.getUseToPoint();
+        Long point = this.pointCal(user, _useToPoint);
+        this.userService.useToPoint(user, point);
+        PaymentLog _paymentLog = this.paymentLogService.usedPoint(paymentLog, point);
+
+        PaymentLogResponseDTO paymentLogResponseDTO = DTOConverter.toPaymentLogResponseDTO(_paymentLog, paymentProductResponseDTOList);
         this.userService.addToPoint(user, paymentLogResponseDTO);
         return paymentLogResponseDTO;
+    }
+
+    private Long pointCal (SiteUser user, Long point) {
+        if (user.getPoint() < point) {
+            point = user.getPoint();
+        }
+        if (point <= 0) {
+            point = 0L;
+        }
+        return point;
     }
 
     /**
