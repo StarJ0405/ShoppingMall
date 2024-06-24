@@ -24,7 +24,7 @@ export default function SideList(props: sideListProps) {
         </div>
         <div className="flex flex-col border-x-2 border-b-2 border-gray-400 py-2 px-4 w-full">
             <label className="font-bold mb-3">회원 정보 변경</label>
-            <a href="" className="text-sm text-gray-500 hover:underline">나의 배송지 관리</a>
+            <a href="/account/address" className="text-sm text-gray-500 hover:underline">나의 배송지 관리</a>
             <a href="" className="text-sm text-gray-500 hover:underline">회원 탈퇴</a>
         </div>
     </div>

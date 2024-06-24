@@ -36,7 +36,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -189,48 +188,61 @@ public class MultiService {
      * address
      */
 
-    @Transactional
-    public List<AddressResponseDTO> getAddressList(String username) {
-        SiteUser user = this.userService.get(username);
-        List<Address> addressList = this.addressService.getList(user);
+    private List<AddressResponseDTO> getAddressDTOList (SiteUser user) {
         List<AddressResponseDTO> addressResponseDTOList = new ArrayList<>();
+        List<Address> addressList = this.addressService.getList(user);
+
+//        if (addressList.isEmpty()) {
+//            throw new NoSuchElementException("not found addresses");
+//        }
 
         for (Address address : addressList) {
-            addressResponseDTOList.add(AddressResponseDTO.builder().address(address).build());
+            addressResponseDTOList.add(AddressResponseDTO.builder()
+                    .address(address)
+                    .build());
         }
         return addressResponseDTOList;
     }
 
     @Transactional
-    public AddressResponseDTO createAddress(String username, AddressRequestDTO addressRequestDTO) {
+    public List<AddressResponseDTO> getAddressList(String username) {
         SiteUser user = this.userService.get(username);
-        Address address = this.addressService.saveAddress(user, addressRequestDTO);
-        return AddressResponseDTO.builder().address(address).build();
+        return this.getAddressDTOList(user);
     }
 
     @Transactional
-    public AddressResponseDTO updateAddress(String username, AddressRequestDTO addressRequestDTO) {
+    public List<AddressResponseDTO> createAddress(String username, AddressRequestDTO addressRequestDTO) {
+        SiteUser user = this.userService.get(username);
+        this.addressService.saveAddress(user, addressRequestDTO);
+
+        return this.getAddressDTOList(user);
+    }
+
+    @Transactional
+    public List<AddressResponseDTO> updateAddress(String username, AddressRequestDTO addressRequestDTO) {
         SiteUser user = this.userService.get(username);
         Address _address = this.addressService.get(addressRequestDTO.getAddressId());
+
         if (!username.equals(_address.getUser().getUsername()) && !user.getRole().equals(UserRole.ADMIN)) {
-            throw new NoSuchElementException("not role");
-        } else {
-            Address address = this.addressService.updateAddress(addressRequestDTO);
-            return AddressResponseDTO.builder().address(address).build();
+            throw new IllegalArgumentException("not role");
         }
+        this.addressService.updateAddress(addressRequestDTO);
+
+        return this.getAddressDTOList(user);
     }
 
     @Transactional
-    public void deleteAddress(String username, List<Long> addressIdList) {
+    public List<AddressResponseDTO> deleteAddress(String username, List<Long> addressIdList) {
         SiteUser user = this.userService.get(username);
         for (Long addressId : addressIdList) {
             Address address = this.addressService.get(addressId);
             if (!username.equals(address.getUser().getUsername()) && !user.getRole().equals(UserRole.ADMIN)) {
-                throw new NoSuchElementException("not role");
+                throw new IllegalArgumentException("not role");
             } else {
                 this.addressService.delete(address);
             }
         }
+        return this.getAddressDTOList(user);
     }
 
 
@@ -521,7 +533,6 @@ public class MultiService {
     @Transactional
     public PaymentLogResponseDTO addPaymentLog(String username, PaymentLogRequestDTO paymentLogRequestDTO) {
         SiteUser user = this.userService.get(username);
-        Address address = this.addressService.get(paymentLogRequestDTO.getAddressId());
         List<CartItem> cartItemList = this.cartItemService.getList(paymentLogRequestDTO.getCartItemIdList());
 
         // 장바구니 항목이 없는 경우 예외 처리
@@ -545,7 +556,7 @@ public class MultiService {
         }
 
         // 결제 로그 생성
-        PaymentLog paymentLog = this.paymentLogService.save(user, address);
+        PaymentLog paymentLog = this.paymentLogService.save(user, paymentLogRequestDTO);
 
         for (CartItem cartItem : cartItemList) {
             Product product = cartItem.getProduct();
@@ -888,6 +899,24 @@ public class MultiService {
     /**
      * ProductQA
      */
+
+    @Transactional
+    public List<ProductResponseDTO> getMyProductList(String username) {
+        SiteUser user = this.userService.get(username);
+        List<ProductResponseDTO> productResponseDTOList = new ArrayList<>();
+
+        if (user.getRole().equals(UserRole.USER)) {
+            throw new IllegalArgumentException("only Seller and ADMIN SERVICE");
+        }
+        List<Product> productList = this.productService.getMyList(user);
+        if (productList.isEmpty()) {
+            throw new NoSuchElementException("not found your list");
+        }
+        for (Product product : productList) {
+            productResponseDTOList.add(this.getProduct(product));
+        }
+        return productResponseDTOList;
+    }
 
     @Transactional
     public void productQASave(String username, ProductQARequestDTO requestDTO) {
@@ -1528,6 +1557,7 @@ public class MultiService {
         return result;
     }
 
+
     /**
      * File
      */
@@ -1540,6 +1570,7 @@ public class MultiService {
             file.delete();
         }
     }
+
 }
 
 

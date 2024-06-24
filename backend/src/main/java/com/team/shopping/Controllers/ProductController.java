@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @RestController
 @RequiredArgsConstructor
@@ -107,6 +108,23 @@ public class ProductController {
             return ResponseEntity.status(HttpStatus.OK).body("문제 없음");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/myProducts")
+    public ResponseEntity<?> myProducts (@RequestHeader("Authorization") String accessToken) {
+        TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
+        try {
+            if (tokenRecord.isOK()) {
+                String username = tokenRecord.username();
+                List<ProductResponseDTO> productResponseDTOList = this.multiService.getMyProductList(username);
+                return tokenRecord.getResponseEntity(productResponseDTOList);
+            }
+            return tokenRecord.getResponseEntity();
+        }catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("권한 없음");
+        }catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("올린 상품 없음");
         }
     }
 }
