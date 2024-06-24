@@ -69,7 +69,7 @@ export default function Page(props: pageProps) {
                         <td >{recent?.price?.grade}</td>
                         <td className="text-xs">
                             <button className="px-2 border border-black mb-1 btn btn-xs" onClick={() => addCart(recent?.productId)}>장바구니</button>
-                            <button className="px-2 border border-black btn btn-xs" onClick={() => { postWish(recent?.productId).catch(e => console.log(e)) }}>찜하기</button>
+                            <button className="px-2 border border-black btn btn-xs" onClick={() => { postWish(recent?.productId).then(()=>alert('찜목록에 추가하였습니다.')).catch(e => alert('이미 찜목록에 추가되어있습니다.')) }}>찜하기</button>
                         </td>
                     </tr>
                 )}

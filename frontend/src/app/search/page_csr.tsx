@@ -65,7 +65,9 @@ export default function Page(props: pageProps) {
             {search?.content?.length > 0 ? (search.content as any[])?.map((product, index) => <div key={index} className="flex group cursor-pointer mb-8" onClick={() => location.href = "/product/" + product.id}>
                 <img src={product?.url ? product?.url : '/empty_product.png'} className="w-[120px] h-[120px]" />
                 <div className="ml-4 flex flex-col w-[680px]">
-                    <label className="text-xl cursor-pointer group-hover:underline">{product?.title}</label>
+                    <div>
+                        <label className={"text-xl cursor-pointer" + (product?.remain > 0 ? ' group-hover:underline' : ' line-through')}>{product?.title}</label>
+                        {product?.remain > 0 ? <></> : <label className="text-red-500 text-xs">품절</label>}</div>
                     <div className="flex">
                         <label className="text-lg text-red-500 mr-1 cursor-pointer">{(product?.discount / 100).toLocaleString('ko-kr', { maximumFractionDigits: 0 })}%</label>
                         <label className="cursor-pointer"><label className="text-xl font-bold cursor-pointer">{product?.price.toLocaleString('ko-kr')}</label>원</label>
