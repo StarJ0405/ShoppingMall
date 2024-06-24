@@ -39,8 +39,8 @@ export default function Page(props: pageProps) {
                         let discountedPrice = 0;
                         let price = 0;
                         (ORDER as any[]).forEach(order => {
-                            discountedPrice += order?.discountPrice * order?.count;
-                            price += order?.productPrice * order?.count;
+                            discountedPrice += getDiscountPrice(order);
+                            price += getPrice(order);
                         });
                         setPrice(price);
                         setDiscountedPrice(discountedPrice);
@@ -62,7 +62,21 @@ export default function Page(props: pageProps) {
             return;
         let list = [] as number[];
         ORDER?.forEach(order => list.push(order.cartItemId));
-        postPayment({ cartItemIdList: list, recipient: who, phoneNumber: phoneNumber, mainAddress: address, addressDetail: detail, postNumber: postNumber.toString().padStart(5, '0'), deliveryMessage: delivery, used_point: point }).then(() => window.location.href = "/account/log")
+        postPayment({ cartItemIdList: list, recipient: who, phoneNumber: phoneNumber, mainAddress: address, addressDetail: detail, postNumber: postNumber.toString().padStart(5, '0'), deliveryMessage: delivery, point: point }).then(() => window.location.href = "/account/log")
+    }
+    function getPrice(order: any) {
+        let price = order?.productPrice;
+        (order?.cartItemDetailResponseDTOList as any[]).forEach(option => {
+            price += option.optionPrice;
+        });
+        return price * order.count;
+    }
+    function getDiscountPrice(order: any) {
+        let price = order?.productPrice * (100 - order.discount) / 100;
+        (order?.cartItemDetailResponseDTOList as any[]).forEach(option => {
+            price += option.optionPrice;
+        });
+        return price * order.count;
     }
     return <Main categories={props.categories} recentList={recentList} setRecentList={setRecentList} user={user} >
         <div className='flex flex-col w-[1240px]'>
@@ -170,8 +184,8 @@ export default function Page(props: pageProps) {
                                 <label className="w-[90px] text-center">{order?.count}개</label>
                                 {order?.discount > 0 ?
                                     <div className="flex flex-col w-[155px] text-center">
-                                        <label><label className="text-lg text font-bold">{(order?.discountPrice * order?.count).toLocaleString('ko-kr')}</label>원</label>
-                                        <label className="line-through text-gray-500 text-sm">{(order?.productPrice * order?.count).toLocaleString('ko-kr')}원</label>
+                                        <label><label className="text-lg text font-bold">{getDiscountPrice(order).toLocaleString('ko-kr')}</label>원</label>
+                                        <label className="line-through text-gray-500 text-sm">{getPrice(order).toLocaleString('ko-kr')}원</label>
                                     </div>
                                     :
                                     <label className="w-[155px]"><label >{(order?.productPrice * order?.count).toLocaleString('ko-kr')}</label>원</label>
