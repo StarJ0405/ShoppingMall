@@ -46,6 +46,8 @@ public class QPaymentLog extends EntityPathBase<PaymentLog> {
 
     public final NumberPath<Integer> trackingNumber = createNumber("trackingNumber", Integer.class);
 
+    public final NumberPath<Long> usedPoint = createNumber("usedPoint", Long.class);
+
     public QPaymentLog(String variable) {
         this(PaymentLog.class, forVariable(variable), INITS);
     }

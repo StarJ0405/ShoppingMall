@@ -40,6 +40,8 @@ public class PaymentLog {
 
     private int trackingNumber;
 
+    private Long usedPoint;
+
     @Column(columnDefinition = "TEXT")
     private String info;
 
@@ -47,7 +49,7 @@ public class PaymentLog {
     public PaymentLog (SiteUser user, String info, LocalDateTime createDate,
                        PaymentStatus paymentStatus, String recipient,
                        String phoneNumber, String mainAddress, String addressDetail,
-                       int postNumber, String deliveryMessage) {
+                       int postNumber, String deliveryMessage, Long usedPoint) {
         this.order = user;
         this.info = info;
         this.createDate = createDate;
@@ -58,5 +60,6 @@ public class PaymentLog {
         this.addressDetail = addressDetail;
         this.postNumber = postNumber;
         this.deliveryMessage = deliveryMessage;
+        this.usedPoint = usedPoint;
     }
 }

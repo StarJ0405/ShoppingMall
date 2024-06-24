@@ -37,6 +37,8 @@ public class PaymentLogResponseDTO {
 
     private int  trackingNumber;
 
+    private Long usedPoint;
+
     @Builder
     public PaymentLogResponseDTO (Long totalPrice, PaymentLog paymentLog,
                                   List<PaymentProductResponseDTO> paymentProductResponseDTOList, Long paymentDate) {
@@ -52,6 +54,7 @@ public class PaymentLogResponseDTO {
         this.postNumber = paymentLog.getPostNumber();
         this.deliveryMessage = paymentLog.getDeliveryMessage();
         this.trackingNumber = paymentLog.getTrackingNumber();
+        this.usedPoint = paymentLog.getUsedPoint();
     }
 
 
