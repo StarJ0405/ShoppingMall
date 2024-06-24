@@ -66,7 +66,7 @@ public class EventController {
     }
 
     @GetMapping("/id")
-    public ResponseEntity<?> getEvent (@RequestParam("eventId")Long eventId) {
+    public ResponseEntity<?> getEvent (@RequestParam("EventId")Long eventId) {
         try {
             EventResponseDTO eventResponseDTO = this.multiService.getEvent(eventId);
             return ResponseEntity.status(HttpStatus.OK).body(eventResponseDTO);
