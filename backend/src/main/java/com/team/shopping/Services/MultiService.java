@@ -203,7 +203,7 @@ public class MultiService {
      * address
      */
 
-    private List<AddressResponseDTO> getAddressDTOList (SiteUser user) {
+    private List<AddressResponseDTO> getAddressDTOList(SiteUser user) {
         List<AddressResponseDTO> addressResponseDTOList = new ArrayList<>();
         List<Address> addressList = this.addressService.getList(user);
 
@@ -357,11 +357,12 @@ public class MultiService {
         }
         return responseDTOList;
     }
+
     @Transactional
     public void deleteCart(Product product) {
         Optional<CartItem> _cartItem = cartItemService.findByProduct(product);
         // 카트아이템 찾아서 카트 디테일도 먼저 삭제시키고 진행해야함
-        if (_cartItem.isPresent()){
+        if (_cartItem.isPresent()) {
             List<CartItemDetail> cartItemDetailList = cartItemDetailService.getList(_cartItem.get());
             if (cartItemDetailList != null) {
                 for (CartItemDetail cartItemDetail : cartItemDetailList)
@@ -626,7 +627,7 @@ public class MultiService {
         return paymentLogResponseDTO;
     }
 
-    private Long pointCal (SiteUser user, Long point) {
+    private Long pointCal(SiteUser user, Long point) {
         if (user.getPoint() < point) {
             point = user.getPoint();
         }
@@ -754,8 +755,6 @@ public class MultiService {
             productService.deleteProduct(product);
         }
     }
-
-
 
 
     @Transactional
@@ -977,6 +976,7 @@ public class MultiService {
         if (product != null)
             this.productQAService.update(requestDTO.getContent(), user, _productQA.get());
     }
+
     @Transactional
     public void deleteProductQA(Product product) {
         Optional<ProductQA> _productQA = productQAService.findByProduct(product);
@@ -1407,7 +1407,7 @@ public class MultiService {
      */
 
     @Transactional
-    public List<EventResponseDTO> getEventList () {
+    public List<EventResponseDTO> getEventList() {
 
         List<EventResponseDTO> eventResponseDTOList = new ArrayList<>();
         List<Event> eventList = this.eventService.getAll();
@@ -1418,7 +1418,7 @@ public class MultiService {
     }
 
     @Transactional
-    public EventResponseDTO getEvent (Long eventId) {
+    public EventResponseDTO getEvent(Long eventId) {
 
         Event event = this.eventService.get(eventId);
 
@@ -1477,6 +1477,7 @@ public class MultiService {
         Event updatedEvent = this.eventService.updateEvent(_event, eventRequestDTO);
         return this.getEventDTO(updatedEvent);
     }
+
     @Transactional
     public void deleteByEventProduct(Product product) {
         List<EventProduct> eventProductList = eventProductService.findByProduct(product);

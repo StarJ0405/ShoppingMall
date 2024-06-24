@@ -37,6 +37,7 @@ export default function Page(props: pageProps) {
     const [options, setOptions] = useState(null as unknown as number[])
     const [option, setOption] = useState(-1);
     const [count, setCount] = useState(product?.remain >= 1 ? 1 : product?.remain);
+    const [mounted, setMounted] = useState(false);
     useEffect(() => {
         if (ACCESS_TOKEN)
             getUser()
@@ -48,6 +49,7 @@ export default function Page(props: pageProps) {
                     postRecent(product.id)
                         .then(r => setRecentList(r))
                         .catch(e => console.log(e));
+                    setMounted(true);
                 })
                 .catch(e => console.log(e));
     }, [ACCESS_TOKEN]);
@@ -309,7 +311,7 @@ export default function Page(props: pageProps) {
                                     }}>
                                         {list.optionListName}
                                     </div>
-                                    <div className={(option == index ? '' : ' hidden')}>
+                                    {mounted ? <div className={(option == index ? '' : ' hidden')}>
                                         <div className={'flex relative flex-col mt-2' + (typeof window !== "undefined" && (document?.getElementById(list.optionListName) as HTMLInputElement)?.checked ? " bg-red-500 text-white" : "")}>
                                             <label className='mt-2 px-2'>{'옵션 미선택'}</label>
                                             <input type='radio' id={list.optionListName} name={list.optionListName} className='opacity-0 z-1 absolute w-full h-full cursor-pointer' onChange={updateOptions} defaultChecked={true} />
@@ -321,6 +323,8 @@ export default function Page(props: pageProps) {
                                                 <input type='radio' id={list.optionListName + '§' + opt.optionId} name={list.optionListName} className='opacity-0 z-1 absolute w-full h-full cursor-pointer' onChange={updateOptions} />
                                             </div>)}
                                     </div>
+                                        : <></>
+                                    }
                                 </div>)}
                         </div>
                         <div className='flex justify-between'>

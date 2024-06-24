@@ -39,7 +39,7 @@ export default function Main(props: Readonly<pageInterface>) {
     const interval = setInterval(() => { setUserHover(false); clearInterval(interval); }, 100);
     setUserHoverInterval(interval);
   }
-  
+
   function openTopCategoryHover(category: any) {
     clearInterval(topCategoryHoverInterval);
     setTopCategoryHover(category);
@@ -56,8 +56,10 @@ export default function Main(props: Readonly<pageInterface>) {
         <button onClick={() => setIsSideOpen(true)}><img src='/expand_button.png' className='w-[36px] h-[36px]' /></button>
         <a className='ml-10' href='/'><img src='/logo.png' className='w-[94px] h-[40px]' /></a>
         <div className='flex items-center border-2 border-gray-300 rounded-full px-5 ml-4'>
-          <input type='text' className='text-xl bg-transparent w-[480px] mr-[20px] outline-none' placeholder='검색' onKeyDown={e => { if (e.key == 'Enter') document.getElementById('search')?.click() }}></input>
-          <button id='search' onClick={() => alert('검색시도')}><img src='/search.png' className='w-[50px] h-[50px]' /></button>
+          <input id="keyword" type='text' className='text-xl bg-transparent w-[480px] mr-[20px] outline-none' placeholder='검색' onKeyDown={e => { if (e.key == 'Enter') document.getElementById('search')?.click() }}></input>
+          <button id='search' onClick={() => { const value = (document.getElementById('keyword') as HTMLInputElement)?.value; location.href = '/search?keyword=' + (value ? value : '') }}>
+            <img src='/search.png' className='w-[50px] h-[50px]' />
+          </button>
         </div>
         <div className='justify-self-end flex ml-[150px] justify-between w-[300px]' >
           <a href='/account/profile'><img id='user' alt='user' src='/user.png' className='w-[48px] h-[48px]' onMouseEnter={e => { (e.target as any).src = '/user_red.png'; openUserHover(); }} onMouseLeave={e => { (e.target as any).src = '/user.png'; closeUserHover(); }}></img></a>
@@ -99,7 +101,7 @@ export default function Main(props: Readonly<pageInterface>) {
           {(topCategoryHover?.categoryResponseDTOList as any[])?.map((category, index) => <div key={index} className='flex flex-col mt-8'>
             <label className='text-gray-500 text-lg font-bold'>{category.name}</label>
             {(category.categoryResponseDTOList as any[])?.map((category, index) =>
-              <label key={index} className='hover:text-red-500 cursor-pointer my-1'>{category.name}</label>
+              <label key={index} className='hover:text-red-500 cursor-pointer my-1' onClick={()=>location.href = '/search?keyword='+category.name}>{category.name}</label>
             )}
           </div>)}
         </div>
