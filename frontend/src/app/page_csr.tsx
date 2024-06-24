@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import Main from './Global/Layout/MainLayout';
 import { getRecent, getUser } from './API/UserAPI';
 import { MonthDate } from './Global/Method';
+import { getProductRecentList } from './API/NonUserAPI';
 
 interface pageProps {
     productList: any;
@@ -13,6 +14,8 @@ export default function Page(props: pageProps) {
     const [productList, setProductList] = useState(props.productList);
     const ACCESS_TOKEN = typeof window === 'undefined' ? null : localStorage.getItem('accessToken');
     const [recentList, setRecentList] = useState(null as unknown as any[]);
+    const [page, setPage] = useState(0);
+    const [isLoading, setIsLoading] = useState(false);
     useEffect(() => {
         if (ACCESS_TOKEN)
             getUser()
@@ -21,9 +24,37 @@ export default function Page(props: pageProps) {
                     getRecent()
                         .then(r => setRecentList(r))
                         .catch(e => console.log(e));
+                    if (localStorage.getItem('productList'))
+                        setProductList(JSON.parse(localStorage.getItem('productList') as string));
                 })
                 .catch(e => console.log(e));
     }, [ACCESS_TOKEN]);
+    useEffect(() => {
+        const loadPage = () => {
+            const scrollLocation = document.documentElement.scrollTop;
+            const windowHeight = window.innerHeight;
+            const fullHeight = document.body.scrollHeight;
+            if (scrollLocation + windowHeight >= fullHeight) {
+                setIsLoading(true);
+                getProductRecentList(page + 1)
+                    .then(response => {
+                        if (response.length > 0) {
+                            const newlist = [...productList, ...response];
+                            setProductList(newlist);
+                            setPage(page + 1);
+                            localStorage.setItem('productList', JSON.stringify(newlist));
+                        }
+                        setIsLoading(false);
+                    })
+                    .catch(error => {
+                        console.log(error);
+                        setIsLoading(false);
+                    });
+            }
+        };
+        window.addEventListener('scroll', loadPage);
+        return () => window.removeEventListener('scroll', loadPage);
+    }, [page]);
     return <Main user={user} recentList={recentList} setRecentList={setRecentList} categories={props.categories}>
         <div className='w-full h-full flex justify-center'>
             <div className='flex flex-wrap w-[1240px]'>
@@ -78,6 +109,7 @@ export default function Page(props: pageProps) {
                             </div>
                         </div>
                     </a> */}
+                {isLoading ? <div className='w-full flex justify-center'> <img src="/loading.png" style={{ width: 50 + 'px', height: 50 + 'px' }} /> </div> : null}
             </div>
         </div>
     </Main>
