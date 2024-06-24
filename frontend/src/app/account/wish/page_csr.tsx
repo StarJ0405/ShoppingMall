@@ -41,9 +41,10 @@ export default function Page(props: pageProps) {
   }
   function DeleteAll() {
     if (confirm("선택하신 찜한 상품들을 삭제 하시겠습니까?")) {
-      const numbers = [] as unknown as number[];
+      const numbers = [] as number[];
       const checks = document.getElementsByName('check');
-      checks.forEach((check: any) => check.checked ? numbers.push(check.value) : null);
+      checks.forEach((check: any) => check.checked ? numbers.push(Number(check.id)) : null);
+      console.log(numbers);
       deleteWishList(numbers)
         .then(r => {
           setWishList(r);
@@ -54,14 +55,14 @@ export default function Page(props: pageProps) {
   function addCart(id: number) {
     if (confirm("선택하신 찜한 상품을 장바구니에 추가하시겠습니까?"))
       postCartList({ productId: id, optionIdList: [], count: 1 })
-        .then(r => window.location.href = "/account/cart")
+        .then(() => window.location.href = "/account/cart")
         .catch(e => alert(e.response.data));
   }
   function addCartList() {
     if (confirm("선택하신 찜한 상품들을 장바구니에 추가하시겠습니까?"))
       document.getElementsByName('check').forEach((check: any) => check.checked ?
         (postCartList({ productId: check.value, optionIdList: [], count: 1 })
-          .then(r => window.location.href = "/account/cart")
+          .then(() => window.location.href = "/account/cart")
           .catch(e => alert(e.response.data))
         )
         : null);
@@ -85,7 +86,7 @@ export default function Page(props: pageProps) {
       <tbody className="text-center">
         {wishList?.map((wish, index) =>
           <tr className="h-[64px] align-middle" key={index}>
-            <td><input name="check" type="checkbox" value={wish.id} /></td>
+            <td><input name="check" type="checkbox" id={wish.id} /></td>
             <td className="text-start px-2">
               <a href={'/product/' + wish.id} className="flex">
                 <img src={wish.url ? wish.url : '/empty_product.png'} className="w-[60px] h-[60px]" alt="상품이미지" />
