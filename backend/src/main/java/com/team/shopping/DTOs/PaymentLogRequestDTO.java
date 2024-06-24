@@ -25,6 +25,6 @@ public class PaymentLogRequestDTO {
 
     private String deliveryMessage;
 
-    private Long useToPoint;
+    private Long point;
 
 }

@@ -596,7 +596,7 @@ public class MultiService {
             paymentProductResponseDTOList.add(paymentProductResponseDTO);
         }
 
-        Long _useToPoint = paymentLogRequestDTO.getUseToPoint();
+        Long _useToPoint = paymentLogRequestDTO.getPoint();
         Long point = this.pointCal(user, _useToPoint);
         this.userService.useToPoint(user, point);
         PaymentLog _paymentLog = this.paymentLogService.usedPoint(paymentLog, point);
