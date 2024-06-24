@@ -162,7 +162,9 @@ export default function Page(props: pageProps) {
                                 <a onClick={e => Move(1)} className='ml-2 cursor-pointer'>{product?.reviewSize.toLocaleString("ko-kr") + ' 리뷰보기 >'}</a>
                             </div>
                             <div className='mt-4 flex justify-between w-full'>
-                                <label className='text-3xl'>{product?.title}</label>
+                                <div>
+                                    <label className={'text-3xl' + (product?.remain > 0 ? '' : ' line-through text-gray-500')}>{product?.title}</label>
+                                </div>
                                 <button className='min-w-[44px] min-h-[44px] w-[44px] h-[44px] border border-gray-500 rounded-full flex items-center justify-center' onClick={() => Wish()}><img src={love ? '/heart_on.png' : '/heart_off.png'} className='w-[24px] h-[24px]' /></button>
                             </div>
                             <label className='text-gray-500 text-lg'>원산지:상세설명 참조</label>
@@ -241,12 +243,12 @@ export default function Page(props: pageProps) {
                             </div>
                             <div className='divider divider-horizontal'></div>
                             <div className='flex items-center flex-col justify-center'>
-                                <label className='flex items-center text-gray-500'>5점<progress className='progress progress-info w-[300px] h-[18px] mx-3' value={grade5} max={product?.reviewSize} /><label className='text-blue-400 w-[32px]'>{(grade5 / product?.reviewSize * 100).toLocaleString('ko-kr', { maximumFractionDigits: 0 })}%</label></label>
-                                <label className='flex items-center text-gray-500'>4점<progress className='progress progress-info w-[300px] h-[18px] mx-3' value={grade4} max={product?.reviewSize} /><label className='text-blue-400 w-[32px]'>{(grade4 / product?.reviewSize * 100).toLocaleString('ko-kr', { maximumFractionDigits: 0 })}%</label></label>
-                                <label className='flex items-center text-gray-500'>3점<progress className='progress progress-info w-[300px] h-[18px] mx-3' value={grade3} max={product?.reviewSize} /><label className='text-blue-400 w-[32px]'>{(grade3 / product?.reviewSize * 100).toLocaleString('ko-kr', { maximumFractionDigits: 0 })}%</label></label>
-                                <label className='flex items-center text-gray-500'>2점<progress className='progress progress-info w-[300px] h-[18px] mx-3' value={grade2} max={product?.reviewSize} /><label className='text-blue-400 w-[32px]'>{(grade2 / product?.reviewSize * 100).toLocaleString('ko-kr', { maximumFractionDigits: 0 })}%</label></label>
-                                <label className='flex items-center text-gray-500'>1점<progress className='progress progress-info w-[300px] h-[18px] mx-3' value={grade1} max={product?.reviewSize} /><label className='text-blue-400 w-[32px]'>{(grade1 / product?.reviewSize * 100).toLocaleString('ko-kr', { maximumFractionDigits: 0 })}%</label></label>
-                                <label className='flex items-center text-gray-500'>0점<progress className='progress progress-info w-[300px] h-[18px] mx-3' value={grade0} max={product?.reviewSize} /><label className='text-blue-400 w-[32px]'>{(grade0 / product?.reviewSize * 100).toLocaleString('ko-kr', { maximumFractionDigits: 0 })}%</label></label>
+                                <label className='flex items-center text-gray-500'>5점<progress className='progress progress-info w-[300px] h-[18px] mx-3' value={grade5} max={product?.reviewSize} /><label className='text-blue-400 w-[32px]'>{(product?.reviewSize > 0 ? grade5 / product?.reviewSize * 100 : 0).toLocaleString('ko-kr', { maximumFractionDigits: 0 })}%</label></label>
+                                <label className='flex items-center text-gray-500'>4점<progress className='progress progress-info w-[300px] h-[18px] mx-3' value={grade4} max={product?.reviewSize} /><label className='text-blue-400 w-[32px]'>{(product?.reviewSize > 0 ? grade4 / product?.reviewSize * 100 : 0).toLocaleString('ko-kr', { maximumFractionDigits: 0 })}%</label></label>
+                                <label className='flex items-center text-gray-500'>3점<progress className='progress progress-info w-[300px] h-[18px] mx-3' value={grade3} max={product?.reviewSize} /><label className='text-blue-400 w-[32px]'>{(product?.reviewSize > 0 ? grade3 / product?.reviewSize * 100 : 0).toLocaleString('ko-kr', { maximumFractionDigits: 0 })}%</label></label>
+                                <label className='flex items-center text-gray-500'>2점<progress className='progress progress-info w-[300px] h-[18px] mx-3' value={grade2} max={product?.reviewSize} /><label className='text-blue-400 w-[32px]'>{(product?.reviewSize > 0 ? grade2 / product?.reviewSize * 100 : 0).toLocaleString('ko-kr', { maximumFractionDigits: 0 })}%</label></label>
+                                <label className='flex items-center text-gray-500'>1점<progress className='progress progress-info w-[300px] h-[18px] mx-3' value={grade1} max={product?.reviewSize} /><label className='text-blue-400 w-[32px]'>{(product?.reviewSize > 0 ? grade1 / product?.reviewSize * 100 : 0).toLocaleString('ko-kr', { maximumFractionDigits: 0 })}%</label></label>
+                                <label className='flex items-center text-gray-500'>0점<progress className='progress progress-info w-[300px] h-[18px] mx-3' value={grade0} max={product?.reviewSize} /><label className='text-blue-400 w-[32px]'>{(product?.reviewSize > 0 ? grade0 / product?.reviewSize * 100 : 0).toLocaleString('ko-kr', { maximumFractionDigits: 0 })}%</label></label>
                             </div>
                         </div>
                         <div className='divider'></div>
@@ -331,9 +333,13 @@ export default function Page(props: pageProps) {
                             <label>총 <input type='number' id="count" className='[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none m-0 input input-sm min-w-[30px]' defaultValue={product?.remain >= 1 ? 1 : product?.remain} min={product?.remain >= 1 ? 1 : product?.remain} max={getMax()} onChange={(e) => { let value = Number(e.target.value); if (value > getMax()) value = getMax(); else if (value < 0) value = 0; e.target.value = value.toString(); setCount(value); }} />개</label>
                             <label>{(getPrice() * count).toLocaleString('ko-kr')}원</label>
                         </div>
-                        <button className='btn btn-error text-white w-full btn mt-2' onClick={() =>
-                            postCartList({ productId: product.id, optionIdList: options, count: count }).then(() => window.location.href = "/account/cart").catch(e => console.log(e))
-                        }>장바구니 담기</button>
+                        {product?.remain > 0 ?
+                            <button className='btn btn-error text-white w-full mt-2' onClick={() =>
+                                postCartList({ productId: product.id, optionIdList: options, count: count }).then(() => window.location.href = "/account/cart").catch(e => console.log(e))
+                            }>장바구니 담기</button>
+                            :
+                            <button className='btn w-full mt-2' disabled>재입고 예정</button>
+                        }
                     </div>
                 </div>
             </div>
