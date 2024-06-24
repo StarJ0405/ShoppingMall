@@ -29,7 +29,7 @@ public class ImageController {
     public ResponseEntity<?> deleteTempImage(@RequestHeader("Authorization") String accessToken) {
         TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
         if (tokenRecord.isOK()) {
-            System.out.println("test");
+
             String username = tokenRecord.username();
             this.multiService.deleteTempImage(username);
             return tokenRecord.getResponseEntity(true);

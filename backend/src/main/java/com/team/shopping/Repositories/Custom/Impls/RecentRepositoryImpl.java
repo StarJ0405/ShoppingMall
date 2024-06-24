@@ -34,5 +34,11 @@ public class RecentRepositoryImpl implements RecentRepositoryCustom {
         return Optional.ofNullable(recent);
     }
 
+    @Override
+    public Optional<Recent> findByProduct(Product product) {
+        Recent recent = jpaQueryFactory.select(qRecent).from(qRecent).where(qRecent.product.eq(product)).fetchOne();
+        return Optional.ofNullable(recent);
+    }
+
 
 }

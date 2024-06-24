@@ -247,8 +247,14 @@ public class MultiService {
 
 
     /**
-     * List
+     * Wish
      */
+
+    @Transactional
+    public void deleteWish(Product product) {
+        Optional<Wish> _wish = wishListService.findByProduct(product);
+        _wish.ifPresent(wishListService::delete);
+    }
 
     public boolean checkWishList(String username, Long product_id) {
         SiteUser user = userService.get(username);
@@ -335,6 +341,20 @@ public class MultiService {
             responseDTOList.add(this.createCartResponseDTO(item));
         }
         return responseDTOList;
+    }
+    @Transactional
+    public void deleteCart(Product product) {
+        Optional<CartItem> _cartItem = cartItemService.findByProduct(product);
+        // 카트아이템 찾아서 카트 디테일도 먼저 삭제시키고 진행해야함
+        if (_cartItem.isPresent()){
+            List<CartItemDetail> cartItemDetailList = cartItemDetailService.getList(_cartItem.get());
+            if (cartItemDetailList != null) {
+                for (CartItemDetail cartItemDetail : cartItemDetailList)
+                    cartItemDetailService.delete(cartItemDetail);
+
+                cartItemService.delete(_cartItem.get());
+            }
+        }
     }
 
     @Transactional
@@ -614,10 +634,96 @@ public class MultiService {
         return optionResponseDTOList;
     }
 
+    @Transactional
+    public void deleteOptions(OptionList optionList) {
+        Optional<Options> _options = optionsService.getOptionByOptionList(optionList);
+        _options.ifPresent(optionsService::delete);
+        optionListService.delete(optionList);
+    }
+
+    @Transactional
+    public void saveOptions(OptionRequestDTO optionRequestDTO, OptionList optionList) {
+        optionsService.saveOption(optionRequestDTO.getCount(), optionRequestDTO.getName(), optionRequestDTO.getPrice(), optionList);
+    }
+
+    /**
+     * OptionList
+     */
+
+    @Transactional
+    public void deleteOptionList(Product product) {
+        Optional<OptionList> _optionList = optionListService.getOptionListByProduct(product);
+        _optionList.ifPresent(this::deleteOptions);
+    }
+
+    @Transactional
+    public void saveOptionList(OptionListRequestDTO optionListRequestDTO, Product product) {
+        OptionList optionList = optionListService.save(optionListRequestDTO.getName(), product);
+        for (OptionRequestDTO optionRequestDTO : optionListRequestDTO.getChild()) {
+            this.saveOptions(optionRequestDTO, optionList);
+        }
+    }
+
+    /**
+     * Tag
+     */
+    @Transactional
+    public void saveTag(List<String> tagList, Product product) {
+        for (String tagName : tagList) {
+            tagService.save(tagName, product);
+        }
+    }
+
+    @Transactional
+    public void deleteTag(Product product) {
+        List<Tag> tagList = tagService.getTagByProduct(product);
+        if (!tagList.isEmpty())
+            for (Tag tag : tagList) {
+                tagService.delete(tag);
+            }
+    }
 
     /**
      * Product
      */
+    @Transactional
+    public void deleteProduct(Long ProductId, String username) {
+        SiteUser siteUser = userService.get(username);
+        Product product = productService.getProduct(ProductId);
+        Optional<MultiKey> _multiKey = multiKeyService.get(ImageKey.PRODUCT.getKey(product.getId().toString()));
+        if (_multiKey.isPresent() && siteUser == product.getSeller()) {
+            String path = ShoppingApplication.getOsType().getLoc();
+            for (String keyName : _multiKey.get().getVs()) {
+                Optional<FileSystem> _fileSystem = fileSystemService.get(keyName);
+                _fileSystem.ifPresent(fileSystemService::delete);
+            }
+            Optional<FileSystem> fileSystem = fileSystemService.get(ImageKey.PRODUCT.getKey(product.getId().toString()));
+            if (fileSystem.isPresent()) {
+                Path tempPath = Paths.get(path + fileSystem.get().getV());
+                File file = tempPath.toFile();
+                this.deleteFolder(file.getParentFile());
+                fileSystemService.delete(fileSystem.get());
+            }
+            multiKeyService.delete(_multiKey.get());
+        }
+        if (product != null) {
+            this.deleteTag(product);
+            this.deleteOptionList(product);
+            Optional<Review> _review = reviewService.findByProduct(product);
+            _review.ifPresent(reviewService::delete);
+            this.deleteProductQA(product);
+            this.deleteWish(product);
+            this.deleteCart(product);
+            this.deleteByEventProduct(product);
+            Optional<Recent> _recent = recentService.findByProduct(product);
+            _recent.ifPresent(recentService::delete);
+
+            productService.deleteProduct(product);
+        }
+    }
+
+
+
 
     @Transactional
     public void saveProduct(ProductCreateRequestDTO requestDTO, String username) {
@@ -631,16 +737,11 @@ public class MultiService {
         Category category = this.categoryService.get(requestDTO.getCategoryId());
         Product product = this.productService.saveProduct(requestDTO, user, category);
         if (requestDTO.getTagList() != null) {
-            for (String tagName : requestDTO.getTagList()) {
-                tagService.save(tagName, product);
-            }
+            this.saveTag(requestDTO.getTagList(), product);
         }
         if (requestDTO.getOptionLists() != null) {
             for (OptionListRequestDTO optionListRequestDTO : requestDTO.getOptionLists()) {
-                OptionList optionList = optionListService.save(optionListRequestDTO.getName(), product);
-                for (OptionRequestDTO optionRequestDTO : optionListRequestDTO.getChild()) {
-                    optionsService.saveOption(optionRequestDTO.getCount(), optionRequestDTO.getName(), optionRequestDTO.getPrice(), optionList);
-                }
+                this.saveOptionList(optionListRequestDTO, product);
             }
         }
         if (requestDTO.getUrl() != null && !requestDTO.getUrl().isBlank()) {
@@ -795,6 +896,10 @@ public class MultiService {
         return new PageImpl<>(productResponseDTOList, pageable, productPage.getTotalElements());
     }
 
+    /**
+     * ProductQA
+     */
+
     @Transactional
     public List<ProductResponseDTO> getMyProductList(String username) {
         SiteUser user = this.userService.get(username);
@@ -817,7 +922,12 @@ public class MultiService {
     public void productQASave(String username, ProductQARequestDTO requestDTO) {
         SiteUser user = this.userService.get(username);
         Product product = productService.getProduct(requestDTO.getProductId());
-        if (user != null && product != null && user.getRole().equals(UserRole.USER))
+        if (user == null)
+            throw new NoSuchElementException("not user");
+        if (user.getRole() != UserRole.USER)
+            throw new IllegalArgumentException("not role");
+
+        if (product != null)
             this.productQAService.save(requestDTO.getTitle(), user, product);
     }
 
@@ -826,8 +936,18 @@ public class MultiService {
         SiteUser user = this.userService.get(username);
         Optional<ProductQA> _productQA = productQAService.getProductQA(requestDTO.getProductQAId());
         Product product = productService.getProduct(requestDTO.getProductId());
-        if (user != null && product != null && user.getRole().equals(UserRole.SELLER))
+        if (user == null)
+            throw new NoSuchElementException("not user");
+        if (user.getRole() == UserRole.SELLER)
+            throw new IllegalArgumentException("not role");
+
+        if (product != null)
             this.productQAService.update(requestDTO.getContent(), user, _productQA.get());
+    }
+    @Transactional
+    public void deleteProductQA(Product product) {
+        Optional<ProductQA> _productQA = productQAService.findByProduct(product);
+        _productQA.ifPresent(productQAService::delete);
     }
 
     /**
@@ -888,12 +1008,13 @@ public class MultiService {
         }
         return null;
     }
+
     @Transactional
-    public void deleteTempImageList(String username){
+    public void deleteTempImageList(String username) {
         String path = ShoppingApplication.getOsType().getLoc();
         Optional<MultiKey> _multiKey = multiKeyService.get(ImageKey.TEMP.getKey(username));
-        if(_multiKey.isPresent()){
-            for(String key : _multiKey.get().getVs()){
+        if (_multiKey.isPresent()) {
+            for (String key : _multiKey.get().getVs()) {
                 Optional<FileSystem> _fileSystem = fileSystemService.get(key);
                 if (_fileSystem.isPresent()) {
                     FileSystem fileSystem = _fileSystem.get();
@@ -905,6 +1026,7 @@ public class MultiService {
             multiKeyService.delete(_multiKey.get());
         }
     }
+
     @Transactional
     public ImageResponseDTO tempImageList(ImageRequestDTO requestDTO, String username) {
         if (!requestDTO.getFile().isEmpty()) try {
@@ -1310,10 +1432,20 @@ public class MultiService {
         Event updatedEvent = this.eventService.updateEvent(_event, eventRequestDTO);
         return this.getEventDTO(updatedEvent, productResponseDTOList, user);
     }
+    @Transactional
+    public void deleteByEventProduct(Product product) {
+        List<EventProduct> eventProductList = eventProductService.findByProduct(product);
+        if (eventProductList != null) {
+            for (EventProduct eventProduct : eventProductList) {
+                eventProductService.delete(eventProduct);
+            }
+        }
+
+    }
 
     // 초 분 시 일 월 주
     @Scheduled(cron = "0 0 * * * *")
-    public void deleteEvent() {
+    public void deleteEventProduct() {
 
         LocalDateTime now = LocalDateTime.now();
         List<Event> eventList = this.eventService.findByEndDateAfter(now);
@@ -1425,6 +1557,19 @@ public class MultiService {
         return result;
     }
 
+
+    /**
+     * File
+     */
+    public void deleteFolder(File file) {
+        if (file.exists()) {
+            if (file.isDirectory()) {
+                for (File list : file.listFiles())
+                    deleteFolder(list);
+            }
+            file.delete();
+        }
+    }
 
 }
 

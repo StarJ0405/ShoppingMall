@@ -43,4 +43,12 @@ public class WishListService {
         this.wishListRepository.delete(wishList);
 
     }
+
+    public Optional<Wish> findByProduct(Product product) {
+        return wishListRepository.findByProduct(product);
+    }
+
+    public void delete(Wish wish) {
+        wishListRepository.delete(wish);
+    }
 }

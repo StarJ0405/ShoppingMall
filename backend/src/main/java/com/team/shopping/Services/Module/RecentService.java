@@ -50,4 +50,8 @@ public class RecentService {
         recent.setCreateDate(LocalDateTime.now());
         recentRepository.save(recent);
     }
+
+    public Optional<Recent> findByProduct(Product product) {
+        return recentRepository.findByProduct(product);
+    }
 }
