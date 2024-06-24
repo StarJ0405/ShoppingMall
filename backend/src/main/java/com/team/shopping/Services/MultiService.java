@@ -178,7 +178,7 @@ public class MultiService {
         String newUrl = null;
         // 새로 생성
         if (newUserRequestDTO.getUrl() != null && !newUserRequestDTO.getUrl().isBlank()) {
-            String newFile = "/api/user" + "_" + siteUser.getUsername() + "/";
+            String newFile = "/api/user" + "/" + siteUser.getUsername() + "/";
             Optional<FileSystem> _ordFileSystem = fileSystemService.get(ImageKey.TEMP.getKey(username));
             if (_ordFileSystem.isPresent()) {
                 newUrl = this.fileMove(newUserRequestDTO.getUrl(), newFile, _ordFileSystem.get());
@@ -778,7 +778,7 @@ public class MultiService {
         }
         if (requestDTO.getUrl() != null && !requestDTO.getUrl().isBlank()) {
             Optional<FileSystem> _fileSystem = fileSystemService.get(ImageKey.TEMP.getKey(username));
-            String newFile = "/api/product" + "_" + product.getId() + "/";
+            String newFile = "/api/product" + "/" + product.getId() + "/";
             if (_fileSystem.isPresent()) {
                 String newUrl = this.fileMove(requestDTO.getUrl(), newFile, _fileSystem.get());
                 if (newUrl != null) {
@@ -798,7 +798,7 @@ public class MultiService {
                 Optional<MultiKey> _productMulti = multiKeyService.get(ImageKey.PRODUCT.getKey(product.getId().toString()));
                 Optional<FileSystem> _fileSystem = fileSystemService.get(keyName);
                 if (_fileSystem.isPresent()) {
-                    String newFile = "/api/product" + "_" + product.getId() + "/content/";
+                    String newFile = "/api/product" + "/" + product.getId() + "/content/";
                     String newUrl = this.fileMove(_fileSystem.get().getV(), newFile, _fileSystem.get());
                     if (_productMulti.isEmpty()) {
                         MultiKey multiKey = multiKeyService.save(ImageKey.PRODUCT.getKey(product.getId().toString()), ImageKey.PRODUCT.getKey(product.getId().toString()) + ".0");
@@ -1028,7 +1028,7 @@ public class MultiService {
                 if (file.exists()) file.delete();
             }
             UUID uuid = UUID.randomUUID();
-            String fileLoc = "/api/user" + "_" + username + "/temp/" + uuid + "." + requestDTO.getFile().getContentType().split("/")[1];
+            String fileLoc = "/api/user" + "/" + username + "/temp/" + uuid + "." + requestDTO.getFile().getContentType().split("/")[1];
             File file = new File(path + fileLoc);
             if (!file.getParentFile().exists()) file.getParentFile().mkdirs();
             requestDTO.getFile().transferTo(file);
@@ -1066,7 +1066,7 @@ public class MultiService {
             String path = ShoppingApplication.getOsType().getLoc();
 
             UUID uuid = UUID.randomUUID();
-            String fileLoc = "/api/user" + "_" + username + "/temp_list/" + uuid + "." + requestDTO.getFile().getContentType().split("/")[1];
+            String fileLoc = "/api/user" + "/" + username + "/temp_list/" + uuid + "." + requestDTO.getFile().getContentType().split("/")[1];
             File file = new File(path + fileLoc);
             if (!file.getParentFile().exists()) file.getParentFile().mkdirs();
             requestDTO.getFile().transferTo(file);
@@ -1212,15 +1212,15 @@ public class MultiService {
             for (String keyName : _multiKey.get().getVs()) {
                 Optional<MultiKey> _reviewMulti = multiKeyService.get(ImageKey.REVIEW.getKey(reviewKey.getId().toString()));
                 Optional<FileSystem> _fileSystem = fileSystemService.get(keyName);
+                String newFile = "/api/review" + "/" + reviewKey.getId() + "/";
+                String newPath = this.fileMove(_fileSystem.get().getV(), newFile, _fileSystem.get());
                 if (_reviewMulti.isEmpty()) {
                     MultiKey multiKey = multiKeyService.save(ImageKey.REVIEW.getKey(reviewKey.getId().toString()), ImageKey.REVIEW.getKey(reviewKey.getId().toString()) + ".0");
-                    fileSystemService.save(multiKey.getVs().getLast(), _fileSystem.get().getV());
+                    fileSystemService.save(multiKey.getVs().getLast(), newPath);
                 } else {
                     multiKeyService.add(_reviewMulti.get(), ImageKey.REVIEW.getKey(reviewKey.getId().toString()) + "." + _reviewMulti.get().getVs().size());
-                    fileSystemService.save(_reviewMulti.get().getVs().getLast(), _fileSystem.get().getV());
+                    fileSystemService.save(_reviewMulti.get().getVs().getLast(), newPath);
                 }
-                String newFile = "/api/review" + "_" + reviewKey.getId() + "/";
-                this.fileMove(_fileSystem.get().getV(), newFile, _fileSystem.get());
             }
             multiKeyService.delete(_multiKey.get());
         }
