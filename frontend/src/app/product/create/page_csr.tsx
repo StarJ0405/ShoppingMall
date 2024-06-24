@@ -8,14 +8,13 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import 'react-quill/dist/quill.snow.css';
 import QuillNoSSRWrapper from '@/app/Global/QuillNoSSRWrapper';
 import ReactQuill from 'react-quill';
-// const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
+
 interface pageProps{
     categories:any[]
 }
 
 export default function Page(props:pageProps) {
     const [user, setUser] = useState(null as any);
-    // const [categories, setCategories] = useState(null as unknown as any[]);
     const categories = props.categories;
     const [isImageHover, setIsImageHover] = useState(false);
 
@@ -283,7 +282,6 @@ export default function Page(props:pageProps) {
                     <tr>
                         <th className='border border-black'>상세설명</th>
                         <td className='px-2 flex pb-[50px] min-h-[350px]' >
-                            {/* <ReactQuill modules={modules} formats={formats} className='min-h-[300px] w-full' placeholder='상세 설명 작성..' onChange={(e: any) => setDetail(e)} value={detail} /> */}
                             <QuillNoSSRWrapper
                                 forwardedRef={quillInstance}
                                 value={detail}

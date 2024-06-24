@@ -214,3 +214,13 @@ export const getPayment = async () => {
     const response = await UserApi.get('/api/payment/logList');
     return response.data;
 }
+interface postReview {
+    productId: number;
+    title: string;
+    content: string;
+    grade: number;
+}
+export const postReview = async (data: postReview) => {
+    const response = await UserApi.post('/api/review', data);
+    return response.data;
+}
