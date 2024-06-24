@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -62,5 +63,9 @@ public class ReviewService {
 
     public List<Review> getAll () {
         return this.reviewRepository.findAll();
+    }
+
+    public Optional<Review> findByProduct(Product product) {
+        return reviewRepository.findByProduct(product);
     }
 }

@@ -196,3 +196,16 @@ export const updateAddress = async (id: number, data: addressProps) => {
     const response = await UserApi.put('/api/address', { addressId: id, ...data });
     return response.data;
 }
+interface postPayment {
+    cartItemIdList: number[];
+    recipient: string;
+    phoneNumber: string;
+    mainAddress: string;
+    addressDetail: string;
+    postNumber: string;
+    deliveryMessage: string;
+}
+export const postPayment = async (data: postPayment) => {
+    const response = await UserApi.post('/api/payment/logList', data);
+    return response.data;
+}

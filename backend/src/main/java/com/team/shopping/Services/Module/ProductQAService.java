@@ -35,4 +35,12 @@ public class ProductQAService {
     public Optional<ProductQA> getProductQA(Long productQAId) {
         return productQARepository.findById(productQAId);
     }
+
+    public Optional<ProductQA> findByProduct(Product product) {
+        return productQARepository.findByProduct(product);
+    }
+
+    public void delete(ProductQA productQA) {
+        productQARepository.delete(productQA);
+    }
 }

@@ -14,8 +14,8 @@ export default function SideList(props: sideListProps) {
         <div className="flex flex-col border-x-2 border-b-2 border-gray-400 py-2 px-4 w-full">
             <label className="font-bold mb-3">나의 쇼핑 내역</label>
             <a href="" className="text-sm text-gray-500 hover:underline">주문/배송조회</a>
-            <a href="" className="text-sm text-gray-500 hover:underline">취소/반품/교환 신청</a>
-            <a href="" className="text-sm text-gray-500 hover:underline">취소/반품/교환 현황</a>
+            {/* <a href="" className="text-sm text-gray-500 hover:underline">취소/반품/교환 신청</a>
+            <a href="" className="text-sm text-gray-500 hover:underline">취소/반품/교환 현황</a> */}
         </div>
         <div className="flex flex-col border-x-2 border-b-2 border-gray-400 py-2 px-4 w-full">
             <label className="font-bold mb-3">나의 관심 목록</label>
