@@ -67,7 +67,7 @@ export default function Page(props: pageProps) {
         <table className="text-center">
             <thead>
                 <tr>
-                    <th className="w-[24px]"><input type="checkbox" /> </th>
+                    {/* <th className="w-[24px]"><input type="checkbox" /> </th> */}
                     <th className="w-[100px]">별칭</th>
                     <th className="w-[100px]">받는사람</th>
                     <th className="w-[125px]">받는사람 번호</th>
@@ -80,7 +80,7 @@ export default function Page(props: pageProps) {
             </thead>
             <tbody>
                 {addresses?.map((address, index) => <tr key={index}>
-                    <td><input name="check" type="checkbox" /></td>
+                    {/* <td><input name="check" type="checkbox" /></td> */}
                     <td>{address.title}</td>
                     <td>{address.recipient}</td>
                     <td>{address.phoneNumber}</td>

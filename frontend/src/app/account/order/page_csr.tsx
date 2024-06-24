@@ -1,7 +1,7 @@
 "use client";
-import { getAddress, getRecent, getUser } from "@/app/API/UserAPI";
+import { getAddress, getRecent, getUser, postPayment } from "@/app/API/UserAPI";
 import Main from "@/app/Global/Layout/MainLayout";
-import { PhoneNumberCheck } from "@/app/Global/Method";
+import { MonthDate, PhoneNumberCheck } from "@/app/Global/Method";
 import Modal from "@/app/Global/Modal";
 import { redirect } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -14,18 +14,19 @@ export default function Page(props: pageProps) {
     const [user, setUser] = useState(null as any);
     const ACCESS_TOKEN = typeof window == 'undefined' ? null : localStorage.getItem('accessToken');
     const [recentList, setRecentList] = useState(null as unknown as any[]);
-    const ORDER = typeof window == 'undefined' ? null : JSON.parse(localStorage.getItem('order') as string);
-    const price = 0;
-    const discountedPrice = 0;
+    const ORDER = (typeof window == 'undefined' ? [] : JSON.parse(localStorage.getItem('order') as string)) as any[];
+    const [price, setPrice] = useState(0);
+    const [discountedPrice, setDiscountedPrice] = useState(0);
     const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
     const [addresses, setAddresses] = useState(null as unknown as any[]);
-    const [selectAddress, setSelectAddress] = useState(null as any);
     const [who, setWho] = useState('');
     const [phoneNumber, setPhoneNumber] = useState("");
     const [postNumber, setPostNumber] = useState(-1);
     const [address, setAddress] = useState('');
     const [detail, setDetail] = useState('');
     const [delivery, setDelivery] = useState('');
+    const [mounted, setMounted] = useState(false);
+    const [point, setPoint] = useState(0);
     useEffect(() => {
         if (ACCESS_TOKEN)
             getUser()
@@ -34,7 +35,17 @@ export default function Page(props: pageProps) {
                     if (!ORDER) {
                         window.location.href = "/";
                         alert('구매 중인 상품 정보가 삭제되어 메인페이지로 이동합니다.');
+                    } else {
+                        let discountedPrice = 0;
+                        let price = 0;
+                        (ORDER as any[]).forEach(order => {
+                            discountedPrice += order?.discountPrice * order?.count;
+                            price += order?.productPrice * order?.count;
+                        });
+                        setPrice(price);
+                        setDiscountedPrice(discountedPrice);
                     }
+                    setMounted(true);
                     getRecent()
                         .then(r => setRecentList(r))
                         .catch(e => console.log(e));
@@ -46,7 +57,13 @@ export default function Page(props: pageProps) {
         else
             redirect('/account/login');
     }, [ACCESS_TOKEN]);
-
+    function pay() {
+        if (who == '' || phoneNumber == '' || address == '' || detail == '' || postNumber == -1 || delivery == '')
+            return;
+        let list = [] as number[];
+        ORDER?.forEach(order => list.push(order.cartItemId));
+        postPayment({ cartItemIdList: list, recipient: who, phoneNumber: phoneNumber, mainAddress: address, addressDetail: detail, postNumber: postNumber.toString().padStart(5, '0'), deliveryMessage: delivery }).then(() => window.location.href = "/")
+    }
     return <Main categories={props.categories} recentList={recentList} setRecentList={setRecentList} user={user} >
         <div className='flex flex-col w-[1240px]'>
             <div className='divider'></div>
@@ -101,9 +118,20 @@ export default function Page(props: pageProps) {
                                                 </td>
                                                 <td className="border-r border-b border-gray-400">{address?.deliveryMessage}</td>
                                                 <td className="border-b border-gray-400">
-                                                    <button className="btn btn-xs w-[38px] m-0 p-0" onClick={() => {
-                                                        setSelectAddress(null);
-                                                        const interval = setInterval(() => { setSelectAddress(address); clearInterval(interval) }, 100);
+                                                    <button className="btn btn-outline btn-xs w-[38px] m-0 p-0" onClick={() => {
+                                                        setWho(address.recipient);
+                                                        (document.getElementById('who') as HTMLInputElement).value = address.recipient;
+                                                        setPostNumber(address.postNumber);
+                                                        (document.getElementById('postNumber') as HTMLInputElement).value = address.postNumber;
+                                                        setAddress(address.mainAddress);
+                                                        (document.getElementById('address') as HTMLInputElement).value = address.mainAddress;
+                                                        setDetail(address.addressDetail);
+                                                        (document.getElementById('detail') as HTMLInputElement).value = address.addressDetail;
+                                                        setPhoneNumber(address.phoneNumber);
+                                                        (document.getElementById('phoneNumber') as HTMLInputElement).value = address.phoneNumber;
+                                                        setDelivery(address.deliveryMessage);
+                                                        (document.getElementById('delivery') as HTMLInputElement).value = address.deliveryMessage;
+
                                                         setIsAddressModalOpen(false);
                                                     }}>선택</button>
                                                 </td>
@@ -115,13 +143,49 @@ export default function Page(props: pageProps) {
                         </Modal>
                     </div>
                     <div className="flex flex-col">
-                        <input className="input input-bordered w-[375px] mt-4" type="text" defaultValue={selectAddress?.recipient} placeholder="받는 사람" onChange={e => setWho(e.target.value)} />
-                        <input className="input input-bordered w-[375px] mt-4" type="number" defaultValue={selectAddress?.postNumber} placeholder="우편번호" onChange={e => setPostNumber(Number(e.target.value))} />
-                        <input className="input input-bordered w-[642px] mt-4" type="text" defaultValue={selectAddress?.mainAddress} placeholder="기본 주소" onChange={e => setAddress(e.target.value)} />
-                        <input className="input input-bordered w-[642px] mt-4" type="text" defaultValue={selectAddress?.addressDetail} placeholder="상세 주소" onChange={e => setDetail(e.target.value)} />
-                        <input className="input input-bordered w-[642px] mt-4" type="text" defaultValue={selectAddress?.phoneNumber} placeholder="전화번호" onChange={e => { PhoneNumberCheck(e); setPhoneNumber(e.target.value.replaceAll('-', '')); setPhoneNumber(e.target.value); }} />
-                        <input className="input input-bordered w-[642px] mt-4" type="text" defaultValue={selectAddress?.phoneNumber} placeholder="배송메시지" onChange={e => setDelivery(e.target.value)} />
+                        <input className="input input-bordered w-[375px] mt-4" type="text" id="who" placeholder="받는 사람" onChange={e => setWho(e.target.value)} />
+                        <input className="input input-bordered w-[375px] mt-4" type="number" id="postNumber" placeholder="우편번호" onChange={e => setPostNumber(Number(e.target.value))} />
+                        <input className="input input-bordered w-[642px] mt-4" type="text" id="address" placeholder="기본 주소" onChange={e => setAddress(e.target.value)} />
+                        <input className="input input-bordered w-[642px] mt-4" type="text" id="detail" placeholder="상세 주소" onChange={e => setDetail(e.target.value)} />
+                        <input className="input input-bordered w-[642px] mt-4" type="text" id="phoneNumber" placeholder="전화번호" onChange={e => { PhoneNumberCheck(e); setPhoneNumber(e.target.value.replaceAll('-', '')); setPhoneNumber(e.target.value); }} />
+                        <input className="input input-bordered w-[642px] mt-4" type="text" id="delivery" placeholder="배송메시지" onChange={e => setDelivery(e.target.value)} />
                         {/* <div><input type="checkbox" /><label>배송지 저장</label></div> */}
+                    </div>
+                    <div className="flex mt-20 items-end">
+                        <label className="text-2xl font-bold mr-4">주문 상품</label>
+                        <label className="text-sm">상품수량 및 옵션변경은 상품상세 또는 장바구니에서 가능합니다.</label>
+                    </div>
+                    <div className="divider"></div>
+                    <div className="flex felx-col">
+                        {mounted && ORDER?.map((order, index) =>
+                            <div key={index} className="flex mt-4">
+                                <img src={order?.imageUrl ? order?.imageUrl : '/empty_product.png'} className="w-[120px] h-[120px]" alt="order" />
+                                <div className="flex flex-col w-[376px] ml-2 justify-between pb-4">
+                                    <a href={"/product/" + order?.productId} className="text-xl hover:underline">{order?.productTitle}</a>
+                                    <label><label className="font-bold text-blue-500">{MonthDate()}</label> 도착</label>
+                                </div>
+                                <label className="w-[90px] text-center">{order?.count}개</label>
+                                {order?.discount > 0 ?
+                                    <div className="flex flex-col w-[155px] text-center">
+                                        <label><label className="text-lg text font-bold">{(order?.discountPrice * order?.count).toLocaleString('ko-kr')}</label>원</label>
+                                        <label className="line-through text-gray-500 text-sm">{(order?.productPrice * order?.count).toLocaleString('ko-kr')}원</label>
+                                    </div>
+                                    :
+                                    <label className="w-[155px]"><label >{(order?.productPrice * order?.count).toLocaleString('ko-kr')}</label>원</label>
+                                }
+                                <label className="w-[129px] text-center">무료배송</label>
+                            </div>
+                        )}
+                    </div>
+                    <div className="text-2xl font-bold mt-20">포인트</div>
+                    <div className="divider"></div>
+                    <div className="flex items-center mb-16">
+                        <label className="text-lg font-bold">포인트</label>
+                        <div className="flex border border-black ml-4 items-center px-2 ">
+                            <input type="number" className="input input-sm" defaultValue={0} min={0} max={user?.point} onChange={e => { let value = Number(e.target.value); if (value < 0) value = 0; else if (value > user?.point) value = user?.point; e.target.value = value?.toString(); setPoint(value);}} />
+                            <label>원</label>
+                        </div>
+                        <label className="ml-4">사용가능<label className="text-red-500 font-bold ml-2">{user?.point.toLocaleString('ko-kr')}P</label></label>
                     </div>
                 </div>
                 <div className='w-[300px] min-h-[750px] ml-[60px] relative'>
@@ -132,12 +196,17 @@ export default function Page(props: pageProps) {
                         <label className='text-xl font-bold'>결제 예정금액</label>
                         <div className='flex justify-between mt-2'>
                             <label>상품금액</label>
-                            <label>{price?.toLocaleString('ko-kr', { maximumFractionDigits: 0 })}원</label>
+                            <label><label className='font-bold text-lg'>{price.toLocaleString('ko-kr', { maximumFractionDigits: 0 })}</label>원</label>
                         </div>
                         <div className='flex justify-between mt-2'>
                             <label>할인금액</label>
-                            <label className='text-red-500'>{discountedPrice?.toLocaleString('ko-kr', { maximumFractionDigits: 0 })}원</label>
+                            <label className='text-red-500'><label className='font-bold text-lg'>{(discountedPrice - price-point).toLocaleString('ko-kr', { maximumFractionDigits: 0 })}</label>원</label>
                         </div>
+                        <div className='flex justify-between mt-2'>
+                            <label className='text-red-500'>합계</label>
+                            <label className='text-red-500'><label className='font-bold text-2xl'>{(discountedPrice-point).toLocaleString('ko-kr', { maximumFractionDigits: 0 })}</label>원</label>
+                        </div>
+                        <button className='btn btn-error text-white mt-5 text-lg' onClick={pay}>결제하기</button>
                     </div>
                 </div>
             </div>
