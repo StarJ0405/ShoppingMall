@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -22,5 +23,13 @@ public class OptionListService {
                 .name(name)
                 .product(product)
                 .build());
+    }
+
+    public Optional<OptionList> getOptionListByProduct(Product product) {
+        return optionListRepository.getOptionListByProduct(product);
+    }
+
+    public void delete(OptionList optionList) {
+        optionListRepository.delete(optionList);
     }
 }

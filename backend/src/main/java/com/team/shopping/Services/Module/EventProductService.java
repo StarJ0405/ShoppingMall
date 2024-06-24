@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -42,5 +43,9 @@ public class EventProductService {
     public EventProduct get (Long id) {
         return this.eventProductRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("not found eventProduct"));
+    }
+
+    public List<EventProduct> findByProduct(Product product) {
+        return eventProductRepository.findByProduct(product);
     }
 }

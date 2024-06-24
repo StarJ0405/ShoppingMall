@@ -31,6 +31,18 @@ public class ProductController {
         return tokenRecord.getResponseEntity();
     }
 
+    @DeleteMapping
+    public ResponseEntity<?> deleteProduct(@RequestHeader("Authorization") String accessToken,
+                                           @RequestHeader("ProductId") Long productId) {
+        TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
+        if (tokenRecord.isOK()) {
+            String username = tokenRecord.username();
+            this.multiService.deleteProduct(productId, username);
+            return tokenRecord.getResponseEntity("문제 없음");
+        }
+        return tokenRecord.getResponseEntity();
+    }
+
     @GetMapping
     public ResponseEntity<?> getProduct(@RequestHeader("ProductId") Long productId) {
         ProductResponseDTO productResponseDTO = multiService.getProduct(productId);
@@ -58,7 +70,7 @@ public class ProductController {
     }
 
     @GetMapping("/latest")
-    public ResponseEntity<?> latestProductList(@RequestHeader("Page") int page){
+    public ResponseEntity<?> latestProductList(@RequestHeader("Page") int page) {
         try {
             Page<ProductResponseDTO> productResponseDTOList = multiService.getLatestList(page);
 
@@ -69,27 +81,32 @@ public class ProductController {
     }
 
 
-
     @PostMapping("/question")
     public ResponseEntity<?> productQuestion(@RequestHeader("Authorization") String accessToken, @RequestBody ProductQARequestDTO requestDTO) {
-        TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
-        if (tokenRecord.isOK()) {
-            String username = tokenRecord.username();
-            this.multiService.productQASave(username, requestDTO);
-            return tokenRecord.getResponseEntity("문제 없음");
+        try {
+            TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
+            if (tokenRecord.isOK()) {
+                String username = tokenRecord.username();
+                this.multiService.productQASave(username, requestDTO);
+            }
+            return ResponseEntity.status(HttpStatus.OK).body("문제 없음");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
-        return tokenRecord.getResponseEntity();
     }
 
     @PostMapping("/answer")
     public ResponseEntity<?> productAnswer(@RequestHeader("Authorization") String accessToken,
                                            @RequestBody ProductQARequestDTO requestDTO) {
-        TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
-        if (tokenRecord.isOK()) {
-            String username = tokenRecord.username();
-            this.multiService.productQAUpdate(username, requestDTO);
-            return tokenRecord.getResponseEntity("문제 없음");
+        try {
+            TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
+            if (tokenRecord.isOK()) {
+                String username = tokenRecord.username();
+                this.multiService.productQAUpdate(username, requestDTO);
+            }
+            return ResponseEntity.status(HttpStatus.OK).body("문제 없음");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
-        return tokenRecord.getResponseEntity();
     }
 }
