@@ -204,8 +204,13 @@ interface postPayment {
     addressDetail: string;
     postNumber: string;
     deliveryMessage: string;
+    used_point: number;
 }
 export const postPayment = async (data: postPayment) => {
     const response = await UserApi.post('/api/payment/logList', data);
+    return response.data;
+}
+export const getPayment = async () => {
+    const response = await UserApi.get('/api/payment/logList');
     return response.data;
 }

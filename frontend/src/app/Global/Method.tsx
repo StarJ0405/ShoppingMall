@@ -44,7 +44,7 @@ export function Check(pattern: string, test: string) {
 export function MonthDate() {
     const now = new Date();
     let week = ''
-    switch ((now.getDay() + 2)%7) {
+    switch ((now.getDay() + 2) % 7) {
         case 0: week = '일'; break;
         case 1: week = '월'; break;
         case 2: week = '화'; break;
@@ -54,4 +54,12 @@ export function MonthDate() {
         case 6: week = '토'; break;
     }
     return (now.getMonth() + 1) + '/' + (now.getDate() + 2) + '(' + week + ')';
+}
+export function getDate(data: any) {
+    const date = new Date(data);
+    return date.getFullYear() + '.' + (date.getMonth() + 1) + '.' + date.getDate();
+}
+export function getDateTime(data: any) {
+    const date = new Date(data);
+    return date.getFullYear() + "" + (date.getMonth() + 1) + "" + date.getDate() + "" + date.getHours() + "" + date.getMinutes();
 }
