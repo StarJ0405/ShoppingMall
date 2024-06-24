@@ -25,7 +25,8 @@ public class DTOConverter {
         Long createDate = dateTimeTransfer(_createDate);
 
         List<CartItemDetailResponseDTO> cartItemDetailResponseDTOList = new ArrayList<>();
-        long totalPrice =  ((long)discountPrice * cartItem.getCount());
+        long totalPrice = 0L;
+        totalPrice += (long)discountPrice * cartItem.getCount();
 
         for (CartItemDetail cartItemDetail : cartItemDetails) {
             Options option = cartItemDetail.getOptions();

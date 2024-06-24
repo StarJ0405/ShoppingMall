@@ -31,6 +31,8 @@ public class Event {
 
     private LocalDateTime modifyDate;
 
+    private Boolean active;
+
     @Builder
     public Event (LocalDateTime startDate, LocalDateTime endDate, Double discount, SiteUser creator) {
         this.startDate = startDate;
@@ -38,5 +40,6 @@ public class Event {
         this.discount = discount;
         this.creator = creator;
         this.createDate = LocalDateTime.now();
+        this.active = true;
     }
 }

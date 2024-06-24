@@ -27,6 +27,8 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -1251,6 +1253,25 @@ public class MultiService {
      * event
      */
 
+    @Transactional
+    public List<EventResponseDTO> getEventList () {
+
+        List<EventResponseDTO> eventResponseDTOList = new ArrayList<>();
+        List<Event> eventList = this.eventService.getAll();
+        for (Event event : eventList) {
+            eventResponseDTOList.add(this.getEventDTO(event));
+        }
+        return eventResponseDTOList;
+    }
+
+    @Transactional
+    public EventResponseDTO getEvent (Long eventId) {
+
+        Event event = this.eventService.get(eventId);
+
+        return this.getEventDTO(event);
+    }
+
 
     @Transactional
     public EventResponseDTO createEvent(String username, EventRequestDTO eventRequestDTO) {
@@ -1261,15 +1282,12 @@ public class MultiService {
 
         Event event = this.eventService.saveEvent(user, eventRequestDTO);
         List<Long> productIdList = eventRequestDTO.getProductIdList();
-        List<ProductResponseDTO> productResponseDTOList = new ArrayList<>();
 
         for (Long productId : productIdList) {
             Product product = this.productService.getProduct(productId);
             this.eventProductService.saveEventProduct(event, product);
-            ProductResponseDTO productResponseDTO = this.getProduct(product);
-            productResponseDTOList.add(productResponseDTO);
         }
-        return this.getEventDTO(event, productResponseDTOList, user);
+        return this.getEventDTO(event);
     }
 
     @Transactional
@@ -1281,7 +1299,6 @@ public class MultiService {
             throw new IllegalArgumentException("not role");
         }
         List<Long> productIdList = eventRequestDTO.getProductIdList();
-        List<ProductResponseDTO> productResponseDTOList = new ArrayList<>();
 
 
         List<EventProduct> eventProductList = this.eventProductService.getList(_event);
@@ -1293,8 +1310,6 @@ public class MultiService {
             if (!productIdList.contains(productId)) {
                 this.eventProductService.delete(eventProduct);
                 iterator.remove();
-            } else {
-                productResponseDTOList.add(this.getProduct(eventProduct.getProduct()));
             }
         }
 
@@ -1303,32 +1318,41 @@ public class MultiService {
             if (!exists) {
                 Product product = this.productService.getProduct(productId);
                 this.eventProductService.saveEventProduct(_event, product);
-                productResponseDTOList.add(this.getProduct(product));
             }
         }
 
         Event updatedEvent = this.eventService.updateEvent(_event, eventRequestDTO);
-        return this.getEventDTO(updatedEvent, productResponseDTOList, user);
+        return this.getEventDTO(updatedEvent);
     }
 
     // 초 분 시 일 월 주
-    @Scheduled(cron = "0 0 * * * *")
-    public void deleteEvent() {
+    @Scheduled(cron = "0 * * * * *")
+    public void disableEvent() {
 
         LocalDateTime now = LocalDateTime.now();
         List<Event> eventList = this.eventService.findByEndDateAfter(now);
 
         for (Event event : eventList) {
-            List<EventProduct> eventProductList = this.eventProductService.getList(event);
-            for (EventProduct eventProduct : eventProductList) {
-                this.eventProductService.delete(eventProduct);
-            }
-            this.eventService.delete(event);
+            this.eventService.disableActive(event);
         }
     }
 
-    private EventResponseDTO getEventDTO(Event event, List<ProductResponseDTO> productResponseDTOList, SiteUser user) {
-        return EventResponseDTO.builder().startDate(this.dateTimeTransfer(event.getStartDate())).endDate(this.dateTimeTransfer(event.getEndDate())).productResponseDTOList(productResponseDTOList).user(user).event(event).createDate(this.dateTimeTransfer(event.getCreateDate())).modifyDate(this.dateTimeTransfer(event.getModifyDate())).build();
+    private EventResponseDTO getEventDTO(Event event) {
+
+        List<EventProduct> eventProductList = this.eventProductService.getList(event);
+        List<ProductResponseDTO> productResponseDTOList = new ArrayList<>();
+        for (EventProduct eventProduct : eventProductList) {
+            productResponseDTOList.add(this.getProduct(eventProduct.getProduct()));
+        }
+        return EventResponseDTO.builder()
+                .startDate(this.dateTimeTransfer(event.getStartDate()))
+                .endDate(this.dateTimeTransfer(event.getEndDate()))
+                .productResponseDTOList(productResponseDTOList)
+                .user(event.getCreator())
+                .event(event)
+                .createDate(this.dateTimeTransfer(event.getCreateDate()))
+                .modifyDate(this.dateTimeTransfer(event.getModifyDate()))
+                .build();
     }
 
     /**
@@ -1352,33 +1376,45 @@ public class MultiService {
     }
 
     private Integer getProductDiscountPrice(Product product, Double discount) {
+        // 유효성 검사: 할인율이 음수인 경우 0으로 처리
         if (discount < 0.0) {
             discount = 0.0;
         }
-        double discountedPrice = product.getPrice() * (1 - discount / 100);
-        discountedPrice = Math.round(discountedPrice * 10) / 10.0;
-        return (int) Math.round(discountedPrice);
+
+        // 할인된 가격 계산 (부동소수점 정밀도 보장을 위해 BigDecimal 사용)
+        BigDecimal originalPrice = BigDecimal.valueOf(product.getPrice());
+        BigDecimal discountPercent = BigDecimal.valueOf(discount);
+        BigDecimal discountMultiplier = BigDecimal.ONE.subtract(discountPercent.divide(BigDecimal.valueOf(100)));
+        BigDecimal discountedPrice = originalPrice.multiply(discountMultiplier);
+
+        // 소수점 첫 번째 자리에서 반올림하여 정수로 변환
+
+        return discountedPrice.setScale(0, RoundingMode.HALF_UP).intValue();
     }
+
 
     private Double getProductDiscount(Product product) {
         List<Event> eventList = this.eventService.findByProduct(product);
-        Event maxDiscountEvent = null;
         double maxDiscount = 0.0;
         LocalDateTime now = LocalDateTime.now();
 
         for (Event event : eventList) {
-            if ((now.isEqual(event.getStartDate()) || now.isAfter(event.getStartDate())) && now.isBefore(event.getEndDate())) {
+            if (isActiveEvent(event, now)) {
                 double discount = event.getDiscount();
                 if (discount > maxDiscount) {
-                    maxDiscountEvent = event;
+                    maxDiscount = discount;
                 }
             }
         }
-        if (maxDiscountEvent != null) {
-            return maxDiscountEvent.getDiscount();
-        } else {
-            return 0.0;
-        }
+
+        return maxDiscount;
+    }
+
+    private boolean isActiveEvent(Event event, LocalDateTime now) {
+        // 이벤트가 활성화되어 있고, 현재 시간이 이벤트의 유효 기간에 속하는지 여부를 반환
+        return event.getActive()
+                && now.isEqual(event.getStartDate()) || now.isAfter(event.getStartDate())
+                && now.isBefore(event.getEndDate());
     }
 
     private Map<String, Object> gradeCalculate(List<Review> reviewList) {

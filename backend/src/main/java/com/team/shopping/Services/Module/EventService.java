@@ -18,6 +18,10 @@ public class EventService {
 
     private final EventRepository eventRepository;
 
+    public List<Event> getAll () {
+        return this.eventRepository.findAll();
+    }
+
     public Event saveEvent (SiteUser creator, EventRequestDTO eventRequestDTO) {
         Double discount = eventRequestDTO.getDiscount();
         if (discount < 0.0) {
@@ -29,6 +33,11 @@ public class EventService {
                 .creator(creator)
                 .discount(discount)
                 .build());
+    }
+
+    public void disableActive (Event event) {
+        event.setActive(false);
+        this.eventRepository.save(event);
     }
 
     public List<Event> findByProduct (Product product) {
