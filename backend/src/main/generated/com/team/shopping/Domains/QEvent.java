@@ -22,6 +22,8 @@ public class QEvent extends EntityPathBase<Event> {
 
     public static final QEvent event = new QEvent("event");
 
+    public final BooleanPath active = createBoolean("active");
+
     public final DateTimePath<java.time.LocalDateTime> createDate = createDateTime("createDate", java.time.LocalDateTime.class);
 
     public final QSiteUser creator;

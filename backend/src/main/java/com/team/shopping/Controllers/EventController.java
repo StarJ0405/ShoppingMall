@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 
 @RequiredArgsConstructor
@@ -52,5 +53,25 @@ public class EventController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("제품을 찾지 못했습니다.");
         }
         return tokenRecord.getResponseEntity();
+    }
+
+    @GetMapping
+    public ResponseEntity<?> getEventList () {
+        try {
+            List<EventResponseDTO> eventResponseDTOList = this.multiService.getEventList();
+            return ResponseEntity.status(HttpStatus.OK).body(eventResponseDTOList);
+        }catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("제품을 찾지 못했습니다.");
+        }
+    }
+
+    @GetMapping("/id")
+    public ResponseEntity<?> getEvent (@RequestParam("eventId")Long eventId) {
+        try {
+            EventResponseDTO eventResponseDTO = this.multiService.getEvent(eventId);
+            return ResponseEntity.status(HttpStatus.OK).body(eventResponseDTO);
+        }catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("제품을 찾지 못했습니다.");
+        }
     }
 }
