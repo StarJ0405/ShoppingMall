@@ -68,4 +68,9 @@ public class ReviewService {
     public Optional<Review> findByProduct(Product product) {
         return reviewRepository.findByProduct(product);
     }
+
+    public void updateContent(Review reviewKey, String detail) {
+        reviewKey.setContent(detail);
+        this.reviewRepository.save(reviewKey);
+    }
 }

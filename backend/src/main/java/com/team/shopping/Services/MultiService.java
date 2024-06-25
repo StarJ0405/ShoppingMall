@@ -1204,7 +1204,7 @@ public class MultiService {
 
         // 구매 기록이 있는 경우에만 리뷰를 저장
         Review reviewKey = this.reviewService.save(user, reviewRequestDTO, product);
-
+        String detail = reviewKey.getContent();
         // 이미지 저장
         Optional<MultiKey> _multiKey = multiKeyService.get(ImageKey.TEMP.getKey(username));
         if (_multiKey.isPresent()) {
@@ -1220,7 +1220,9 @@ public class MultiService {
                     multiKeyService.add(_reviewMulti.get(), ImageKey.REVIEW.getKey(reviewKey.getId().toString()) + "." + _reviewMulti.get().getVs().size());
                     fileSystemService.save(_reviewMulti.get().getVs().getLast(), newPath);
                 }
+                detail = detail.replace(_fileSystem.get().getV(), newPath);
             }
+            reviewService.updateContent(reviewKey, detail);
             multiKeyService.delete(_multiKey.get());
         }
 
