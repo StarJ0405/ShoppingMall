@@ -43,3 +43,13 @@ export const getSearch = async (data: searchProps) => {
     const response = await NonUserApi.get('/api/search', { headers: { ...data } });
     return response.data;
 }
+interface categorySearchProps {
+    CategoryId:number;
+    Page: number;
+    Sort: number
+    Keyword: string;
+}
+export const getCategorySearch = async (data: categorySearchProps) => {
+    const response = await NonUserApi.get('/api/category/search', { headers: { ...data } });
+    return response.data;
+}

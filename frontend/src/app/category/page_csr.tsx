@@ -13,11 +13,16 @@ interface pageProps {
     keyword: string;
     page: number;
     sort: number;
+    CategoryId: number;
+    topCategory: any;
+    secondCategory: any;
+    bottomCatrgory: any;
 }
 export default function Page(props: pageProps) {
     const [user, setUser] = useState(null as any);
     const ACCESS_TOKEN = typeof window == 'undefined' ? null : localStorage.getItem('accessToken');
     const [recentList, setRecentList] = useState(null as unknown as any[]);
+    const [secondCategory, setSecondCategory] = useState(props.secondCategory);
     const search = props.search;
     const [openSort, setOpenSort] = useState(false);
     useEffect(() => {
@@ -44,7 +49,7 @@ export default function Page(props: pageProps) {
         }
 
 
-        return value.map((v, index) => <button className="btn btn-xs btn-outline" key={index} disabled={v == props.page} onClick={() => window.location.href = "/search?keyword=" + props.keyword + "&page=" + v + "&sort=" + props.sort}>{v + 1}</button>);
+        return value.map((v, index) => <button className="btn btn-xs btn-outline" key={index} disabled={v == props.page} onClick={() => window.location.href = '/category?CategoryId=' + props.CategoryId + "&keyword=" + props.keyword + "&page=" + v + "&sort=" + props.sort}>{v + 1}</button>);
     }
     const sortName = ['최근 등록순', '높은 가격순', '낮은 가격순', '리뷰 많은순']
     return <Main categories={props.categories} user={user} recentList={recentList} setRecentList={setRecentList}>
@@ -54,14 +59,38 @@ export default function Page(props: pageProps) {
                 <button id="sort" className="self-end font-bold btn btn-sm" onClick={() => setOpenSort(!openSort)}>{sortName[props.sort]}</button>
                 <DropDown open={openSort} onClose={() => setOpenSort(false)} background="main" button="sort" className="bg-white mt-[0.5px]" defaultDriection={Direcion.DOWN} height={100} width={100}>
                     <div className="flex flex-col">
-                        <label className="hover:underline cursor-pointer" onClick={() => window.location.href = "/search?keyword=" + props.keyword + "&page=" + 0 + "&sort=" + 0}>최근 등록순</label>
-                        <label className="hover:underline cursor-pointer" onClick={() => window.location.href = "/search?keyword=" + props.keyword + "&page=" + 0 + "&sort=" + 1}>높은 가격순</label>
-                        <label className="hover:underline cursor-pointer" onClick={() => window.location.href = "/search?keyword=" + props.keyword + "&page=" + 0 + "&sort=" + 2}>낮은 가격순</label>
-                        <label className="hover:underline cursor-pointer" onClick={() => window.location.href = "/search?keyword=" + props.keyword + "&page=" + 0 + "&sort=" + 3}>리뷰 많은순</label>
+                        <label className="hover:underline cursor-pointer" onClick={() => window.location.href = '/category?CategoryId=' + props.CategoryId + "&keyword=" + props.keyword + "&page=" + 0 + "&sort=" + 0}>최근 등록순</label>
+                        <label className="hover:underline cursor-pointer" onClick={() => window.location.href = '/category?CategoryId=' + props.CategoryId + "&keyword=" + props.keyword + "&page=" + 0 + "&sort=" + 1}>높은 가격순</label>
+                        <label className="hover:underline cursor-pointer" onClick={() => window.location.href = '/category?CategoryId=' + props.CategoryId + "&keyword=" + props.keyword + "&page=" + 0 + "&sort=" + 2}>낮은 가격순</label>
+                        <label className="hover:underline cursor-pointer" onClick={() => window.location.href = '/category?CategoryId=' + props.CategoryId + "&keyword=" + props.keyword + "&page=" + 0 + "&sort=" + 3}>리뷰 많은순</label>
                     </div>
                 </DropDown>
             </div>
-
+            <label className="text-2xl font-bold">{props.topCategory.name}</label>
+            <div className="p-2 flex font-bold">
+                <div className="flex flex-col h-[200px] w-full">
+                    <label className="text-lg font-bold bg-gray-700 text-white p-2">중간 카테고리</label>
+                    <div className="flex flex-col overflow-y-scroll">
+                        {(props.topCategory.categoryResponseDTOList as any[]).map((second, index) => <label key={index} className={"p-2 cursor-pointer" + (second.id == props.secondCategory.id ? ' text-red-500' : '')} onClick={() => setSecondCategory(second)}>
+                            {second.name}
+                        </label>)}
+                    </div>
+                </div>
+                <div className="flex flex-col h-[200px] w-full">
+                    <label className="text-lg font-bold bg-gray-700 text-white p-2">하위 카테고리</label>
+                    <div className="flex flex-col overflow-y-scroll">
+                        {(secondCategory.categoryResponseDTOList as any[]).map((bottom, index) => <label key={index} className={"p-2 cursor-pointer" + (bottom.id == props.bottomCatrgory.id ? ' text-red-500' : '')} onClick={() => location.href = '/category?CategoryId=' + bottom.id}>
+                            {bottom.name}
+                        </label>)}
+                    </div>
+                </div>
+            </div>
+            <div className='flex items-center border-2 border-gray-300 rounded-full px-5 ml-4 my-5 w-[350px] h-[48px]'>
+                <input type="text" id="category_keyword" placeholder="카테고리 내 검색" className="bg-transparent w-[300px] outline-none" onKeyDown={e => { if (e.key == 'Enter') document.getElementById('category_search')?.click() }} />
+                <button id='category_search' onClick={() => { const value = (document.getElementById('category_keyword') as HTMLInputElement)?.value; location.href = '/category?CategoryId=' + props.CategoryId + "&keyword=" + (value ? value : '') + "&sort=" + props.sort }}>
+                    <img src='/search.png' className='w-[24px] h-[24px]' />
+                </button>
+            </div>
             {search?.content?.length > 0 ? (search.content as any[])?.map((product, index) => <div key={index} className="flex group cursor-pointer mb-8" onClick={() => location.href = "/product/" + product.id}>
                 <img src={product?.url ? product?.url : '/empty_product.png'} className="w-[120px] h-[120px]" />
                 <div className="ml-4 flex flex-col w-[680px]">
@@ -102,13 +131,13 @@ export default function Page(props: pageProps) {
             }
         </div>
         <div className="flex">
-            <button className="btn btn-xs btn-outline" disabled={props.page < 10} onClick={() => window.location.href = "/search?keyword=" + props.keyword + "&page=" + (props.page - props.page % 10 - 10) + "&sort=" + props.sort}>
+            <button className="btn btn-xs btn-outline" disabled={props.page < 10} onClick={() => window.location.href = '/category?CategoryId=' + props.CategoryId + "&keyword=" + props.keyword + "&page=" + (props.page - props.page % 10 - 10) + "&sort=" + props.sort}>
                 {'<'}
             </button>
 
             <Pages />
 
-            <button className="btn btn-xs btn-outline" disabled={search.totalPages - props.page < 10} onClick={() => window.location.href = "/search?keyword=" + props.keyword + "&page=" + (props.page - props.page % 10 + 10) + "&sort=" + props.sort}>
+            <button className="btn btn-xs btn-outline" disabled={search.totalPages - props.page < 10} onClick={() => window.location.href = '/category?CategoryId=' + props.CategoryId + "&keyword=" + props.keyword + "&page=" + (props.page - props.page % 10 + 10) + "&sort=" + props.sort}>
                 {'>'}
             </button>
         </div>

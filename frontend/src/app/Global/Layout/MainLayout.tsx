@@ -101,7 +101,7 @@ export default function Main(props: Readonly<pageInterface>) {
           {(topCategoryHover?.categoryResponseDTOList as any[])?.map((category, index) => <div key={index} className='flex flex-col mt-8'>
             <label className='text-gray-500 text-lg font-bold'>{category.name}</label>
             {(category.categoryResponseDTOList as any[])?.map((category, index) =>
-              <label key={index} className='hover:text-red-500 cursor-pointer my-1' onClick={()=>location.href = '/search?keyword='+category.name}>{category.name}</label>
+              <label key={index} className='hover:text-red-500 cursor-pointer my-1' onClick={()=>location.href = '/category?CategoryId='+category.id}>{category.name}</label>
             )}
           </div>)}
         </div>

@@ -35,7 +35,7 @@ public class PaymentLogResponseDTO {
 
     private String deliveryMessage;
 
-    private int  trackingNumber;
+    private int trackingNumber;
 
     private Long usedPoint;
 
