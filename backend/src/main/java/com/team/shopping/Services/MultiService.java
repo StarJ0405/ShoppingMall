@@ -616,8 +616,7 @@ public class MultiService {
             paymentProductResponseDTOList.add(paymentProductResponseDTO);
         }
 
-        Long _useToPoint = paymentLogRequestDTO.getPoint();
-        Long point = this.pointCal(user, _useToPoint);
+        Long point = this.pointCal(user, paymentLogRequestDTO);
         this.userService.useToPoint(user, point);
         PaymentLog _paymentLog = this.paymentLogService.usedPoint(paymentLog, point);
 
@@ -626,12 +625,29 @@ public class MultiService {
         return paymentLogResponseDTO;
     }
 
-    private Long pointCal(SiteUser user, Long point) {
+    private Long pointCal(SiteUser user, PaymentLogRequestDTO paymentLogRequestDTO) {
+        Long point = paymentLogRequestDTO.getPoint();
+        List<CartItem> cartItemList = new ArrayList<>();
+
+        for (Long cartItemId : paymentLogRequestDTO.getCartItemIdList()) {
+            cartItemList.add(this.cartItemService.get(cartItemId));
+        }
+        long maxPoint = 0L;
+        for (CartItem cartItem : cartItemList) {
+            Double discount = this.getProductDiscount(cartItem.getProduct());
+            Integer discountPrice = this.getProductDiscountPrice(cartItem.getProduct(), discount);
+            maxPoint += discountPrice;
+        }
+
+
         if (user.getPoint() < point) {
             point = user.getPoint();
         }
         if (point <= 0) {
             point = 0L;
+        }
+        if (point > maxPoint) {
+            point = maxPoint;
         }
         return point;
     }
@@ -1179,15 +1195,18 @@ public class MultiService {
         List<ReviewResponseDTO> reviewResponseDTOList = new ArrayList<>();
         SiteUser user = this.userService.get(username);
         Product product = this.productService.getProduct(reviewRequestDTO.getProductId());
+        List<Review> _reviewList = this.reviewService.getMyReviewByProduct(user, product);
 
         // 사용자의 구매 기록을 가져옴
         List<PaymentLog> paymentLogList = this.paymentLogService.get(user);
+        List<PaymentProduct> _paymentProductList = new ArrayList<>();
         boolean hasPurchased = false;
 
         for (PaymentLog paymentLog : paymentLogList) {
             List<PaymentProduct> paymentProductList = this.paymentProductService.getList(paymentLog);
             for (PaymentProduct paymentProduct : paymentProductList) {
                 if (Objects.equals(paymentProduct.getProductId(), product.getId())) {
+                    _paymentProductList.add(paymentProduct);
                     hasPurchased = true;
                     break;
                 }
@@ -1202,8 +1221,14 @@ public class MultiService {
             throw new NoSuchElementException("your paymentLogs have not this product");
         }
 
+        // 구매기록에 해당 제품이 포함된 만큼만 리뷰 작성 가능
+        if (_reviewList.size()>=_paymentProductList.size()) {
+            throw new DataDuplicateException("1 paymentProduct by 1 review");
+        }
         // 구매 기록이 있는 경우에만 리뷰를 저장
+
         Review reviewKey = this.reviewService.save(user, reviewRequestDTO, product);
+        this.paymentProductService.updateStatus(reviewRequestDTO.getPaymentProductId());
         String detail = reviewKey.getContent();
         // 이미지 저장
         Optional<MultiKey> _multiKey = multiKeyService.get(ImageKey.TEMP.getKey(username));

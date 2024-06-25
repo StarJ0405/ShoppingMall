@@ -27,6 +27,8 @@ public class PaymentProduct {
 
     private Double discount;
 
+    private Boolean reviewStatus;
+
     @Column(columnDefinition = "TEXT")
     private String description;
 
@@ -53,6 +55,7 @@ public class PaymentProduct {
         this.brand = brand;
         this.count = count;
         this.discount = discount;
+        this.reviewStatus = false;
 
     }
 

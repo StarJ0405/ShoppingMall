@@ -41,6 +41,10 @@ public class ReviewService {
         return this.reviewRepository.findByProductOrderByCreateDateDesc(product);
     }
 
+    public List<Review> getMyReviewByProduct (SiteUser user, Product product) {
+        return this.reviewRepository.findByAuthorAndProduct(user, product);
+    }
+
     public Review get (Long reviewId) {
         return this.reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new NoSuchElementException("not found review"));
