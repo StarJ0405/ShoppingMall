@@ -174,7 +174,6 @@ public class MultiService {
         return UserResponseDTO.builder().username(siteUser.getUsername()).gender(siteUser.getGender().toString()).email(siteUser.getEmail()).point(siteUser.getPoint()).phoneNumber(siteUser.getPhoneNumber()).nickname(siteUser.getNickname()).birthday(this.dateTimeTransfer(siteUser.getBirthday())).createDate(this.dateTimeTransfer(siteUser.getCreateDate())).modifyDate(this.dateTimeTransfer(siteUser.getModifyDate())).url(_fileSystem.get().getV()).name(siteUser.getName()).build();
     }
 
-
     @Transactional
     public UserResponseDTO updatePassword(String username, UserRequestDTO userRequestDTO) {
         SiteUser user = userService.get(username);
@@ -508,27 +507,10 @@ public class MultiService {
         if (paymentLogList == null) {
             return null;
         }
-
-        List<PaymentLogResponseDTO> paymentLogResponseDTOList = new ArrayList<>();
-
-        for (PaymentLog paymentLog : paymentLogList) {
-            List<PaymentProduct> paymentProductList = this.paymentProductService.getList(paymentLog);
-            List<PaymentProductResponseDTO> paymentProductResponseDTOList = new ArrayList<>();
-
-            for (PaymentProduct paymentProduct : paymentProductList) {
-                List<PaymentProductDetail> paymentProductDetailList = this.paymentProductDetailService.getList(paymentProduct);
-                Product product = this.productService.getProduct(paymentProduct.getProductId());
-                String url = this.getImageUrl(product);
-                PaymentProductResponseDTO paymentProductResponseDTO = DTOConverter.toPaymentProductResponseDTO(paymentProduct, paymentProductDetailList, url);
-                paymentProductResponseDTOList.add(paymentProductResponseDTO);
-            }
-
-            PaymentLogResponseDTO paymentLogResponseDTO = DTOConverter.toPaymentLogResponseDTO(paymentLog, paymentProductResponseDTOList);
-            paymentLogResponseDTOList.add(paymentLogResponseDTO);
-        }
-
-        return paymentLogResponseDTOList;
+        return this.getPaymentLogList(paymentLogList);
     }
+
+
 
 
     @Transactional
@@ -602,7 +584,11 @@ public class MultiService {
             List<PaymentProductDetail> paymentProductDetailList = this.paymentProductDetailService.getList(paymentProduct);
             Product product = this.productService.getProduct(paymentProduct.getProductId());
             String url = this.getImageUrl(product);
-            PaymentProductResponseDTO paymentProductResponseDTO = DTOConverter.toPaymentProductResponseDTO(paymentProduct, paymentProductDetailList, url);
+            Optional<Review> review = this.reviewService.findByPaymentProductId(paymentProduct.getId());
+            ReviewResponseDTO reviewResponseDTO = null;
+            if (review.isPresent())
+                reviewResponseDTO = this.getReview(review.get());
+            PaymentProductResponseDTO paymentProductResponseDTO = DTOConverter.toPaymentProductResponseDTO(paymentProduct, paymentProductDetailList, url, reviewResponseDTO);
             paymentProductResponseDTOList.add(paymentProductResponseDTO);
         }
 
@@ -610,12 +596,13 @@ public class MultiService {
         this.userService.useToPoint(user, point);
         PaymentLog _paymentLog = this.paymentLogService.usedPoint(paymentLog, point);
 
+
         PaymentLogResponseDTO paymentLogResponseDTO = DTOConverter.toPaymentLogResponseDTO(_paymentLog, paymentProductResponseDTOList);
         this.userService.addToPoint(user, paymentLogResponseDTO);
         return paymentLogResponseDTO;
     }
 
-    private Long pointCal(SiteUser user, PaymentLogRequestDTO paymentLogRequestDTO) {
+    private Long pointCal (SiteUser user, PaymentLogRequestDTO paymentLogRequestDTO) {
         Long point = paymentLogRequestDTO.getPoint();
         List<CartItem> cartItemList = new ArrayList<>();
 
@@ -640,6 +627,32 @@ public class MultiService {
             point = maxPoint;
         }
         return point;
+    }
+
+    private List<PaymentLogResponseDTO> getPaymentLogList(List<PaymentLog> paymentLogList) {
+
+        List<PaymentLogResponseDTO> paymentLogResponseDTOList = new ArrayList<>();
+
+        for (PaymentLog paymentLog : paymentLogList) {
+            List<PaymentProduct> paymentProductList = this.paymentProductService.getList(paymentLog);
+            List<PaymentProductResponseDTO> paymentProductResponseDTOList = new ArrayList<>();
+
+            for (PaymentProduct paymentProduct : paymentProductList) {
+                List<PaymentProductDetail> paymentProductDetailList = this.paymentProductDetailService.getList(paymentProduct);
+                Product product = this.productService.getProduct(paymentProduct.getProductId());
+                String url = this.getImageUrl(product);
+                Optional<Review> review = this.reviewService.findByPaymentProductId(paymentProduct.getId());
+                ReviewResponseDTO reviewResponseDTO = null;
+                if (review.isPresent())
+                    reviewResponseDTO = this.getReview(review.get());
+                PaymentProductResponseDTO paymentProductResponseDTO = DTOConverter.toPaymentProductResponseDTO(paymentProduct, paymentProductDetailList, url, reviewResponseDTO);
+                paymentProductResponseDTOList.add(paymentProductResponseDTO);
+            }
+
+            PaymentLogResponseDTO paymentLogResponseDTO = DTOConverter.toPaymentLogResponseDTO(paymentLog, paymentProductResponseDTOList);
+            paymentLogResponseDTOList.add(paymentLogResponseDTO);
+        }
+        return paymentLogResponseDTOList;
     }
 
     /**
@@ -1400,7 +1413,8 @@ public class MultiService {
     }
 
     @Transactional
-    public Page<ProductResponseDTO> categorySearchByKeyword(int page, String encodedKeyword, int sort, Long categoryId) {
+    public Page<ProductResponseDTO> categorySearchByKeyword(int page, String encodedKeyword, int sort, Long
+            categoryId) {
         String keyword = URLDecoder.decode(encodedKeyword, StandardCharsets.UTF_8);
         Sorts sorts = Sorts.values()[sort];
 

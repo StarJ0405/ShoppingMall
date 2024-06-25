@@ -22,7 +22,8 @@ public class ReviewController {
     private final MultiService multiService;
 
     @PostMapping
-    public ResponseEntity<?> addReview(@RequestHeader("Authorization") String accessToken, @RequestBody ReviewRequestDTO reviewRequestDTO) {
+    public ResponseEntity<?> addReview(@RequestHeader("Authorization") String accessToken,
+                                       @RequestBody ReviewRequestDTO reviewRequestDTO) {
         TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
         try {
             if (tokenRecord.isOK()) {

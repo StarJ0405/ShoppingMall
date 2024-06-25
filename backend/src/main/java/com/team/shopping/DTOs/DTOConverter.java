@@ -52,7 +52,7 @@ public class DTOConverter {
 
     public static PaymentProductResponseDTO toPaymentProductResponseDTO (PaymentProduct paymentProduct,
                                                                          List<PaymentProductDetail> paymentProductDetailList,
-                                                                         String imageUrl) {
+                                                                         String imageUrl, ReviewResponseDTO reviewResponseDTO) {
         List<PaymentProductDetailResponseDTO> paymentProductDetailResponseDTOList = new ArrayList<>();
 
         double discount = (paymentProduct.getDiscount() != null) ? paymentProduct.getDiscount() : 0.0;
@@ -71,6 +71,7 @@ public class DTOConverter {
                 .discountPrice(discountPrice)
                 .imageUrl(imageUrl)
                 .paymentProductDetailResponseDTOList(paymentProductDetailResponseDTOList)
+                .responseDTO(reviewResponseDTO)
                 .build();
     }
 

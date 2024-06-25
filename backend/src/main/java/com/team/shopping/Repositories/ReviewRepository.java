@@ -14,7 +14,5 @@ import java.util.Optional;
 public interface ReviewRepository extends JpaRepository<Review, Long>, ReviewRepositoryCustom {
 
     List<Review> findByProductOrderByCreateDateDesc(Product product);
-
-
     List<Review> findByAuthorAndProduct(SiteUser user, Product product);
 }
