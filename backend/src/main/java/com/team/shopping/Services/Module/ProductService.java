@@ -12,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -72,5 +73,22 @@ public class ProductService {
 
     public List<Product> getMyList(SiteUser user) {
         return this.productRepository.findBySeller(user);
+    }
+
+    public Product updateProduct(Product product, ProductCreateRequestDTO requestDTO, Category category) {
+        product.setTitle(requestDTO.getTitle());
+        product.setDetail(requestDTO.getDetail());
+        product.setRemain(requestDTO.getRemain());
+        product.setPrice(requestDTO.getPrice());
+        product.setBrand(requestDTO.getBrand());
+        product.setA_s(requestDTO.getA_s());
+        product.setAddress(requestDTO.getAddress());
+        product.setCategory(category);
+        product.setDateLimit(requestDTO.getDateLimit());
+        product.setDelivery(requestDTO.getDelivery());
+        product.setModifyDate(LocalDateTime.now());
+        product.setDescription(requestDTO.getDescription());
+        product.setReceipt(requestDTO.getReceipt());
+        return productRepository.save(product);
     }
 }
