@@ -11,5 +11,7 @@ public class ProductQARequestDTO {
 
     private String content;
 
+    private String answer;
+
     private Long productQAId;
 }

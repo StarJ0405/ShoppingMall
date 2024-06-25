@@ -53,3 +53,7 @@ export const getCategorySearch = async (data: categorySearchProps) => {
     const response = await NonUserApi.get('/api/category/search', { headers: { ...data } });
     return response.data;
 }
+export const getProductQAList = async (data: number) => {
+    const response = await NonUserApi.get('/api/product/question', { headers: { ProductId:data} });
+    return response.data;
+}

@@ -22,8 +22,11 @@ public class ProductQA {
     @Column(length = 50)
     private String title;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "LONGTEXT")
     private String content;
+
+    @Column(columnDefinition = "LONGTEXT")
+    private String answer;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private SiteUser author;

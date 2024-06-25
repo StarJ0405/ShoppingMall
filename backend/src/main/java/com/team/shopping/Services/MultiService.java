@@ -744,7 +744,7 @@ public class MultiService {
             this.deleteOptionList(product);
             Optional<Review> _review = reviewService.findByProduct(product);
             _review.ifPresent(reviewService::delete);
-            this.deleteProductQA(product);
+            this.deleteQAByProductAll(product);
             this.deleteWish(product);
             this.deleteCart(product);
             this.deleteByEventProduct(product);
@@ -935,14 +935,21 @@ public class MultiService {
         return productResponseDTOList;
     }
 
+    public List<ProductQAResponseDTO> getQA(long productId) {
+        List<ProductQAResponseDTO> list = new ArrayList<>();
+        Product product = productService.getProduct(productId);
+        List<ProductQA> productQAList = productQAService.findByProduct(product);
+        for (ProductQA qa : productQAList)
+            list.add(ProductQAResponseDTO.builder().productId(qa.getProduct().getId()).productQAId(qa.getId()).title(qa.getTitle()).content(qa.getContent()).author(qa.getAuthor().getNickname()).answer(qa.getAnswer()).createDate(qa.getCreateDate()).build());
+        return list;
+    }
+
     @Transactional
     public void productQASave(String username, ProductQARequestDTO requestDTO) {
         SiteUser user = this.userService.get(username);
         Product product = productService.getProduct(requestDTO.getProductId());
         if (user == null) throw new NoSuchElementException("not user");
-        if (user.getRole() != UserRole.USER) throw new IllegalArgumentException("not role");
-
-        if (product != null) this.productQAService.save(requestDTO.getTitle(), user, product);
+        if (product != null) this.productQAService.save(requestDTO.getTitle(), requestDTO.getContent(), user, product);
     }
 
     @Transactional
@@ -951,15 +958,18 @@ public class MultiService {
         Optional<ProductQA> _productQA = productQAService.getProductQA(requestDTO.getProductQAId());
         Product product = productService.getProduct(requestDTO.getProductId());
         if (user == null) throw new NoSuchElementException("not user");
-        if (user.getRole() == UserRole.SELLER) throw new IllegalArgumentException("not role");
-
-        if (product != null) this.productQAService.update(requestDTO.getContent(), user, _productQA.get());
+        if (product == null)
+            throw new NoSuchElementException("not product");
+        if (!product.getSeller().getUsername().equals(user.getUsername()))
+            throw new IllegalArgumentException("not owner");
+        _productQA.ifPresent(productQA -> this.productQAService.update(requestDTO.getAnswer(), user, productQA));
     }
 
     @Transactional
-    public void deleteProductQA(Product product) {
-        Optional<ProductQA> _productQA = productQAService.findByProduct(product);
-        _productQA.ifPresent(productQAService::delete);
+    public void deleteQAByProductAll(Product product) {
+        List<ProductQA> productQAList = productQAService.findByProduct(product);
+        for (ProductQA qa : productQAList)
+            productQAService.delete(qa);
     }
 
     /**
