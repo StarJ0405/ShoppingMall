@@ -55,23 +55,38 @@ public class EventController {
         return tokenRecord.getResponseEntity();
     }
 
-    @GetMapping
-    public ResponseEntity<?> getEventList () {
+    @GetMapping("/list")
+    public ResponseEntity<?> getEventList (@RequestHeader("Authorization") String accessToken) {
+        TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
         try {
-            List<EventResponseDTO> eventResponseDTOList = this.multiService.getEventList();
-            return ResponseEntity.status(HttpStatus.OK).body(eventResponseDTOList);
+            if (tokenRecord.isOK()) {
+                String username = tokenRecord.username();
+                List<EventResponseDTO> eventResponseDTOList = this.multiService.getEventList(username);
+                return ResponseEntity.status(HttpStatus.OK).body(eventResponseDTOList);
+            }
         }catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("제품을 찾지 못했습니다.");
+        }catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("권한이 없습니다.");
         }
+        return tokenRecord.getResponseEntity();
     }
 
-    @GetMapping("/id")
-    public ResponseEntity<?> getEvent (@RequestParam("EventId")Long eventId) {
+    @GetMapping
+    public ResponseEntity<?> getEvent (@RequestHeader("Authorization") String accessToken,
+                                       @RequestHeader("EventId")Long eventId) {
+        TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
         try {
-            EventResponseDTO eventResponseDTO = this.multiService.getEvent(eventId);
-            return ResponseEntity.status(HttpStatus.OK).body(eventResponseDTO);
+            if (tokenRecord.isOK()) {
+                String username = tokenRecord.username();
+                EventResponseDTO eventResponseDTO = this.multiService.getEvent(username, eventId);
+                return ResponseEntity.status(HttpStatus.OK).body(eventResponseDTO);
+            }
         }catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("제품을 찾지 못했습니다.");
+        }catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("권한이 없습니다.");
         }
+        return tokenRecord.getResponseEntity();
     }
 }

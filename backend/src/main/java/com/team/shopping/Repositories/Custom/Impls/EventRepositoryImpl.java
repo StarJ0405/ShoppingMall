@@ -24,4 +24,9 @@ public class EventRepositoryImpl implements EventRepositoryCustom {
                 .where(qProduct.eq(product))
                 .fetch();
     }
+
+    @Override
+    public List<Event> findMyList(SiteUser user) {
+        return jpaQueryFactory.selectFrom(qEvent).where(qEvent.creator.eq(user)).fetch();
+    }
 }

@@ -603,6 +603,7 @@ public class MultiService {
     }
 
     private Long pointCal (SiteUser user, PaymentLogRequestDTO paymentLogRequestDTO) {
+
         Long point = paymentLogRequestDTO.getPoint();
         List<CartItem> cartItemList = new ArrayList<>();
 
@@ -1448,21 +1449,26 @@ public class MultiService {
      */
 
     @Transactional
-    public List<EventResponseDTO> getEventList() {
-
+    public List<EventResponseDTO> getEventList(String username) {
+        SiteUser user = this.userService.get(username);
         List<EventResponseDTO> eventResponseDTOList = new ArrayList<>();
-        List<Event> eventList = this.eventService.getAll();
+        List<Event> eventList = this.eventService.getMyList(user);
         for (Event event : eventList) {
+            if (!user.equals(event.getCreator())) {
+                throw new IllegalArgumentException("not role");
+            }
             eventResponseDTOList.add(this.getEventDTO(event));
         }
         return eventResponseDTOList;
     }
 
     @Transactional
-    public EventResponseDTO getEvent(Long eventId) {
-
+    public EventResponseDTO getEvent(String username, Long eventId) {
+        SiteUser user = this.userService.get(username);
         Event event = this.eventService.get(eventId);
-
+        if (!user.equals(event.getCreator())) {
+            throw new IllegalArgumentException("not role");
+        }
         return this.getEventDTO(event);
     }
 

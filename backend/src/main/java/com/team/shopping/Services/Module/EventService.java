@@ -18,8 +18,8 @@ public class EventService {
 
     private final EventRepository eventRepository;
 
-    public List<Event> getAll () {
-        return this.eventRepository.findAll();
+    public List<Event> getMyList (SiteUser user) {
+        return this.eventRepository.findMyList(user);
     }
 
     public Event saveEvent (SiteUser creator, EventRequestDTO eventRequestDTO) {
