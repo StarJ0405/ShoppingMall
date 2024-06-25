@@ -1327,16 +1327,9 @@ public class MultiService {
     }
 
     @Transactional
-    public List<ArticleResponseDTO> getArticleList(int type) { // Long 을 Type 형식으로 바꿔야함
-        List<ArticleResponseDTO> articleResponseDTOList = new ArrayList<>();
-
-        List<Article> articleList = this.articleService.getArticleList(Type.values()[type]); // 예를들어 Type 인데 값이 1인거 ->결국 int 가아닌 Type이다
-        for (Article article : articleList) {
-            ArticleResponseDTO articleResponseDTO = this.getArticleResponseDTO(article);
-            articleResponseDTOList.add(articleResponseDTO);
-        }
-
-        return articleResponseDTOList;
+    public Page<ArticleResponseDTO> getArticleList(int type, int page) {
+        Page<Article> articleList = this.articleService.getArticleList(Type.values()[type],page);
+        return articleList.map(this::getArticleResponseDTO);
     }
 
     @Transactional

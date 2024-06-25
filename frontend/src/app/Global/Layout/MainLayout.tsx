@@ -71,9 +71,9 @@ export default function Main(props: Readonly<pageInterface>) {
       </header>
       <DropDown open={userHover} onClose={() => closeUserHover()} className='bg-white' background='main' button='user' defaultDriection={Direcion.DOWN} height={235} width={170}>
         <div className='h-full w-full flex flex-col justify-between py-4 px-2 text-lg' onMouseEnter={() => openUserHover()} onMouseLeave={() => closeUserHover()}>
-          <a href='' className='hover:text-red-500'>주문/배송조회</a>
-          <a href='' className='hover:text-red-500'>취소/반품/교환</a>
-          <a href='' className='hover:text-red-500'>고객센터</a>
+          <a href='/account/log/' className='hover:text-red-500'>주문/배송조회</a>
+          {/* <a href='' className='hover:text-red-500'>취소/반품/교환</a> */}
+          <a href='/' className='hover:text-red-500'>고객센터</a>
           <a href='/account/profile' className='hover:text-red-500'>회원정보</a>
           {user?.role != 'USER' ? <a href='/product/create' className='hover:text-red-500'>상품 등록</a> : <></>}
           {user?.role != 'USER' ? <a href='/event' className='hover:text-red-500'>이벤트 등록</a> : <></>}
@@ -133,7 +133,8 @@ export default function Main(props: Readonly<pageInterface>) {
       </Side>
       <nav className='flex w-[1240px] h-[66px] items-center justify-between'>
         <div className='flex items-center'>
-          <a href='/product/best' className='text-lg border-red-500 hover:border-b-2'>베스트</a>
+          <a href='/product/best' className='text-lg border-red-500 hover:border-b-2 mr-8'>베스트</a>
+          <a href='/notification' className='text-lg border-red-500 hover:border-b-2'>공지사항</a>
         </div>
         {user ?
           <div><a href='/account/profile/' className='font-bold hover:underline'>{user?.nickname}</a> <label className='text-red-500 font-bold'>{(user?.point ? user?.point : 0).toLocaleString('ko-kr')} P</label></div>
@@ -142,9 +143,10 @@ export default function Main(props: Readonly<pageInterface>) {
         }
       </nav>
       {props.children}
-      <footer className='flex flex-col w-[1240px]'>
+      <footer className='flex flex-col w-[1240px] mt-16'>
         <div className='flex justify-between'>
-          <label className='font-bold'>상호명 및 호스팅 서비스 제공 : 십일번가(주)</label><label className='w-[360px] cursor-pointer'>고객센터</label>
+          <div className='flex font-bold'>상호명 및 호스팅 서비스 제공 : <div className='flex flex-col ml-2'> 오이번가(주) <img src="/logo_text.png" className='w-[200px] mr-[160px]' /></div></div>
+          <a href="/help" className='mr-[296px] hover:underline'>고객센터</a>
         </div>
         <label className='text-xs'>대표이사 : 홍성재, 이동원, 황준하, 이순재, 주소: 대전광역시 서구 둔산로 52, Tel: 042-369-5890</label>
         <label className='text-xs'>사업자등록번호 : 889-86-02332, 통신판매업신고 : 제 2021-대전서구-1956호</label>

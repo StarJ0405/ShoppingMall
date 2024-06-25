@@ -28,7 +28,7 @@ export default function Page(props:pageProps) {
     const [price, setPrice] = useState(0);
     const [delivery, setDelivery] = useState('택배');
     const [address, setAddress] = useState('전국(제주 도서산간지역 제외)');
-    const [receipt, setReceipt] = useState('국내거주해외셀러 : 구매대행 수수료에 대한 현금영수증만 발행이 가능하며, 판매자에게 직접 발행 요청 필요(11번가 발행불가)\n해외거주해외셀러 : 온라인 현금영수증 발급 불가, 신용카드 전표 정보는 나의 11번가 PC참조');
+    const [receipt, setReceipt] = useState('국내거주해외셀러 : 구매대행 수수료에 대한 현금영수증만 발행이 가능하며, 판매자에게 직접 발행 요청 필요(52번가 발행불가)\n해외거주해외셀러 : 온라인 현금영수증 발급 불가, 신용카드 전표 정보는 나의 52번가 PC참조');
     const [a_s, setAS] = useState('');
     const [brand, setBrand] = useState('');
     const [tags, setTags] = useState([] as string[]);
@@ -212,7 +212,7 @@ export default function Page(props:pageProps) {
                     <tr>
                         <th className='border border-black'>영수증발행</th>
                         <td className='px-2'>
-                            <textarea placeholder='영수발행 방법..' className='w-full' defaultValue={'국내거주해외셀러 : 구매대행 수수료에 대한 현금영수증만 발행이 가능하며, 판매자에게 직접 발행 요청 필요(11번가 발행불가)\n해외거주해외셀러 : 온라인 현금영수증 발급 불가, 신용카드 전표 정보는 나의 11번가 PC참조'} onChange={e => setReceipt(e.target.value)}></textarea>
+                            <textarea placeholder='영수발행 방법..' className='w-full' defaultValue={'국내거주해외셀러 : 구매대행 수수료에 대한 현금영수증만 발행이 가능하며, 판매자에게 직접 발행 요청 필요(52번가 발행불가)\n해외거주해외셀러 : 온라인 현금영수증 발급 불가, 신용카드 전표 정보는 나의 52번가 PC참조'} onChange={e => setReceipt(e.target.value)}></textarea>
                         </td>
                     </tr>
                     <tr>

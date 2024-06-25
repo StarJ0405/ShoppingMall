@@ -289,7 +289,7 @@ export default function Page(props: pageProps) {
                         </table>
                         <div className='w-[860px] h-[100px] flex justify-center items-center text-gray-600 text-xl bg-gray-200 font-bold'>
                             <img src={'/exclamation.png'} className='w-[30px] h-[30px] mr-2' />
-                            판매자가<label className='text-black ml-2'>현금결제를 요구하면 거부</label>하시고 즉시 <a href='?' className='underline'>11번가로 신고</a>해 주세요.
+                            판매자가<label className='text-black ml-2'>현금결제를 요구하면 거부</label>하시고 즉시 <a href='?' className='underline'>52번가로 신고</a>해 주세요.
                         </div>
                         <div id='0' className='p-4'>
                             <div dangerouslySetInnerHTML={{ __html: product.detail }} />

@@ -10,10 +10,8 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@NoArgsConstructor // 이건 내가 원하는 필드값 없이  만들어줄수있고
-public class ArticleResponseDTO { //  DTO 는 데이터를 객체로 변환한다
-
-
+@NoArgsConstructor
+public class ArticleResponseDTO {
     private Long id;
 
     private String title;
@@ -24,11 +22,11 @@ public class ArticleResponseDTO { //  DTO 는 데이터를 객체로 변환한�
 
     private Long modifyDate;
 
-    private String authorName; // 내가 보내줘야 화면에 나오니깐 .
+    private String authorName;
 
 
     @Builder
-    public ArticleResponseDTO (Article article, SiteUser siteUser, Long createDate, Long modifyDate) { //set 을 대신해준다. (빈상태로 보내면 안되니깐. article을 ArticleResponseDTO 로전환해 보내야함  )
+    public ArticleResponseDTO (Article article, SiteUser siteUser, Long createDate, Long modifyDate) {
         this.id= article.getId();
         this.title=article.getTitle();
         this.content= article.getContent();
