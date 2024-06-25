@@ -1352,9 +1352,20 @@ public class MultiService {
         List<Recent> recentList = recentService.getRecent(user);
         List<RecentResponseDTO> responseDTOList = new ArrayList<>();
         for (Recent recent : recentList) {
+            if (recent.getProduct().getRemain() <= 0) {
+                this.recentService.delete(recent);
+            }
             ProductResponseDTO responseDTO = this.getProduct(recent.getProduct().getId());
 
-            responseDTOList.add(RecentResponseDTO.builder().price(responseDTO.getPrice()).title(responseDTO.getTitle()).grade(responseDTO.getGrade()).recentId(recent.getId()).productId(responseDTO.getId()).url(responseDTO.getUrl()).createDate(responseDTO.getCreateDate()).build());
+            responseDTOList.add(RecentResponseDTO.builder()
+                    .price(responseDTO.getPrice())
+                    .title(responseDTO.getTitle())
+                    .grade(responseDTO.getGrade())
+                    .recentId(recent.getId())
+                    .productId(responseDTO.getId())
+                    .url(responseDTO.getUrl())
+                    .createDate(responseDTO.getCreateDate())
+                    .build());
         }
         return responseDTOList;
     }
