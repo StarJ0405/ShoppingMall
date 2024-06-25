@@ -1,6 +1,6 @@
 "use client";
 
-import { deleteImageList, getPayment, getRecent, getUser, postReview, saveImageList } from "@/app/API/UserAPI";
+import { deleteImageList, getPayment, getRecent, getUser, postReview, putReview, saveImageList } from "@/app/API/UserAPI";
 import Profile from "@/app/Global/Layout/ProfileLayout";
 import { getDate, getDateTime } from "@/app/Global/Method";
 import Modal from "@/app/Global/Modal";
@@ -120,6 +120,11 @@ export default function Page(props: pageProps) {
             return;
         postReview({ paymentProductId: review.paymentProductId, productId: review.productId, title: title, content: content, grade: grade }).then(r => { setReview(null); setPlayments(r) }).catch(e => console.log(e));
     }
+    function modify() {
+        if (title == '' || content == '')
+            return;
+        putReview({ reviewId: review?.reviewResponseDTO?.id, paymentProductId: review.paymentProductId, title: title, content: content, grade: grade }).then(r => { setReview(null); setPlayments(r) }).catch(e => console.log(e));
+    }
     return <Profile categories={props.categories} recentList={recentList} setRecentList={setRecentList} user={user}>
         <label className="font-bold text-2xl"><label className="text-red-500">주문/배송</label>조회</label>
         <table>
@@ -230,9 +235,16 @@ export default function Page(props: pageProps) {
                                     <label className="font-bold">{product.count.toLocaleString('ko-kr')}</label> 개
                                 </div>
                                 <div className="w-[50px]">
-                                    <button className="btn btn-xs" onClick={() => { setReview(product); setSelectPayment(null); deleteImageList(); 
-                                        if(product?.reviewStatus){
-                                            // 리뷰 불러오기
+                                    <button className="btn btn-xs" onClick={() => {
+                                        setReview(product); setSelectPayment(null); deleteImageList();
+                                        if (product?.reviewStatus && product?.reviewResponseDTO) {
+                                            setTitle(product?.reviewResponseDTO?.title);
+                                            setContent(product?.reviewResponseDTO?.content);
+                                            setGrade(product?.reviewResponseDTO?.grade);
+                                        } else {
+                                            setTitle('');
+                                            setContent('');
+                                            setGrade(0);
                                         }
                                     }}>리뷰</button>
                                 </div>
@@ -295,19 +307,24 @@ export default function Page(props: pageProps) {
                     />
                     <div className="flex justify-between mt-14 items-center">
                         <div className='rating rating-lg rating-half'>
-                            <input name="grade" type='radio' className='rating-hidden' onClick={() => setGrade(0)} defaultChecked={grade==0} />
-                            <input name="grade" type='radio' className='bg-orange-500 mask mask-star-2 mask-half-1' onClick={() => setGrade(0.5)}  defaultChecked={grade==0.5}/>
-                            <input name="grade" type='radio' className='bg-orange-500 mask mask-star-2 mask-half-2' onClick={() => setGrade(1)}  defaultChecked={grade==1}/>
-                            <input name="grade" type='radio' className='bg-orange-500 mask mask-star-2 mask-half-1' onClick={() => setGrade(1.5)}  defaultChecked={grade==1.5}/>
-                            <input name="grade" type='radio' className='bg-orange-500 mask mask-star-2 mask-half-2' onClick={() => setGrade(2)}  defaultChecked={grade==2}/>
-                            <input name="grade" type='radio' className='bg-orange-500 mask mask-star-2 mask-half-1' onClick={() => setGrade(2.5)}  defaultChecked={grade==2.5}/>
-                            <input name="grade" type='radio' className='bg-orange-500 mask mask-star-2 mask-half-2' onClick={() => setGrade(3)}  defaultChecked={grade==3}/>
-                            <input name="grade" type='radio' className='bg-orange-500 mask mask-star-2 mask-half-1' onClick={() => setGrade(3.5)} defaultChecked={grade==3.5}/>
-                            <input name="grade" type='radio' className='bg-orange-500 mask mask-star-2 mask-half-2' onClick={() => setGrade(4)} defaultChecked={grade==4}/>
-                            <input name="grade" type='radio' className='bg-orange-500 mask mask-star-2 mask-half-1' onClick={() => setGrade(4.5)} defaultChecked={grade==4.5}/>
-                            <input name="grade" type='radio' className='bg-orange-500 mask mask-star-2 mask-half-2' onClick={() => setGrade(5)} defaultChecked={grade==5}/>
+                            <input name="grade" type='radio' className='rating-hidden' onClick={() => setGrade(0)} defaultChecked={grade == 0} />
+                            <input name="grade" type='radio' className='bg-orange-500 mask mask-star-2 mask-half-1' onClick={() => setGrade(0.5)} defaultChecked={grade == 0.5} />
+                            <input name="grade" type='radio' className='bg-orange-500 mask mask-star-2 mask-half-2' onClick={() => setGrade(1)} defaultChecked={grade == 1} />
+                            <input name="grade" type='radio' className='bg-orange-500 mask mask-star-2 mask-half-1' onClick={() => setGrade(1.5)} defaultChecked={grade == 1.5} />
+                            <input name="grade" type='radio' className='bg-orange-500 mask mask-star-2 mask-half-2' onClick={() => setGrade(2)} defaultChecked={grade == 2} />
+                            <input name="grade" type='radio' className='bg-orange-500 mask mask-star-2 mask-half-1' onClick={() => setGrade(2.5)} defaultChecked={grade == 2.5} />
+                            <input name="grade" type='radio' className='bg-orange-500 mask mask-star-2 mask-half-2' onClick={() => setGrade(3)} defaultChecked={grade == 3} />
+                            <input name="grade" type='radio' className='bg-orange-500 mask mask-star-2 mask-half-1' onClick={() => setGrade(3.5)} defaultChecked={grade == 3.5} />
+                            <input name="grade" type='radio' className='bg-orange-500 mask mask-star-2 mask-half-2' onClick={() => setGrade(4)} defaultChecked={grade == 4} />
+                            <input name="grade" type='radio' className='bg-orange-500 mask mask-star-2 mask-half-1' onClick={() => setGrade(4.5)} defaultChecked={grade == 4.5} />
+                            <input name="grade" type='radio' className='bg-orange-500 mask mask-star-2 mask-half-2' onClick={() => setGrade(5)} defaultChecked={grade == 5} />
                         </div>
-                        <button className="btn btn-xs btn-info" onClick={submit}>작성하기</button>
+                        {review?.reviewStatus ?
+                            <button className="btn btn-xs btn-info" onClick={modify}>수정하기</button>
+                            :
+                            <button className="btn btn-xs btn-info" onClick={submit}>작성하기</button>
+                        }
+
                     </div>
                 </div>
             </div>

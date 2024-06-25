@@ -247,6 +247,18 @@ export const postReview = async (data: postReview) => {
     const response = await UserApi.post('/api/review', data);
     return response.data;
 }
+interface putReview {
+    reviewId:number;
+    // productId: number;
+    paymentProductId: number;
+    title: string;
+    content: string;
+    grade: number;
+}
+export const putReview = async (data: putReview) => {
+    const response = await UserApi.put('/api/review', data);
+    return response.data;
+}
 export const getMyProducts = async () => {
     const response = await UserApi.get('/api/product/myProducts');
     return response.data;
