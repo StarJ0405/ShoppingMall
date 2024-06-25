@@ -230,7 +230,11 @@ export default function Page(props: pageProps) {
                                     <label className="font-bold">{product.count.toLocaleString('ko-kr')}</label> 개
                                 </div>
                                 <div className="w-[50px]">
-                                    <button className="btn btn-xs" onClick={() => { setReview(product); setSelectPayment(null); deleteImageList(); }} disabled={product?.reviewStatus}>리뷰</button>
+                                    <button className="btn btn-xs" onClick={() => { setReview(product); setSelectPayment(null); deleteImageList(); 
+                                        if(product?.reviewStatus){
+                                            // 리뷰 불러오기
+                                        }
+                                    }}>리뷰</button>
                                 </div>
                             </div>)}
                         </div>
@@ -279,9 +283,10 @@ export default function Page(props: pageProps) {
                 <div className="px-4 flex flex-col mt-8">
                     <label className="font-bold text-sm mt-2" autoFocus>리뷰 작성</label>
                     <div className="divider divider-neutral my-2"></div>
-                    <input id="title" type="text" className="input input-bordered mb-4" placeholder="리뷰 제목.." onChange={e => setTitle(e.target.value)} />
+                    <input id="title" type="text" className="input input-bordered mb-4" placeholder="리뷰 제목.." defaultValue={title} onChange={e => setTitle(e.target.value)} />
                     <QuillNoSSRWrapper
                         forwardedRef={quillInstance}
+                        defaultValue={content}
                         onChange={(e: any) => setContent(e)}
                         modules={modules}
                         theme="snow"
@@ -290,17 +295,17 @@ export default function Page(props: pageProps) {
                     />
                     <div className="flex justify-between mt-14 items-center">
                         <div className='rating rating-lg rating-half'>
-                            <input name="grade" type='radio' className='rating-hidden' onClick={() => setGrade(0)} />
-                            <input name="grade" type='radio' className='bg-orange-500 mask mask-star-2 mask-half-1' onClick={() => setGrade(0.5)} />
-                            <input name="grade" type='radio' className='bg-orange-500 mask mask-star-2 mask-half-2' onClick={() => setGrade(1)} />
-                            <input name="grade" type='radio' className='bg-orange-500 mask mask-star-2 mask-half-1' onClick={() => setGrade(1.5)} />
-                            <input name="grade" type='radio' className='bg-orange-500 mask mask-star-2 mask-half-2' onClick={() => setGrade(2)} />
-                            <input name="grade" type='radio' className='bg-orange-500 mask mask-star-2 mask-half-1' onClick={() => setGrade(2.5)} />
-                            <input name="grade" type='radio' className='bg-orange-500 mask mask-star-2 mask-half-2' onClick={() => setGrade(3)} />
-                            <input name="grade" type='radio' className='bg-orange-500 mask mask-star-2 mask-half-1' onClick={() => setGrade(3.5)} />
-                            <input name="grade" type='radio' className='bg-orange-500 mask mask-star-2 mask-half-2' onClick={() => setGrade(4)} />
-                            <input name="grade" type='radio' className='bg-orange-500 mask mask-star-2 mask-half-1' onClick={() => setGrade(4.5)} />
-                            <input name="grade" type='radio' className='bg-orange-500 mask mask-star-2 mask-half-2' onClick={() => setGrade(5)} />
+                            <input name="grade" type='radio' className='rating-hidden' onClick={() => setGrade(0)} defaultChecked={grade==0} />
+                            <input name="grade" type='radio' className='bg-orange-500 mask mask-star-2 mask-half-1' onClick={() => setGrade(0.5)}  defaultChecked={grade==0.5}/>
+                            <input name="grade" type='radio' className='bg-orange-500 mask mask-star-2 mask-half-2' onClick={() => setGrade(1)}  defaultChecked={grade==1}/>
+                            <input name="grade" type='radio' className='bg-orange-500 mask mask-star-2 mask-half-1' onClick={() => setGrade(1.5)}  defaultChecked={grade==1.5}/>
+                            <input name="grade" type='radio' className='bg-orange-500 mask mask-star-2 mask-half-2' onClick={() => setGrade(2)}  defaultChecked={grade==2}/>
+                            <input name="grade" type='radio' className='bg-orange-500 mask mask-star-2 mask-half-1' onClick={() => setGrade(2.5)}  defaultChecked={grade==2.5}/>
+                            <input name="grade" type='radio' className='bg-orange-500 mask mask-star-2 mask-half-2' onClick={() => setGrade(3)}  defaultChecked={grade==3}/>
+                            <input name="grade" type='radio' className='bg-orange-500 mask mask-star-2 mask-half-1' onClick={() => setGrade(3.5)} defaultChecked={grade==3.5}/>
+                            <input name="grade" type='radio' className='bg-orange-500 mask mask-star-2 mask-half-2' onClick={() => setGrade(4)} defaultChecked={grade==4}/>
+                            <input name="grade" type='radio' className='bg-orange-500 mask mask-star-2 mask-half-1' onClick={() => setGrade(4.5)} defaultChecked={grade==4.5}/>
+                            <input name="grade" type='radio' className='bg-orange-500 mask mask-star-2 mask-half-2' onClick={() => setGrade(5)} defaultChecked={grade==5}/>
                         </div>
                         <button className="btn btn-xs btn-info" onClick={submit}>작성하기</button>
                     </div>
