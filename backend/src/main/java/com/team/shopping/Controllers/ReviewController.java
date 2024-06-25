@@ -2,6 +2,7 @@ package com.team.shopping.Controllers;
 
 import com.team.shopping.DTOs.ReviewRequestDTO;
 import com.team.shopping.DTOs.ReviewResponseDTO;
+import com.team.shopping.Exceptions.DataDuplicateException;
 import com.team.shopping.Records.TokenRecord;
 import com.team.shopping.Services.MultiService;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +34,8 @@ public class ReviewController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("구매기록에 해당상품 없음");
         }catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("별점은 0.5 단위로만 등록가능");
+        }catch (DataDuplicateException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("리뷰는 구매기록 품목당 1건만 작성 가능합니다");
         }
         return tokenRecord.getResponseEntity();
     }

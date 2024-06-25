@@ -30,4 +30,12 @@ public class PaymentProductService {
                 .discount(discount)
                 .build());
     }
+
+    public void updateStatus(Long paymentProductId) {
+        PaymentProduct paymentProduct = this.paymentProductRepository.findById(paymentProductId)
+                .orElseThrow(() -> new IllegalArgumentException("not found paymentProduct"));
+        paymentProduct.setReviewStatus(true);
+        this.paymentProductRepository.save(paymentProduct);
+
+    }
 }

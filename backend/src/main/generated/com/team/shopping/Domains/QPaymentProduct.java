@@ -38,6 +38,8 @@ public class QPaymentProduct extends EntityPathBase<PaymentProduct> {
 
     public final NumberPath<Long> productId = createNumber("productId", Long.class);
 
+    public final BooleanPath reviewStatus = createBoolean("reviewStatus");
+
     public final StringPath seller = createString("seller");
 
     public final StringPath title = createString("title");

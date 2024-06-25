@@ -7,6 +7,8 @@ public class ReviewRequestDTO {
 
     private Long productId;
 
+    private Long paymentProductId;
+
     private Long reviewId;
 
     private String title;
