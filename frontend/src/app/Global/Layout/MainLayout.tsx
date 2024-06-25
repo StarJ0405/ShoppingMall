@@ -15,7 +15,7 @@ interface pageInterface {
   recentList: any[];
   setRecentList: (data: any) => void;
   categories: any[];
-  keyword?:string;
+  keyword?: string;
 }
 
 export default function Main(props: Readonly<pageInterface>) {
@@ -69,13 +69,14 @@ export default function Main(props: Readonly<pageInterface>) {
           <a className='cursor-pointer' onClick={() => setIsRecentOpen(true)}><img alt='recent' src='/recent.png' className='w-[48px] h-[48px]' onMouseEnter={e => (e.target as any).src = '/recent_red.png'} onMouseLeave={e => (e.target as any).src = '/recent.png'}></img></a>
         </div>
       </header>
-      <DropDown open={userHover} onClose={() => closeUserHover()} className='bg-white' background='main' button='user' defaultDriection={Direcion.DOWN} height={205} width={170}>
+      <DropDown open={userHover} onClose={() => closeUserHover()} className='bg-white' background='main' button='user' defaultDriection={Direcion.DOWN} height={235} width={170}>
         <div className='h-full w-full flex flex-col justify-between py-4 px-2 text-lg' onMouseEnter={() => openUserHover()} onMouseLeave={() => closeUserHover()}>
           <a href='' className='hover:text-red-500'>주문/배송조회</a>
           <a href='' className='hover:text-red-500'>취소/반품/교환</a>
           <a href='' className='hover:text-red-500'>고객센터</a>
           <a href='/account/profile' className='hover:text-red-500'>회원정보</a>
-          {user?.role == 'SELLER' || user?.role == 'ADMIN' ? <a href='/product/create' className='hover:text-red-500'>상품 등록</a> : <></>}
+          {user?.role != 'USER' ? <a href='/product/create' className='hover:text-red-500'>상품 등록</a> : <></>}
+          {user?.role != 'USER' ? <a href='/event' className='hover:text-red-500'>이벤트 등록</a> : <></>}
           {user ? <a href='/' onClick={e => { e.preventDefault(); localStorage.clear(); window.location.reload(); }} className='hover:text-red-500'>로그아웃</a> : <></>}
         </div>
       </DropDown>
@@ -102,7 +103,7 @@ export default function Main(props: Readonly<pageInterface>) {
           {(topCategoryHover?.categoryResponseDTOList as any[])?.map((category, index) => <div key={index} className='flex flex-col mt-8'>
             <label className='text-gray-500 text-lg font-bold'>{category.name}</label>
             {(category.categoryResponseDTOList as any[])?.map((category, index) =>
-              <label key={index} className='hover:text-red-500 cursor-pointer my-1' onClick={()=>location.href = '/category?CategoryId='+category.id}>{category.name}</label>
+              <label key={index} className='hover:text-red-500 cursor-pointer my-1' onClick={() => location.href = '/category?CategoryId=' + category.id}>{category.name}</label>
             )}
           </div>)}
         </div>
@@ -135,7 +136,7 @@ export default function Main(props: Readonly<pageInterface>) {
           <a href='/product/best' className='text-lg border-red-500 hover:border-b-2'>베스트</a>
         </div>
         {user ?
-          <div><a href='/account/profile/' className='font-bold hover:underline'>{user?.nickname}</a> <label className='text-red-500 font-bold'>{user?.point.toLocaleString('ko-kr')} P</label></div>
+          <div><a href='/account/profile/' className='font-bold hover:underline'>{user?.nickname}</a> <label className='text-red-500 font-bold'>{(user?.point ? user?.point : 0).toLocaleString('ko-kr')} P</label></div>
           :
           <a href='/account/login' className='font-bold hover:underline'>로그인</a>
         }
