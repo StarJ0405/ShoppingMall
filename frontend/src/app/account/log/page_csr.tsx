@@ -118,7 +118,7 @@ export default function Page(props: pageProps) {
     function submit() {
         if (title == '' || content == '')
             return;
-        postReview({ productId: review.productId, title: title, content: content, grade: grade }).then(() => setReview(null)).catch(e => console.log(e));
+        postReview({ paymentProductId: review.paymentProductId, productId: review.productId, title: title, content: content, grade: grade }).then(r => { setReview(null); setPlayments(r) }).catch(e => console.log(e));
     }
     return <Profile categories={props.categories} recentList={recentList} setRecentList={setRecentList} user={user}>
         <label className="font-bold text-2xl"><label className="text-red-500">주문/배송</label>조회</label>
@@ -216,7 +216,7 @@ export default function Page(props: pageProps) {
                                 <div className="flex w-[450px]">
                                     <img src={product?.imageUrl ? product?.imageUrl : '/empty_product.png'} className="w-[24px] h-[24px]" />
                                     <div className="flex flex-col px-2 text-start">
-                                    <a href={'/product/'+product?.productId} className="hover:underline">{product?.title?product?.title:'제목 없음'}</a>
+                                        <a href={'/product/' + product?.productId} className="hover:underline">{product?.title ? product?.title : '제목 없음'}</a>
                                         {(product?.paymentProductDetailResponseDTOList as any[]).map((option, index) =>
                                             <label className="text-xs" key={index}>
                                                 {option.optionListName} : {option.optionName} (<label className="font-bold">{option.optionPrice.toLocaleString('ko-kr')}</label>원)
@@ -230,7 +230,7 @@ export default function Page(props: pageProps) {
                                     <label className="font-bold">{product.count.toLocaleString('ko-kr')}</label> 개
                                 </div>
                                 <div className="w-[50px]">
-                                    <button className="btn btn-xs" onClick={() => { setReview(product); setSelectPayment(null); deleteImageList(); }}>리뷰</button>
+                                    <button className="btn btn-xs" onClick={() => { setReview(product); setSelectPayment(null); deleteImageList(); }} disabled={product?.reviewStatus}>리뷰</button>
                                 </div>
                             </div>)}
                         </div>
@@ -258,7 +258,7 @@ export default function Page(props: pageProps) {
                                     <div className="flex">
                                         <img src={review?.imageUrl ? review?.imageUrl : '/empty_product.png'} className="w-[24px] h-[24px]" />
                                         <div className="flex flex-col px-2 text-start">
-                                            <a href={'/product/'+review?.productId} className="hover:underline">{review?.title}</a>
+                                            <a href={'/product/' + review?.productId} className="hover:underline">{review?.title}</a>
                                             {(review?.paymentProductDetailResponseDTOList as any[])?.map((option, index) =>
                                                 <label className="text-xs" key={index}>
                                                     {option.optionListName} : {option.optionName} (<label className="font-bold">{option.optionPrice.toLocaleString('ko-kr')}</label>원)
