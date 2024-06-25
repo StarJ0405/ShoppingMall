@@ -61,4 +61,11 @@ export const getEventList = async () => {
     const response = await NonUserApi.get('/api/event');
     return response.data;
 }
-
+interface getArticleList {
+    Type: number;
+    Page: number;
+}
+export const getArticleList = async (data: getArticleList) => {
+    const response = await NonUserApi.get('/api/article', { headers: { ...data } });
+    return response.data;
+}

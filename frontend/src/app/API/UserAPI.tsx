@@ -1,3 +1,4 @@
+import exp from 'constants';
 import { getAPI } from './AxiosAPI';
 
 
@@ -248,7 +249,7 @@ export const postReview = async (data: postReview) => {
     return response.data;
 }
 interface putReview {
-    reviewId:number;
+    reviewId: number;
     paymentProductId: number;
     title: string;
     content: string;
@@ -291,5 +292,28 @@ interface postEvent {
 
 export const postEvent = async (data: postEvent) => {
     const response = await UserApi.post('/api/event', data);
+    return response.data;
+}
+interface postArticle {
+    title: String;
+    content: String;
+    type: number;
+}
+export const postArticle = async (data: postArticle) => {
+    const response = await UserApi.post('/api/article', data);
+    return response.data;
+}
+export const deleteArticle = async (data: number) => {
+    const response = await UserApi.delete('/api/article', { headers: { ArticleId: data } });
+    return response.data;
+}
+interface putArticle {
+    articleId: number;
+    title: String;
+    content: String;
+    type: number;
+}
+export const updateArticle = async (data: putArticle) => {
+    const response = await UserApi.put('/api/article', data);
     return response.data;
 }
