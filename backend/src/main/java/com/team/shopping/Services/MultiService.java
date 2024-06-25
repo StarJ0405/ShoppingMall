@@ -1661,6 +1661,17 @@ public class MultiService {
         }
     }
 
+    public List<ReviewResponseDTO> getMyReview(String username) {
+        SiteUser user = userService.get(username);
+        if (user == null) {
+            throw new DataNotFoundException("not found user");
+        }
+        List<Review> reviewList = reviewService.getMyReview(user);
+        List<ReviewResponseDTO> responseDTOList = new ArrayList<>();
+        for (Review review : reviewList)
+            responseDTOList.add(this.getReview(review));
+        return responseDTOList;
+    }
 }
 
 

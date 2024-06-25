@@ -81,4 +81,19 @@ public class ReviewController {
         return ResponseEntity.status(HttpStatus.OK).body(reviewResponseDTOList);
     }
 
+    @GetMapping("/my")
+    public ResponseEntity<?> myReview(@RequestHeader("Authorization") String accessToken) {
+        TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
+        try {
+            if (tokenRecord.isOK()) {
+                String username = tokenRecord.username();
+                List<ReviewResponseDTO> reviewResponseDTOList = this.multiService.getMyReview(username);
+                return tokenRecord.getResponseEntity(reviewResponseDTOList);
+            }
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("권한 없음.");
+        }
+        return tokenRecord.getResponseEntity();
+    }
+
 }

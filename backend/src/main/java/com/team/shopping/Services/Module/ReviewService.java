@@ -82,4 +82,8 @@ public class ReviewService {
     public Optional<Review> findByPaymentProductId (Long id) {
         return this.reviewRepository.findByPaymentProductId(id);
     }
+
+    public List<Review> getMyReview(SiteUser user) {
+        return reviewRepository.getMyReview(user);
+    }
 }

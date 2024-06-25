@@ -4,9 +4,11 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.team.shopping.Domains.Product;
 import com.team.shopping.Domains.QReview;
 import com.team.shopping.Domains.Review;
+import com.team.shopping.Domains.SiteUser;
 import com.team.shopping.Repositories.Custom.ReviewRepositoryCustom;
 import lombok.RequiredArgsConstructor;
 
+import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -25,5 +27,10 @@ public class ReviewRepositoryImpl implements ReviewRepositoryCustom {
     public Optional<Review> findByPaymentProductId(Long paymentProductId) {
         Review review = jpaQueryFactor.selectFrom(qReview).where(qReview.paymentProductId.eq(paymentProductId)).fetchOne();
         return Optional.ofNullable(review);
+    }
+
+    @Override
+    public List<Review> getMyReview(SiteUser user) {
+        return jpaQueryFactor.selectFrom(qReview).where(qReview.author.eq(user)).fetch();
     }
 }
