@@ -118,7 +118,6 @@ export default function Page(props: pageProps) {
     function submit() {
         if (title == '' || content == '')
             return;
-
         postReview({ productId: review.productId, title: title, content: content, grade: grade }).then(() => setReview(null)).catch(e => console.log(e));
     }
     return <Profile categories={props.categories} recentList={recentList} setRecentList={setRecentList} user={user}>
@@ -217,7 +216,7 @@ export default function Page(props: pageProps) {
                                 <div className="flex w-[450px]">
                                     <img src={product?.imageUrl ? product?.imageUrl : '/empty_product.png'} className="w-[24px] h-[24px]" />
                                     <div className="flex flex-col px-2 text-start">
-                                        <label>{product?.title}</label>
+                                    <a href={'/product/'+product?.productId} className="hover:underline">{product?.title}</a>
                                         {(product?.paymentProductDetailResponseDTOList as any[]).map((option, index) =>
                                             <label className="text-xs" key={index}>
                                                 {option.optionListName} : {option.optionName} (<label className="font-bold">{option.optionPrice.toLocaleString('ko-kr')}</label>원)
@@ -259,7 +258,7 @@ export default function Page(props: pageProps) {
                                     <div className="flex">
                                         <img src={review?.imageUrl ? review?.imageUrl : '/empty_product.png'} className="w-[24px] h-[24px]" />
                                         <div className="flex flex-col px-2 text-start">
-                                            <label>{review?.title}</label>
+                                            <a href={'/product/'+review?.productId} className="hover:underline">{review?.title}</a>
                                             {(review?.paymentProductDetailResponseDTOList as any[])?.map((option, index) =>
                                                 <label className="text-xs" key={index}>
                                                     {option.optionListName} : {option.optionName} (<label className="font-bold">{option.optionPrice.toLocaleString('ko-kr')}</label>원)
