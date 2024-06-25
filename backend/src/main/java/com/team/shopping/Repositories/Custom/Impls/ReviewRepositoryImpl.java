@@ -20,4 +20,10 @@ public class ReviewRepositoryImpl implements ReviewRepositoryCustom {
         Review review = jpaQueryFactor.selectFrom(qReview).where(qReview.product.eq(product)).fetchOne();
         return Optional.ofNullable(review);
     }
+
+    @Override
+    public Optional<Review> findByPaymentProductId(Long paymentProductId) {
+        Review review = jpaQueryFactor.selectFrom(qReview).where(qReview.paymentProductId.eq(paymentProductId)).fetchOne();
+        return Optional.ofNullable(review);
+    }
 }

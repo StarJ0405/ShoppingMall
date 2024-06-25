@@ -519,7 +519,9 @@ public class MultiService {
                 List<PaymentProductDetail> paymentProductDetailList = this.paymentProductDetailService.getList(paymentProduct);
                 Product product = this.productService.getProduct(paymentProduct.getProductId());
                 String url = this.getImageUrl(product);
-                PaymentProductResponseDTO paymentProductResponseDTO = DTOConverter.toPaymentProductResponseDTO(paymentProduct, paymentProductDetailList, url);
+                Review review = this.reviewService.findByPaymentProductId(paymentProduct.getId());
+                ReviewResponseDTO reviewResponseDTO = this.getReview(review);
+                PaymentProductResponseDTO paymentProductResponseDTO = DTOConverter.toPaymentProductResponseDTO(paymentProduct, paymentProductDetailList, url, reviewResponseDTO);
                 paymentProductResponseDTOList.add(paymentProductResponseDTO);
             }
 
@@ -602,7 +604,9 @@ public class MultiService {
             List<PaymentProductDetail> paymentProductDetailList = this.paymentProductDetailService.getList(paymentProduct);
             Product product = this.productService.getProduct(paymentProduct.getProductId());
             String url = this.getImageUrl(product);
-            PaymentProductResponseDTO paymentProductResponseDTO = DTOConverter.toPaymentProductResponseDTO(paymentProduct, paymentProductDetailList, url);
+            Review review = this.reviewService.findByPaymentProductId(paymentProduct.getId());
+            ReviewResponseDTO reviewResponseDTO = this.getReview(review);
+            PaymentProductResponseDTO paymentProductResponseDTO = DTOConverter.toPaymentProductResponseDTO(paymentProduct, paymentProductDetailList, url, reviewResponseDTO);
             paymentProductResponseDTOList.add(paymentProductResponseDTO);
         }
 

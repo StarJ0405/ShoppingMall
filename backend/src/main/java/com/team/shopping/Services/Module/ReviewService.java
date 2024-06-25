@@ -27,6 +27,7 @@ public class ReviewService {
                 .product(product)
                 .title(reviewRequestDTO.getTitle())
                 .content(reviewRequestDTO.getContent())
+                .paymentProductId(reviewRequestDTO.getPaymentProductId())
                 .build());
     }
 
@@ -76,5 +77,10 @@ public class ReviewService {
     public void updateContent(Review reviewKey, String detail) {
         reviewKey.setContent(detail);
         this.reviewRepository.save(reviewKey);
+    }
+
+    public Review findByPaymentProductId (Long id) {
+        return this.reviewRepository.findByPaymentProductId(id)
+                .orElseThrow(()->new NoSuchElementException("not found review"));
     }
 }

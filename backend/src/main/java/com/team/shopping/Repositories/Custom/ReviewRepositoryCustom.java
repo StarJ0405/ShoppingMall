@@ -7,4 +7,5 @@ import java.util.Optional;
 
 public interface ReviewRepositoryCustom {
     Optional<Review> findByProduct(Product product);
+    Optional<Review> findByPaymentProductId(Long paymentProductId);
 }

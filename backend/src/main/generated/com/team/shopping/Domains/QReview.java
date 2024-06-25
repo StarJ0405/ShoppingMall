@@ -34,6 +34,8 @@ public class QReview extends EntityPathBase<Review> {
 
     public final DateTimePath<java.time.LocalDateTime> modifyDate = createDateTime("modifyDate", java.time.LocalDateTime.class);
 
+    public final NumberPath<Long> paymentProductId = createNumber("paymentProductId", Long.class);
+
     public final QProduct product;
 
     public final StringPath title = createString("title");
