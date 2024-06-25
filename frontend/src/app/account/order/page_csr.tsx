@@ -62,7 +62,7 @@ export default function Page(props: pageProps) {
             return;
         let list = [] as number[];
         ORDER?.forEach(order => list.push(order.cartItemId));
-        postPayment({ cartItemIdList: list, recipient: who, phoneNumber: phoneNumber, mainAddress: address, addressDetail: detail, postNumber: postNumber.toString().padStart(5, '0'), deliveryMessage: delivery, point: point }).then(() => window.location.href = "/account/log")
+        postPayment({ cartItemIdList: list, recipient: who, phoneNumber: phoneNumber, mainAddress: address, addressDetail: detail, postNumber: postNumber.toString().padStart(5, '0'), deliveryMessage: delivery, point: point }).then(() => window.location.href = "/account/log").catch(e=>console.log(e));
     }
     function getPrice(order: any) {
         let price = order?.productPrice;
@@ -77,6 +77,9 @@ export default function Page(props: pageProps) {
             price += option.optionPrice;
         });
         return price * order.count;
+    }
+    function getMaxPoint() {
+        return user?.point > discountedPrice ? discountedPrice : user?.point;
     }
     return <Main categories={props.categories} recentList={recentList} setRecentList={setRecentList} user={user} >
         <div className='flex flex-col w-[1240px]'>
@@ -199,7 +202,7 @@ export default function Page(props: pageProps) {
                     <div className="flex items-center mb-16">
                         <label className="text-lg font-bold">포인트</label>
                         <div className="flex border border-black ml-4 items-center px-2 ">
-                            <input type="number" className="input input-sm" defaultValue={0} min={0} max={user?.point} onChange={e => { let value = Number(e.target.value); if (value < 0) value = 0; else if (value > user?.point) value = user?.point; e.target.value = value?.toString(); setPoint(value); }} />
+                            <input type="number" className="input input-sm" defaultValue={0} min={0} max={getMaxPoint()} onChange={e => { let value = Number(e.target.value); if (value < 0) value = 0; else if (value > getMaxPoint()) value = getMaxPoint(); e.target.value = value?.toString(); setPoint(value); }} />
                             <label>원</label>
                         </div>
                         <label className="ml-4">사용가능<label className="text-red-500 font-bold ml-2">{user?.point.toLocaleString('ko-kr')}P</label></label>

@@ -141,8 +141,8 @@ export default function Page(props: pageProps) {
                     </td>
                     <td>
                         <div className="flex">
-                            <img className="w-[80px] h-[80px] mr-2" src={payment.paymentProductResponseDTOList[0].imageUrl ? payment.paymentProductResponseDTOList[0].imageUrl : '/empty_product.png'} />
-                            <label className="hover:underline cursor-pointer" onClick={() => openPayment(payment)}>{payment.paymentProductResponseDTOList[0].title}{payment.paymentProductResponseDTOList.length > 1 ? ' ... 등 ' : ''}</label>
+                            <img className="w-[80px] h-[80px] mr-2" src={payment.paymentProductResponseDTOList[0]?.imageUrl ? payment.paymentProductResponseDTOList[0].imageUrl : '/empty_product.png'} />
+                            <label className="hover:underline cursor-pointer" onClick={() => openPayment(payment)}>{payment.paymentProductResponseDTOList[0]?.title}{payment.paymentProductResponseDTOList.length > 1 ? ' ... 등 ' : ''}</label>
                         </div>
                     </td>
                     <td className="text-center">
