@@ -79,8 +79,7 @@ public class ReviewService {
         this.reviewRepository.save(reviewKey);
     }
 
-    public Review findByPaymentProductId (Long id) {
-        return this.reviewRepository.findByPaymentProductId(id)
-                .orElseThrow(()->new NoSuchElementException("not found review"));
+    public Optional<Review> findByPaymentProductId (Long id) {
+        return this.reviewRepository.findByPaymentProductId(id);
     }
 }
