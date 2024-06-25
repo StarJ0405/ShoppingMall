@@ -133,8 +133,9 @@ export default function Main(props: Readonly<pageInterface>) {
       </Side>
       <nav className='flex w-[1240px] h-[66px] items-center justify-between'>
         <div className='flex items-center'>
-          <a href='/product/best' className='text-lg border-red-500 hover:border-b-2 mr-8'>베스트</a>
-          <a href='/notification' className='text-lg border-red-500 hover:border-b-2'>공지사항</a>
+          <a href='/product/best' className='text-lg border-red-500 hover:border-b-2'>베스트</a>
+          <a href='/notification' className='text-lg border-red-500 hover:border-b-2 ml-8'>공지사항</a>
+          <a href='/help' className='text-lg border-red-500 hover:border-b-2 ml-8'>고객센터</a>
         </div>
         {user ?
           <div><a href='/account/profile/' className='font-bold hover:underline'>{user?.nickname}</a> <label className='text-red-500 font-bold'>{(user?.point ? user?.point : 0).toLocaleString('ko-kr')} P</label></div>

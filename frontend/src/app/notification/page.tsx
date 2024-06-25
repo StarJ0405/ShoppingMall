@@ -3,6 +3,6 @@ import Page from "./page_csr";
 
 export default async function Home() {
     const categories = await getCategories();
-    const articleList = await getArticleList({ Type: 0, Page: 0 });
+    const articleList = await getArticleList({ Type: 2, Page: 0 });
     return <Page categories={categories} articleList={articleList.content} maxPage={articleList.totalPages} />
 }
