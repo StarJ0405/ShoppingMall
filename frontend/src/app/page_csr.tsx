@@ -11,7 +11,8 @@ interface pageProps {
 }
 export default function Page(props: pageProps) {
     const [user, setUser] = useState(null as any);
-    const [productList, setProductList] = useState(props.productList);
+    const [productList, setProductList] = useState(props.productList.content);
+    const [maxPage,setMaxPage] = useState(props.productList.totalPages);
     const ACCESS_TOKEN = typeof window === 'undefined' ? null : localStorage.getItem('accessToken');
     const [recentList, setRecentList] = useState(null as unknown as any[]);
     const [page, setPage] = useState(0);
@@ -24,8 +25,6 @@ export default function Page(props: pageProps) {
                     getRecent()
                         .then(r => setRecentList(r))
                         .catch(e => console.log(e));
-                    if (localStorage.getItem('productList'))
-                        setProductList(JSON.parse(localStorage.getItem('productList') as string));
                 })
                 .catch(e => console.log(e));
     }, [ACCESS_TOKEN]);
@@ -34,15 +33,17 @@ export default function Page(props: pageProps) {
             const scrollLocation = document.documentElement.scrollTop;
             const windowHeight = window.innerHeight;
             const fullHeight = document.body.scrollHeight;
-            if (scrollLocation + windowHeight >= fullHeight) {
+
+            if (scrollLocation + windowHeight >= fullHeight && page < maxPage-1) {
                 setIsLoading(true);
                 getProductRecentList(page + 1)
                     .then(response => {
-                        if (response.length > 0) {
-                            const newlist = [...productList, ...response];
+                        console.log(page,"test",response);
+                        if (response.size > 0) {
+                            const newlist = [...productList, ...response.content];
                             setProductList(newlist);
+                            setMaxPage(response.totalPages);
                             setPage(page + 1);
-                            localStorage.setItem('productList', JSON.stringify(newlist));
                         }
                         setIsLoading(false);
                     })
@@ -58,7 +59,7 @@ export default function Page(props: pageProps) {
     return <Main user={user} recentList={recentList} setRecentList={setRecentList} categories={props.categories}>
         <div className='w-full h-full flex justify-center'>
             <div className='flex flex-wrap w-[1240px]'>
-                {(productList.content as any[]).map((product, index) =>
+                {(productList as any[]).map((product, index) =>
                     <a href={'/product/' + product.id} key={index} className='mr-4'>
                         <div className='w-[394px] h-[431px] flex flex-col p-4 hover:border border-gray-500'>
                             <img src={product?.url ? product.url : '/empty_product.png'} className='w-[190px] h-[190px]' />
