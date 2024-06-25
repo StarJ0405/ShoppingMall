@@ -178,15 +178,24 @@ export default function Page(props: pageProps) {
         setIsAOpen(true);
         setAnswer('');
     }
+    function getPercent() {
+        let answer = 0;
+        productQAList?.forEach(productQA => {
+            if (productQA?.answer != null)
+                answer++;
+        })
+        return productQAList?.length > 0 ? answer / productQAList.length * 100 : 0;
+    }
+    
     return <Main user={user} recentList={recentList} setRecentList={setRecentList} categories={props.categories}>
         <div className='flex flex-col w-[1240px] min-h-[670px]'>
             <div className='text-sm flex'>
                 <label className='text-2xl font-bold'>{props.seller.nickname}</label>
                 <label className='ml-2 text-gray-500'>긍정 리뷰</label>
                 <label className='ml-2'>{getGood().toLocaleString('ko-kr', { maximumFractionDigits: 0 })}%</label>
-                {/* <div className='divider divider-horizontal h-[20px] mx-0'></div> */}
-                {/* <label className='text-gray-500'>응답률 </label> */}
-                {/* <label className='ml-2'>100%</label> */}
+                <div className='divider divider-horizontal h-[20px] mx-0'></div>
+                <label className='text-gray-500'>응답률 </label>
+                <label className='ml-2'>{getPercent().toLocaleString('ko-kr', { maximumFractionDigits: 0 })}%</label>
             </div>
             <div className='mt-10 flex'>
                 <div className='w-[880px] h-full'>
@@ -318,7 +327,9 @@ export default function Page(props: pageProps) {
                         </div>
                         <div className='divider'></div>
                         <label className='font-bold text-2xl'>전체리뷰<label className='font-normal text-sm ml-2'>{product?.reviewSize.toLocaleString("ko-kr")}건</label></label>
-
+                        {reviews?.length == 0 ?
+                            <div className='h-[100px] flex items-center justify-center'>등록된 리뷰가 없습니다.</div>
+                            : <></>}
                         {reviews?.map((review, index) => <div key={index} className='w-full'>
                             <div className='flex'>
                                 <img className='min-w-[52px] w-[52px] min-h-[52px] h-[52px]' src={review?.url ? review.url : '/base_profile.png'} />
@@ -350,6 +361,7 @@ export default function Page(props: pageProps) {
                             <div className='divider'></div>
                         </div>)}
                     </div>
+                    <label className='font-bold text-2xl'>문의/답변<label className='font-normal text-sm ml-2'>{product?.reviewSize.toLocaleString("ko-kr")}건</label></label>
                     <div className='flex text-center mb-2'>
                         <div className='w-[604px]'>문의/답변</div>
                         <div className='w-[96px]'>작성자</div>
@@ -421,11 +433,11 @@ export default function Page(props: pageProps) {
                         <div className="flex flex-col w-[744px] h-[752px]">
                             <div className="text-white bg-red-500 h-[37px] py-2 px-4">상품 문의하기</div>
                             <div className="px-4 flex flex-col">
-                                <div className="w-[712px] h-[48px] p-2 border border-black mt-4 rounded-lg flex items-center">{productQAList[focusQA]?.title}</div>
-                                <div className='w-[712px] h-[300px] p-2 border border-black mt-4 rounded-lg' dangerouslySetInnerHTML={{ __html: productQAList[focusQA]?.content }} ></div>
+                                <div className="w-[712px] h-[48px] p-2 border border-black mt-4 rounded-lg flex items-center">{focusQA > 0 ? productQAList[focusQA]?.title : ''}</div>
+                                <div className='w-[712px] h-[300px] p-2 border border-black mt-4 rounded-lg'> {focusQA > 0 ? <div dangerouslySetInnerHTML={{ __html: productQAList[focusQA]?.content }} ></div> : <></>}</div>
                                 <QuillNoSSRWrapper
                                     forwardedRef={quillInstance}
-                                    defaultValue={content}
+                                    defaultValue={answer}
                                     onChange={(e: any) => setAnswer(e)}
                                     modules={modules}
                                     theme="snow"
@@ -484,6 +496,9 @@ export default function Page(props: pageProps) {
                         }
                     </div>
                 </div>
+            </div>
+            <div className='w-[880px] text-xs flex justify-end'>
+                {(product?.tagList as String[])?.map((tag,index)=><label key={index} className='btn btn-xs' onClick={()=>location.href="/search?keyword="+tag}>{tag}</label>)}
             </div>
         </div>
     </Main>

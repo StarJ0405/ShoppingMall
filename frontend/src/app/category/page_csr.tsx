@@ -86,7 +86,7 @@ export default function Page(props: pageProps) {
                 </div>
             </div>
             <div className='flex items-center border-2 border-gray-300 rounded-full px-5 ml-4 my-5 w-[350px] h-[48px]'>
-                <input type="text" id="category_keyword" placeholder="카테고리 내 검색" className="bg-transparent w-[300px] outline-none" onKeyDown={e => { if (e.key == 'Enter') document.getElementById('category_search')?.click() }} />
+                <input type="text" id="category_keyword" defaultValue={props.keyword} placeholder="카테고리 내 검색" className="bg-transparent w-[300px] outline-none" onKeyDown={e => { if (e.key == 'Enter') document.getElementById('category_search')?.click() }} />
                 <button id='category_search' onClick={() => { const value = (document.getElementById('category_keyword') as HTMLInputElement)?.value; location.href = '/category?CategoryId=' + props.CategoryId + "&keyword=" + (value ? value : '') + "&sort=" + props.sort }}>
                     <img src='/search.png' className='w-[24px] h-[24px]' />
                 </button>
