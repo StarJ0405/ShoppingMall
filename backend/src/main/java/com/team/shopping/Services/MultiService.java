@@ -147,20 +147,7 @@ public class MultiService {
 
         if (_fileSystem.isPresent()) url = _fileSystem.get().getV();
 
-        return UserResponseDTO.builder()
-                .username(siteUser.getUsername())
-                .gender(siteUser.getGender().toString())
-                .role(siteUser.getRole().toString())
-                .email(siteUser.getEmail())
-                .point(siteUser.getPoint())
-                .phoneNumber(siteUser.getPhoneNumber())
-                .nickname(siteUser.getNickname())
-                .birthday(this.dateTimeTransfer(siteUser.getBirthday()))
-                .createDate(this.dateTimeTransfer(siteUser.getCreateDate()))
-                .modifyDate(this.dateTimeTransfer(siteUser.getModifyDate()))
-                .name(siteUser.getName())
-                .url(url)
-                .build();
+        return UserResponseDTO.builder().username(siteUser.getUsername()).gender(siteUser.getGender().toString()).role(siteUser.getRole().toString()).email(siteUser.getEmail()).point(siteUser.getPoint()).phoneNumber(siteUser.getPhoneNumber()).nickname(siteUser.getNickname()).birthday(this.dateTimeTransfer(siteUser.getBirthday())).createDate(this.dateTimeTransfer(siteUser.getCreateDate())).modifyDate(this.dateTimeTransfer(siteUser.getModifyDate())).name(siteUser.getName()).url(url).build();
     }
 
     @Transactional
@@ -211,9 +198,7 @@ public class MultiService {
 //        }
 
         for (Address address : addressList) {
-            addressResponseDTOList.add(AddressResponseDTO.builder()
-                    .address(address)
-                    .build());
+            addressResponseDTOList.add(AddressResponseDTO.builder().address(address).build());
         }
         return addressResponseDTOList;
     }
@@ -555,7 +540,8 @@ public class MultiService {
         if (cartItemList.isEmpty()) {
             throw new NoSuchElementException("Cart is empty, cannot proceed with payment.");
         }
-
+        long point = paymentLogRequestDTO.getPoint();
+        long maxPoint = 0L;
         // 상품 재고 및 장바구니 항목 수량 검증
         for (CartItem cartItem : cartItemList) {
             Product product = cartItem.getProduct();
@@ -569,7 +555,11 @@ public class MultiService {
             if (cartItem.getCount() == 0) {
                 throw new NoSuchElementException("Please set this product count");
             }
+            Double discount = this.getProductDiscount(cartItem.getProduct());
+            Integer discountPrice = this.getProductDiscountPrice(cartItem.getProduct(), discount);
+            maxPoint += (long) discountPrice * cartItem.getCount();
         }
+        point = Math.max(0, Math.min(maxPoint, Math.min(user.getPoint(), point)));
 
         // 결제 로그 생성
         PaymentLog paymentLog = this.paymentLogService.save(user, paymentLogRequestDTO);
@@ -616,7 +606,7 @@ public class MultiService {
             paymentProductResponseDTOList.add(paymentProductResponseDTO);
         }
 
-        Long point = this.pointCal(user, paymentLogRequestDTO);
+
         this.userService.useToPoint(user, point);
         PaymentLog _paymentLog = this.paymentLogService.usedPoint(paymentLog, point);
 
@@ -662,10 +652,7 @@ public class MultiService {
 
         for (OptionList optionList : optionLists) {
             List<OptionResponseDTO> optionResponseDTOList = this.getOptionResponseDTOList(optionList);
-            optionListResponseDTOList.add(OptionListResponseDTO.builder()
-                    .optionResponseDTOList(optionResponseDTOList)
-                    .optionList(optionList)
-                    .build());
+            optionListResponseDTOList.add(OptionListResponseDTO.builder().optionResponseDTOList(optionResponseDTOList).optionList(optionList).build());
         }
         return optionListResponseDTOList;
     }
@@ -675,9 +662,7 @@ public class MultiService {
         List<Options> optionsList = this.optionsService.getList(optionList);
 
         for (Options options : optionsList) {
-            optionResponseDTOList.add(OptionResponseDTO.builder()
-                    .options(options)
-                    .build());
+            optionResponseDTOList.add(OptionResponseDTO.builder().options(options).build());
         }
 
         return optionResponseDTOList;
@@ -726,10 +711,9 @@ public class MultiService {
     @Transactional
     public void deleteTag(Product product) {
         List<Tag> tagList = tagService.getTagByProduct(product);
-        if (!tagList.isEmpty())
-            for (Tag tag : tagList) {
-                tagService.delete(tag);
-            }
+        if (!tagList.isEmpty()) for (Tag tag : tagList) {
+            tagService.delete(tag);
+        }
     }
 
     /**
@@ -860,21 +844,7 @@ public class MultiService {
         Double discount = this.getProductDiscount(product);
         int discountPrice = this.getProductDiscountPrice(product, discount);
 
-        return ProductResponseDTO
-                .builder()
-                .optionListResponseDTOList(optionListResponseDTOList)
-                .product(product)
-                .tagList(tagList)
-                .url(url)
-                .discount(discount)
-                .discountPrice(discountPrice)
-                .dateLimit(this.dateTimeTransfer(product.getDateLimit()))
-                .createDate(this.dateTimeTransfer(product.getCreateDate()))
-                .modifyDate(this.dateTimeTransfer(product.getModifyDate()))
-                .reviewList(reviewList)
-                .averageGrade(averageGrade)
-                .numOfGrade(numOfGrade)
-                .build();
+        return ProductResponseDTO.builder().optionListResponseDTOList(optionListResponseDTOList).product(product).tagList(tagList).url(url).discount(discount).discountPrice(discountPrice).dateLimit(this.dateTimeTransfer(product.getDateLimit())).createDate(this.dateTimeTransfer(product.getCreateDate())).modifyDate(this.dateTimeTransfer(product.getModifyDate())).reviewList(reviewList).averageGrade(averageGrade).numOfGrade(numOfGrade).build();
     }
 
     @Transactional
@@ -969,13 +939,10 @@ public class MultiService {
     public void productQASave(String username, ProductQARequestDTO requestDTO) {
         SiteUser user = this.userService.get(username);
         Product product = productService.getProduct(requestDTO.getProductId());
-        if (user == null)
-            throw new NoSuchElementException("not user");
-        if (user.getRole() != UserRole.USER)
-            throw new IllegalArgumentException("not role");
+        if (user == null) throw new NoSuchElementException("not user");
+        if (user.getRole() != UserRole.USER) throw new IllegalArgumentException("not role");
 
-        if (product != null)
-            this.productQAService.save(requestDTO.getTitle(), user, product);
+        if (product != null) this.productQAService.save(requestDTO.getTitle(), user, product);
     }
 
     @Transactional
@@ -983,13 +950,10 @@ public class MultiService {
         SiteUser user = this.userService.get(username);
         Optional<ProductQA> _productQA = productQAService.getProductQA(requestDTO.getProductQAId());
         Product product = productService.getProduct(requestDTO.getProductId());
-        if (user == null)
-            throw new NoSuchElementException("not user");
-        if (user.getRole() == UserRole.SELLER)
-            throw new IllegalArgumentException("not role");
+        if (user == null) throw new NoSuchElementException("not user");
+        if (user.getRole() == UserRole.SELLER) throw new IllegalArgumentException("not role");
 
-        if (product != null)
-            this.productQAService.update(requestDTO.getContent(), user, _productQA.get());
+        if (product != null) this.productQAService.update(requestDTO.getContent(), user, _productQA.get());
     }
 
     @Transactional
@@ -1191,7 +1155,7 @@ public class MultiService {
     }
 
     @Transactional
-    public List<ReviewResponseDTO> addToReview(String username, ReviewRequestDTO reviewRequestDTO) {
+    public void addToReview(String username, ReviewRequestDTO reviewRequestDTO) {
         List<ReviewResponseDTO> reviewResponseDTOList = new ArrayList<>();
         SiteUser user = this.userService.get(username);
         Product product = this.productService.getProduct(reviewRequestDTO.getProductId());
@@ -1222,7 +1186,7 @@ public class MultiService {
         }
 
         // 구매기록에 해당 제품이 포함된 만큼만 리뷰 작성 가능
-        if (_reviewList.size()>=_paymentProductList.size()) {
+        if (_reviewList.size() >= _paymentProductList.size()) {
             throw new DataDuplicateException("1 paymentProduct by 1 review");
         }
         // 구매 기록이 있는 경우에만 리뷰를 저장
@@ -1252,14 +1216,14 @@ public class MultiService {
         }
 
         // 리뷰 리스트를 가져와서 DTO로 변환하여 반환
-        List<Review> reviewList = this.reviewService.getList(product);
-        for (Review review : reviewList) {
-            ReviewResponseDTO reviewResponseDTO = this.getReview(review);
-            reviewResponseDTOList.add(reviewResponseDTO);
-        }
-
-
-        return reviewResponseDTOList;
+//        List<Review> reviewList = this.reviewService.getList(product);
+//        for (Review review : reviewList) {
+//            ReviewResponseDTO reviewResponseDTO = this.getReview(review);
+//            reviewResponseDTOList.add(reviewResponseDTO);
+//        }
+//
+//
+//        return reviewResponseDTOList;
 
     }
 
@@ -1384,15 +1348,7 @@ public class MultiService {
             }
             ProductResponseDTO responseDTO = this.getProduct(recent.getProduct().getId());
 
-            responseDTOList.add(RecentResponseDTO.builder()
-                    .price(responseDTO.getPrice())
-                    .title(responseDTO.getTitle())
-                    .grade(responseDTO.getGrade())
-                    .recentId(recent.getId())
-                    .productId(responseDTO.getId())
-                    .url(responseDTO.getUrl())
-                    .createDate(responseDTO.getCreateDate())
-                    .build());
+            responseDTOList.add(RecentResponseDTO.builder().price(responseDTO.getPrice()).title(responseDTO.getTitle()).grade(responseDTO.getGrade()).recentId(recent.getId()).productId(responseDTO.getId()).url(responseDTO.getUrl()).createDate(responseDTO.getCreateDate()).build());
         }
         return responseDTOList;
     }
@@ -1546,15 +1502,7 @@ public class MultiService {
         for (EventProduct eventProduct : eventProductList) {
             productResponseDTOList.add(this.getProduct(eventProduct.getProduct()));
         }
-        return EventResponseDTO.builder()
-                .startDate(this.dateTimeTransfer(event.getStartDate()))
-                .endDate(this.dateTimeTransfer(event.getEndDate()))
-                .productResponseDTOList(productResponseDTOList)
-                .user(event.getCreator())
-                .event(event)
-                .createDate(this.dateTimeTransfer(event.getCreateDate()))
-                .modifyDate(this.dateTimeTransfer(event.getModifyDate()))
-                .build();
+        return EventResponseDTO.builder().startDate(this.dateTimeTransfer(event.getStartDate())).endDate(this.dateTimeTransfer(event.getEndDate())).productResponseDTOList(productResponseDTOList).user(event.getCreator()).event(event).createDate(this.dateTimeTransfer(event.getCreateDate())).modifyDate(this.dateTimeTransfer(event.getModifyDate())).build();
     }
 
     /**
@@ -1614,9 +1562,7 @@ public class MultiService {
 
     private boolean isActiveEvent(Event event, LocalDateTime now) {
         // 이벤트가 활성화되어 있고, 현재 시간이 이벤트의 유효 기간에 속하는지 여부를 반환
-        return event.getActive()
-                && now.isEqual(event.getStartDate()) || now.isAfter(event.getStartDate())
-                && now.isBefore(event.getEndDate());
+        return event.getActive() && now.isEqual(event.getStartDate()) || now.isAfter(event.getStartDate()) && now.isBefore(event.getEndDate());
     }
 
     private Map<String, Object> gradeCalculate(List<Review> reviewList) {

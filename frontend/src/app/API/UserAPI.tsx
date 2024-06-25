@@ -110,7 +110,7 @@ export const productRegist = async (data: productProps) => {
     return response.data;
 }
 interface updateProductProps {
-    productId:number,
+    productId: number,
     categoryId: number,
     price: number,
     description: string,
@@ -127,7 +127,7 @@ interface updateProductProps {
     url: string,
     optionLists: any
 }
-export const prodcutUpdate = async(data: updateProductProps)=>{
+export const prodcutUpdate = async (data: updateProductProps) => {
     const response = await UserApi.put('/api/product', data);
     return response.data;
 }
@@ -237,6 +237,7 @@ export const getPayment = async () => {
     return response.data;
 }
 interface postReview {
+    paymentProductId: number;
     productId: number;
     title: string;
     content: string;
