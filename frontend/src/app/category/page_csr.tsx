@@ -98,7 +98,7 @@ export default function Page(props: pageProps) {
                         <label className={"text-xl cursor-pointer" + (product?.remain > 0 ? ' group-hover:underline' : ' line-through')}>{product?.title ? product?.title : '제목 없음'}</label>
                         {product?.remain > 0 ? <></> : <label className="text-red-500 text-xs">품절</label>}</div>
                     <div className="flex">
-                        <label className="text-lg text-red-500 mr-1 cursor-pointer">{(product?.discount / 100).toLocaleString('ko-kr', { maximumFractionDigits: 0 })}%</label>
+                        <label className="text-lg text-red-500 mr-1 cursor-pointer">{(product?.discount).toLocaleString('ko-kr', { maximumFractionDigits: 0 })}%</label>
                         <label className="cursor-pointer"><label className="text-xl font-bold cursor-pointer">{product?.price.toLocaleString('ko-kr')}</label>원</label>
                     </div>
                     <div className="flex items-center">

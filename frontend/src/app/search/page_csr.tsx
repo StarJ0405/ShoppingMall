@@ -6,6 +6,7 @@ import { getRecent, getUser } from "../API/UserAPI";
 import { useEffect, useState } from "react";
 import { MonthDate } from "../Global/Method";
 import DropDown, { Direcion } from "../Global/DropDown";
+import { getProductList } from "../API/NonUserAPI";
 
 interface pageProps {
     categories: any[];
@@ -37,7 +38,7 @@ export default function Page(props: pageProps) {
         const start = props.page - (props.page % 10);
         const value = [] as number[];
         for (let i = start; i < start + 10; i++) {
-            if (i + 1 == search.totalPages)
+            if (i  == search.totalPages)
                 break;
             else
                 value.push(i);
@@ -69,7 +70,7 @@ export default function Page(props: pageProps) {
                         <label className={"text-xl cursor-pointer" + (product?.remain > 0 ? ' group-hover:underline' : ' line-through')}>{product?.title ? product?.title : '제목 없음'}</label>
                         {product?.remain > 0 ? <></> : <label className="text-red-500 text-xs">품절</label>}</div>
                     <div className="flex">
-                        <label className="text-lg text-red-500 mr-1 cursor-pointer">{(product?.discount / 100).toLocaleString('ko-kr', { maximumFractionDigits: 0 })}%</label>
+                        <label className="text-lg text-red-500 mr-1 cursor-pointer">{(product?.discount).toLocaleString('ko-kr', { maximumFractionDigits: 0 })}%</label>
                         <label className="cursor-pointer"><label className="text-xl font-bold cursor-pointer">{product?.price.toLocaleString('ko-kr')}</label>원</label>
                     </div>
                     <div className="flex items-center">

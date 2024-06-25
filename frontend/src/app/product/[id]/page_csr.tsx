@@ -156,6 +156,16 @@ export default function Page(props: pageProps) {
         });
         return product.price + optionPrice;
     }
+    function getDiscountPrice() {
+        let optionPrice = 0;
+        (product?.optionListResponseDTOList as any[])?.forEach(optionList => {
+            (optionList.optionResponseDTOList as any[])?.forEach(option => {
+                if (options?.includes(option.optionId))
+                    optionPrice += option.optionPrice;
+            })
+        });
+        return product.price * (100 - product?.discount) / 100 + optionPrice;
+    }
     function getMax() {
         let max = product.remain;
         (product?.optionListResponseDTOList as any[])?.forEach(optionList => {
@@ -186,7 +196,7 @@ export default function Page(props: pageProps) {
         })
         return productQAList?.length > 0 ? answer / productQAList.length * 100 : 0;
     }
-    
+
     return <Main user={user} recentList={recentList} setRecentList={setRecentList} categories={props.categories}>
         <div className='flex flex-col w-[1240px] min-h-[670px]'>
             <div className='text-sm flex'>
@@ -242,10 +252,18 @@ export default function Page(props: pageProps) {
                                 <button className='min-w-[44px] min-h-[44px] w-[44px] h-[44px] border border-gray-500 rounded-full flex items-center justify-center' onClick={() => Wish()}><img src={love ? '/heart_on.png' : '/heart_off.png'} className='w-[24px] h-[24px]' /></button>
                             </div>
                             <label className='text-gray-500 text-lg'>원산지:상세설명 참조</label>
-                            <label className='text-xl mt-2'><label className='text-2xl font-bold'>{product?.price.toLocaleString('ko-kr')}</label>원</label>
+                            {product?.discount > 0 ?
+                                <div className='flex flex-col'>
+                                    <label className='text-sm mt-2 text-gray-500 line-through'>{getPrice().toLocaleString('ko-kr')}원</label>
+                                    <label className='text-xl mt-2 font-bold'><label className='text-2xl'>{product?.discount}% {getDiscountPrice().toLocaleString('ko-kr', { maximumFractionDigits: 0 })}</label>원</label>
+                                </div>
+                                :
+                                <label className='text-xl mt-2 font-bold'><label className='text-2xl font-bold'>{getPrice().toLocaleString('ko-kr')}</label>원</label>
+                            }
+
                             <div className='flex justify-between mt-auto'>
                                 <label className='flex items-center'><div className='border border-black rounded-full w-[20px] h-[20px] flex items-center justify-center mr-2'>p</div>최대 적립 포인트</label>
-                                <label className='font-bold'>{(product?.price / 100).toLocaleString('ko-kr', { maximumFractionDigits: 0 })}P</label>
+                                <label className='font-bold'>{(getDiscountPrice() / 100).toLocaleString('ko-kr', { maximumFractionDigits: 0 })}P</label>
                             </div>
                             <label className='mt-auto flex items-center'><div className='border border-black rounded-full w-[20px] h-[20px] flex items-center justify-center mr-2'>%</div>최대 22개월 무이자 할부</label>
                             <label className='mt-auto'>무료배송 | CJ대한통운</label>
@@ -485,7 +503,7 @@ export default function Page(props: pageProps) {
                         </div>
                         <div className='flex justify-between'>
                             <label>총 <input type='number' id="count" className='[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none m-0 input input-sm min-w-[30px]' defaultValue={product?.remain >= 1 ? 1 : product?.remain} min={product?.remain >= 1 ? 1 : product?.remain} max={getMax()} onChange={(e) => { let value = Number(e.target.value); if (value > getMax()) value = getMax(); else if (value < 0) value = 0; e.target.value = value.toString(); setCount(value); }} />개</label>
-                            <label>{(getPrice() * count).toLocaleString('ko-kr')}원</label>
+                            <label>{(getDiscountPrice() * count).toLocaleString('ko-kr')}원</label>
                         </div>
                         {product?.remain > 0 ?
                             <button className='btn btn-error text-white w-full mt-2' onClick={() =>
@@ -498,7 +516,7 @@ export default function Page(props: pageProps) {
                 </div>
             </div>
             <div className='w-[880px] text-xs flex justify-end'>
-                {(product?.tagList as String[])?.map((tag,index)=><label key={index} className='btn btn-xs' onClick={()=>location.href="/search?keyword="+tag}>{tag}</label>)}
+                {(product?.tagList as String[])?.map((tag, index) => <label key={index} className='btn btn-xs' onClick={() => location.href = "/search?keyword=" + tag}>{tag}</label>)}
             </div>
         </div>
     </Main>
