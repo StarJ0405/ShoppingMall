@@ -1225,6 +1225,21 @@ public class MultiService {
 
         Review reviewKey = this.reviewService.save(user, reviewRequestDTO, product);
         this.paymentProductService.updateStatus(reviewRequestDTO.getPaymentProductId());
+        this.updateReviewContent(reviewKey, username);
+
+        // 리뷰 리스트를 가져와서 DTO로 변환하여 반환
+//        List<Review> reviewList = this.reviewService.getList(product);
+//        for (Review review : reviewList) {
+//            ReviewResponseDTO reviewResponseDTO = this.getReview(review);
+//            reviewResponseDTOList.add(reviewResponseDTO);
+//        }
+//
+//
+//        return reviewResponseDTOList;
+
+    }
+
+    private void updateReviewContent(Review reviewKey, String username) {
         String detail = reviewKey.getContent();
         // 이미지 저장
         Optional<MultiKey> _multiKey = multiKeyService.get(ImageKey.TEMP.getKey(username));
@@ -1246,17 +1261,6 @@ public class MultiService {
             reviewService.updateContent(reviewKey, detail);
             multiKeyService.delete(_multiKey.get());
         }
-
-        // 리뷰 리스트를 가져와서 DTO로 변환하여 반환
-//        List<Review> reviewList = this.reviewService.getList(product);
-//        for (Review review : reviewList) {
-//            ReviewResponseDTO reviewResponseDTO = this.getReview(review);
-//            reviewResponseDTOList.add(reviewResponseDTO);
-//        }
-//
-//
-//        return reviewResponseDTOList;
-
     }
 
 
@@ -1284,8 +1288,9 @@ public class MultiService {
         if (review.getAuthor() != user && !user.getRole().equals(UserRole.ADMIN)) {
             throw new IllegalArgumentException("not yours");
         } else {
-            this.reviewService.update(review, reviewRequestDTO);
+            Review newReview = this.reviewService.update(review, reviewRequestDTO);
             List<Review> reviewList = this.reviewService.getList(review.getProduct());
+            this.updateReviewContent(newReview, username);
             for (Review _review : reviewList) {
                 ReviewResponseDTO reviewResponseDTO = this.getReview(_review);
                 reviewResponseDTOList.add(reviewResponseDTO);

@@ -63,8 +63,9 @@ public class ReviewController {
         try {
             if (tokenRecord.isOK()) {
                 String username = tokenRecord.username();
-                List<ReviewResponseDTO> reviewResponseDTOList = this.multiService.updateReview(username, reviewRequestDTO);
-                return tokenRecord.getResponseEntity(reviewResponseDTOList);
+                this.multiService.updateReview(username, reviewRequestDTO);
+                List<PaymentLogResponseDTO> paymentLogResponseDTOList = this.multiService.getPaymentLogList(username);
+                return tokenRecord.getResponseEntity(paymentLogResponseDTOList);
             }
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("권한이 없습니다.");
