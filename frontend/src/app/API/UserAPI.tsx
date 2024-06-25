@@ -251,3 +251,22 @@ export const getMyProducts = async () => {
     const response = await UserApi.get('/api/product/myProducts');
     return response.data;
 }
+interface question {
+    productId: number;
+    title: string;
+    content: string;
+}
+
+export const postQuestion = async (data: question) => {
+    const response = await UserApi.post('/api/product/question', data);
+    return response.data;
+}
+interface answer {
+    productId: number;
+    answer: string;
+    productQAId: number;
+}
+export const postAnswer = async (data: answer) => {
+    const response = await UserApi.post('/api/product/answer', data);
+    return response.data;
+}

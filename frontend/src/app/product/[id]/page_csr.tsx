@@ -1,10 +1,14 @@
 'use client'
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Main from '@/app/Global/Layout/MainLayout';
-import { checkWish, deleteWish, getUser, postCartList, postRecent, postWish } from '@/app/API/UserAPI';
+import { checkWish, deleteWish, getUser, postAnswer, postCartList, postQuestion, postRecent, postWish } from '@/app/API/UserAPI';
 import DropDown, { Direcion } from '@/app/Global/DropDown';
-import { MonthDate } from '@/app/Global/Method';
-import { getReviews } from '@/app/API/NonUserAPI';
+import { MonthDate, getDateTimeFormat } from '@/app/Global/Method';
+import { getProductQAList, getReviews } from '@/app/API/NonUserAPI';
+import Modal from '@/app/Global/Modal';
+import 'react-quill/dist/quill.snow.css';
+import QuillNoSSRWrapper from '@/app/Global/QuillNoSSRWrapper';
+import ReactQuill from 'react-quill';
 
 interface pageProps {
     product: any;
@@ -23,6 +27,7 @@ export default function Page(props: pageProps) {
     const [focus, setFocus] = useState(0);
     const [reviews, setReviews] = useState(null as unknown as any[]);
     const [recentList, setRecentList] = useState(null as unknown as any[]);
+    const [productQAList, setProductQAList] = useState(null as unknown as any[]);
     //const [product,setProduct] = useState(props.product);
     const product = props.product;
     const seller = props.seller;
@@ -38,6 +43,47 @@ export default function Page(props: pageProps) {
     const [option, setOption] = useState(-1);
     const [count, setCount] = useState(product?.remain >= 1 ? 1 : product?.remain);
     const [mounted, setMounted] = useState(false);
+    const [isQOpen, setIsQOpen] = useState(false);
+    const [isAOpen, setIsAOpen] = useState(false);
+    const [title, setTitle] = useState('');
+    const [content, setContent] = useState('');
+    const [answer, setAnswer] = useState('');
+    const [focusQA, setFocustQA] = useState(-1);
+    const quillInstance = useRef<ReactQuill>(null);
+
+    const modules = useMemo(
+        () => ({
+            toolbar: {
+                container: [
+                    [{ header: '1' }, { header: '2' }],
+                    [{ size: [] }],
+                    ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+                    [{ list: 'ordered' }, { list: 'bullet' }, { align: [] }],
+
+                ],
+
+            },
+            clipboard: {
+                matchVisual: false,
+            },
+        }),
+        [],
+    );
+
+    const formats = [
+        'header',
+        'font',
+        'size',
+        'bold',
+        'italic',
+        'underline',
+        'strike',
+        'blockquote',
+        'list',
+        'bullet',
+        'align',
+        'image',
+    ];
     useEffect(() => {
         if (ACCESS_TOKEN)
             getUser()
@@ -49,10 +95,14 @@ export default function Page(props: pageProps) {
                     postRecent(product.id)
                         .then(r => setRecentList(r))
                         .catch(e => console.log(e));
+                    getProductQAList(product.id)
+                        .then(r => setProductQAList(r))
+                        .catch(e => console.log(e));
                     setMounted(true);
                 })
                 .catch(e => console.log(e));
     }, [ACCESS_TOKEN]);
+
     useEffect(() => {
         getReviews(product.id)
             .then(r => setReviews(r))
@@ -118,6 +168,15 @@ export default function Page(props: pageProps) {
     }
     function getGood() {
         return product?.reviewSize > 0 ? (product?.numOfGrade['3.5~4'] + product?.numOfGrade['4.5~5']) / product?.reviewSize * 100 : 0;
+    }
+    function openQModal() {
+        setIsQOpen(true);
+        setTitle('');
+        setContent('');
+    }
+    function openAModal() {
+        setIsAOpen(true);
+        setAnswer('');
     }
     return <Main user={user} recentList={recentList} setRecentList={setRecentList} categories={props.categories}>
         <div className='flex flex-col w-[1240px] min-h-[670px]'>
@@ -291,20 +350,97 @@ export default function Page(props: pageProps) {
                             <div className='divider'></div>
                         </div>)}
                     </div>
-                    {/* <table>
-                        <thead>
-                            <tr>
-                                <th>문의/답변</th>
-                                <th>작성자</th>
-                                <th>작성일</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td></td>
-                            </tr>
-                        </tbody>
-                    </table> */}
+                    <div className='flex text-center mb-2'>
+                        <div className='w-[604px]'>문의/답변</div>
+                        <div className='w-[96px]'>작성자</div>
+                        <div className='w-[150px]'>작성일</div>
+                    </div>
+                    {productQAList?.map((productQA, index) => <div key={index} className='flex'>
+                        <div className='flex flex-col text-center mb-2'>
+                            <div className='flex items-center'>
+                                <div className='w-[604px] text-start flex items-center'>
+                                    {productQA.answer != null ? <label className='text-blue-500 border border-blue-500 p-1 text-xs mr-2'>답변완료</label> : <label className='text-red-500 border border-red-500 p-1 text-xs mr-2'>확인중</label>}
+                                    <label className='hover:underline cursor-pointer' onClick={() => setFocustQA(index)}>{productQA?.title}</label>
+                                </div>
+                                <div className='w-[96px]'>{productQA?.author}</div>
+                                <div className='w-[150px]'>{getDateTimeFormat(productQA?.createDate)}</div>
+                            </div>
+                            {focusQA == index ?
+                                <div className='flex flex-col'>
+                                    <div className='flex items-center'>
+                                        <label className='text-blue-500 font-bold text-3xl mr-2'>Q</label>
+                                        <label dangerouslySetInnerHTML={{ __html: productQA?.content }} />
+                                    </div>
+                                    {productQA.answer != null ?
+                                        <>
+                                            <div className='flex items-center mt-4'>
+                                                <label className='text-red-500 font-bold text-3xl mr-2'>A</label>
+                                                <label dangerouslySetInnerHTML={{ __html: productQA?.answer }} />
+                                            </div>
+                                            {/* {user.unsername == seller.unsername ? <button className='self-end btn btn-xs btn-error text-white w-[100px]' onClick={openAModal}>수정하기</button> : <></>} */}
+                                        </>
+                                        :
+                                        <>
+                                            {user.unsername == seller.unsername ? <button className='self-end btn btn-xs btn-error text-white w-[100px]' onClick={openAModal}>답변하기</button> : <></>}
+                                        </>
+                                    }
+
+                                </div>
+                                : <></>
+                            }
+                        </div>
+                    </div>)}
+                    <div className='min-h-[100px] w-full flex flex-col items-center justify-center'>
+                        {productQAList && productQAList.length <= 0 ? <label>등록된 Q&A가 없습니다.</label> : <></>}
+                        <button className='btn btn-warning ml-auto btn-sm text-white' onClick={openQModal}>상품 문의하기</button>
+                    </div>
+                    <Modal open={isQOpen} onClose={() => setIsQOpen(false)} className='' escClose={true} outlineClose={true}>
+                        <div className="flex flex-col w-[744px] h-[552px]">
+                            <div className="text-white bg-red-500 h-[37px] py-2 px-4">상품 문의하기</div>
+                            <div className="px-4 flex flex-col">
+                                <input id="title" type="text" className="input input-bordered mt-4" placeholder="문의 제목.." defaultValue={title} onChange={e => setTitle(e.target.value)} />
+                                <QuillNoSSRWrapper
+                                    forwardedRef={quillInstance}
+                                    defaultValue={content}
+                                    onChange={(e: any) => setContent(e)}
+                                    modules={modules}
+                                    theme="snow"
+                                    className='w-full h-[300px] mt-2'
+                                    placeholder="문의 내용을 입력해주세요."
+                                />
+                                <div className='flex justify-center mt-16'>
+                                    <button className='btn btn-info btn-xs mr-2 text-white' disabled={title == "" || content == ""} onClick={() => {
+                                        postQuestion({ productId: product.id, title: title, content: content }).then(r => { setProductQAList(r); setIsQOpen(false) }).catch(e => console.log(e));
+                                    }}>등록</button>
+                                    <button className='btn btn-error btn-xs text-white' onClick={() => setIsQOpen(false)}>취소</button>
+                                </div>
+                            </div>
+                        </div>
+                    </Modal>
+                    <Modal open={isAOpen} onClose={() => setIsAOpen(false)} className='' escClose={true} outlineClose={true}>
+                        <div className="flex flex-col w-[744px] h-[752px]">
+                            <div className="text-white bg-red-500 h-[37px] py-2 px-4">상품 문의하기</div>
+                            <div className="px-4 flex flex-col">
+                                <div className="w-[712px] h-[48px] p-2 border border-black mt-4 rounded-lg flex items-center">{productQAList[focusQA]?.title}</div>
+                                <div className='w-[712px] h-[300px] p-2 border border-black mt-4 rounded-lg' dangerouslySetInnerHTML={{ __html: productQAList[focusQA]?.content }} ></div>
+                                <QuillNoSSRWrapper
+                                    forwardedRef={quillInstance}
+                                    defaultValue={content}
+                                    onChange={(e: any) => setAnswer(e)}
+                                    modules={modules}
+                                    theme="snow"
+                                    className='w-full h-[200px] mt-2'
+                                    placeholder="답변 내용을 입력해주세요."
+                                />
+                                <div className='flex justify-center mt-16'>
+                                    <button className='btn btn-info btn-xs mr-2 text-white' disabled={answer == ""} onClick={() => {
+                                        postAnswer({ productId: product.id, answer: answer, productQAId: productQAList[focusQA].productQAId }).then(r => { setProductQAList(r); setIsAOpen(false) }).catch(e => console.log(e));
+                                    }}>등록</button>
+                                    <button className='btn btn-error btn-xs text-white' onClick={() => setIsQOpen(false)}>취소</button>
+                                </div>
+                            </div>
+                        </div>
+                    </Modal>
                 </div>
                 <div className='w-[300px] h-full ml-[60px] relative' >
                     <div className='w-[300px] fixed h-[650px]'>
@@ -351,5 +487,4 @@ export default function Page(props: pageProps) {
             </div>
         </div>
     </Main>
-
 }

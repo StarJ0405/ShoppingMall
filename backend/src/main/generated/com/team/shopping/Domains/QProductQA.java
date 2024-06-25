@@ -22,6 +22,8 @@ public class QProductQA extends EntityPathBase<ProductQA> {
 
     public static final QProductQA productQA = new QProductQA("productQA");
 
+    public final StringPath answer = createString("answer");
+
     public final QSiteUser author;
 
     public final StringPath content = createString("content");

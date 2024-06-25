@@ -7,7 +7,7 @@ import com.team.shopping.Domains.QProductQA;
 import com.team.shopping.Repositories.Custom.ProductQARepositoryCustom;
 import lombok.RequiredArgsConstructor;
 
-import java.util.Optional;
+import java.util.List;
 
 @RequiredArgsConstructor
 public class ProductQARepositoryImpl implements ProductQARepositoryCustom {
@@ -16,8 +16,7 @@ public class ProductQARepositoryImpl implements ProductQARepositoryCustom {
 
 
     @Override
-    public Optional<ProductQA> findByProduct(Product product) {
-        ProductQA productQA = jpaQueryFactory.selectFrom(qProductQA).where(qProductQA.product.eq(product)).fetchOne();
-        return Optional.ofNullable(productQA);
+    public List<ProductQA> findByProduct(Product product) {
+        return jpaQueryFactory.selectFrom(qProductQA).where(qProductQA.product.eq(product)).fetch();
     }
 }
