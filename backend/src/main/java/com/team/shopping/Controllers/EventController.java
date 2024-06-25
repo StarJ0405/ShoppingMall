@@ -26,8 +26,11 @@ public class EventController {
         try {
             if (tokenRecord.isOK()) {
                 String username = tokenRecord.username();
-                EventResponseDTO eventResponseDTO = this.multiService.createEvent(username, eventRequestDTO);
-                return tokenRecord.getResponseEntity(eventResponseDTO);
+//                EventResponseDTO eventResponseDTO =
+                this.multiService.createEvent(username, eventRequestDTO);
+//                return tokenRecord.getResponseEntity(eventResponseDTO);
+                List<EventResponseDTO> eventResponseDTOList = this.multiService.getEventList(username);
+                return tokenRecord.getResponseEntity(eventResponseDTOList);
             }
         }catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("권한이 없습니다.");
@@ -44,8 +47,11 @@ public class EventController {
         try {
             if (tokenRecord.isOK()) {
                 String username = tokenRecord.username();
-                EventResponseDTO eventResponseDTO = this.multiService.updateEvent(username, eventRequestDTO);
-                return tokenRecord.getResponseEntity(eventResponseDTO);
+//                EventResponseDTO eventResponseDTO =
+                        this.multiService.updateEvent(username, eventRequestDTO);
+//                return tokenRecord.getResponseEntity(eventResponseDTO);
+                List<EventResponseDTO> eventResponseDTOList = this.multiService.getEventList(username);
+                return tokenRecord.getResponseEntity(eventResponseDTOList);
             }
         }catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("권한이 없습니다.");

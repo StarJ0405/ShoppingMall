@@ -57,10 +57,7 @@ export const getProductQAList = async (data: number) => {
     const response = await NonUserApi.get('/api/product/question', { headers: { ProductId: data } });
     return response.data;
 }
-export const getEventList = async () => {
-    const response = await NonUserApi.get('/api/event');
-    return response.data;
-}
+
 interface getArticleList {
     Type: number;
     Page: number;
