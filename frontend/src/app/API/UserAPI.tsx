@@ -249,7 +249,6 @@ export const postReview = async (data: postReview) => {
 }
 interface putReview {
     reviewId:number;
-    // productId: number;
     paymentProductId: number;
     title: string;
     content: string;
@@ -280,5 +279,17 @@ interface answer {
 }
 export const postAnswer = async (data: answer) => {
     const response = await UserApi.post('/api/product/answer', data);
+    return response.data;
+}
+
+interface postEvent {
+    startDate: Date;
+    endDate: Date;
+    discount: number;
+    productIdList: number[];
+}
+
+export const postEvent = async (data: postEvent) => {
+    const response = await UserApi.post('/api/event', data);
     return response.data;
 }

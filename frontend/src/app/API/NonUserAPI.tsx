@@ -44,7 +44,7 @@ export const getSearch = async (data: searchProps) => {
     return response.data;
 }
 interface categorySearchProps {
-    CategoryId:number;
+    CategoryId: number;
     Page: number;
     Sort: number
     Keyword: string;
@@ -54,6 +54,11 @@ export const getCategorySearch = async (data: categorySearchProps) => {
     return response.data;
 }
 export const getProductQAList = async (data: number) => {
-    const response = await NonUserApi.get('/api/product/question', { headers: { ProductId:data} });
+    const response = await NonUserApi.get('/api/product/question', { headers: { ProductId: data } });
     return response.data;
 }
+export const getEventList = async () => {
+    const response = await NonUserApi.get('/api/event');
+    return response.data;
+}
+
