@@ -116,32 +116,38 @@ export default function Page(props: pageProps) {
         });
         return max;
     }
+    function getGood() {
+        return product?.reviewSize > 0 ? (product?.numOfGrade['3.5~4'] + product?.numOfGrade['4.5~5']) / product?.reviewSize * 100 : 0;
+    }
     return <Main user={user} recentList={recentList} setRecentList={setRecentList} categories={props.categories}>
         <div className='flex flex-col w-[1240px] min-h-[670px]'>
             <div className='text-sm flex'>
                 <label className='text-2xl font-bold'>{props.seller.nickname}</label>
                 <label className='ml-2 text-gray-500'>긍정 리뷰</label>
-                <label className='ml-2'>93.1%</label>
-                <div className='divider divider-horizontal h-[20px] mx-0'></div>
-                <label className='text-gray-500'>응답률 </label>
-                <label className='ml-2'>100%</label>
+                <label className='ml-2'>{getGood().toLocaleString('ko-kr', { maximumFractionDigits: 0 })}%</label>
+                {/* <div className='divider divider-horizontal h-[20px] mx-0'></div> */}
+                {/* <label className='text-gray-500'>응답률 </label> */}
+                {/* <label className='ml-2'>100%</label> */}
             </div>
             <div className='mt-10 flex'>
                 <div className='w-[880px] h-full'>
-                    <div className='flex'>
-                        <button id='middle' className='flex' onClick={() => setMiddleCategoryDropdown(!middleCategoryDropdown)}>{product.middleCategoryName}<img src={middleCategoryDropdown ? '/up.png' : '/down.png'} className='ml-1 w-[24px] h-[24px]' alt='dropdown' /></button>
-                        <button id='bottom' className='flex ml-4' onClick={() => setBottomCategoryDropdown(!bottomCategoryDropdownm)}>{product.categoryName}<img src={bottomCategoryDropdownm ? '/up.png' : '/down.png'} className='ml-1 w-[24px] h-[24px]' alt='dropdown' /></button>
-                        <DropDown open={middleCategoryDropdown} onClose={() => setMiddleCategoryDropdown(false)} background='main' button='middle' className='overflow-y-scroll bg-white' defaultDriection={Direcion.DOWN} width={140} height={180}>
-                            <div className='max-w-[120px] max-h-[180px] flex flex-col'>
-                                {(topCategory?.categoryResponseDTOList as any[])?.map((middle, index) => <a key={index} href={'/'} className={'' + (middle.name == product.middleCategoryName ? ' text-red-500' : '')}>{middle.name}</a>)}
-                            </div>
-                        </DropDown>
-                        <DropDown open={bottomCategoryDropdownm} onClose={() => setBottomCategoryDropdown(false)} background='main' button='bottom' className='overflow-y-scroll bg-white' defaultDriection={Direcion.DOWN} width={200} height={180}>
-                            <div className='max-w-[180px] max-h-[200px] flex flex-col'>
-                                {(middleCategory?.categoryResponseDTOList as any[])?.map((bottom, index) => <a key={index} href={'/'} className={'' + (bottom.name == product.categoryName ? ' text-red-500' : '')}>{bottom.name}</a>)}
-                            </div>
-                        </DropDown>
+                    <div className='flex justify-between'>
+                        <div className='flex'>
+                            <button id='middle' className='flex' onClick={() => setMiddleCategoryDropdown(!middleCategoryDropdown)}>{product.middleCategoryName}<img src={middleCategoryDropdown ? '/up.png' : '/down.png'} className='ml-1 w-[24px] h-[24px]' alt='dropdown' /></button>
+                            <button id='bottom' className='flex ml-4' onClick={() => setBottomCategoryDropdown(!bottomCategoryDropdownm)}>{product.categoryName}<img src={bottomCategoryDropdownm ? '/up.png' : '/down.png'} className='ml-1 w-[24px] h-[24px]' alt='dropdown' /></button>
+                        </div>
+                        {seller?.username == user?.username ? <a href={"/product/modify?id=" + product?.id} className='btn btn-error btn-xs text-white'>수정하기</a> : <></>}
                     </div>
+                    <DropDown open={middleCategoryDropdown} onClose={() => setMiddleCategoryDropdown(false)} background='main' button='middle' className='overflow-y-scroll bg-white' defaultDriection={Direcion.DOWN} width={140} height={180}>
+                        <div className='max-w-[120px] max-h-[180px] flex flex-col'>
+                            {(topCategory?.categoryResponseDTOList as any[])?.map((middle, index) => <a key={index} href={'/'} className={'' + (middle.name == product.middleCategoryName ? ' text-red-500' : '')}>{middle.name}</a>)}
+                        </div>
+                    </DropDown>
+                    <DropDown open={bottomCategoryDropdownm} onClose={() => setBottomCategoryDropdown(false)} background='main' button='bottom' className='overflow-y-scroll bg-white' defaultDriection={Direcion.DOWN} width={200} height={180}>
+                        <div className='max-w-[180px] max-h-[200px] flex flex-col'>
+                            {(middleCategory?.categoryResponseDTOList as any[])?.map((bottom, index) => <a key={index} href={'/'} className={'' + (bottom.name == product.categoryName ? ' text-red-500' : '')}>{bottom.name}</a>)}
+                        </div>
+                    </DropDown>
                     <div className='flex mt-2'>
                         <div className='min-w-[410px] min-h-[410px] w-[410px] h-[410px] flex items-center justify-center'><img src={product?.url ? product.url : '/empty_product.png'} className='w-[300px] h-[300px]' /></div>
                         <div className='flex flex-col ml-2 w-full'>
@@ -163,7 +169,7 @@ export default function Page(props: pageProps) {
                             </div>
                             <div className='mt-4 flex justify-between w-full'>
                                 <div>
-                                    <label className={'text-3xl' + (product?.remain > 0 ? '' : ' line-through text-gray-500')}>{product?.title}</label>
+                                    <label className={'text-3xl' + (product?.remain > 0 ? '' : ' line-through text-gray-500')}>{product?.title ? product?.title : '제목 없음'}</label>
                                 </div>
                                 <button className='min-w-[44px] min-h-[44px] w-[44px] h-[44px] border border-gray-500 rounded-full flex items-center justify-center' onClick={() => Wish()}><img src={love ? '/heart_on.png' : '/heart_off.png'} className='w-[24px] h-[24px]' /></button>
                             </div>

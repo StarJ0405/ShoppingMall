@@ -54,7 +54,7 @@ export default function Main(props: Readonly<pageInterface>) {
     <main id='main' className={'min-h-screen flex flex-col items-center realtive ' + className}>
       <header className='flex w-[1240px] items-center h-[120px]'>
         <button onClick={() => setIsSideOpen(true)}><img src='/expand_button.png' className='w-[36px] h-[36px]' /></button>
-        <a className='ml-10' href='/'><img src='/logo.png' className='w-[94px] h-[40px]' /></a>
+        <a className='ml-10' href='/'><img src='/logo.png' className='w-[64px] h-[40px]' /></a>
         <div className='flex items-center border-2 border-gray-300 rounded-full px-5 ml-4'>
           <input id="keyword" type='text' className='text-xl bg-transparent w-[480px] mr-[20px] outline-none' placeholder='검색' onKeyDown={e => { if (e.key == 'Enter') document.getElementById('search')?.click() }}></input>
           <button id='search' onClick={() => { const value = (document.getElementById('keyword') as HTMLInputElement)?.value; location.href = '/search?keyword=' + (value ? value : '') }}>

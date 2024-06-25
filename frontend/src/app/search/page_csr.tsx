@@ -66,7 +66,7 @@ export default function Page(props: pageProps) {
                 <img src={product?.url ? product?.url : '/empty_product.png'} className="w-[120px] h-[120px]" />
                 <div className="ml-4 flex flex-col w-[680px]">
                     <div>
-                        <label className={"text-xl cursor-pointer" + (product?.remain > 0 ? ' group-hover:underline' : ' line-through')}>{product?.title}</label>
+                        <label className={"text-xl cursor-pointer" + (product?.remain > 0 ? ' group-hover:underline' : ' line-through')}>{product?.title?product?.title:'제목 없음'}</label>
                         {product?.remain > 0 ? <></> : <label className="text-red-500 text-xs">품절</label>}</div>
                     <div className="flex">
                         <label className="text-lg text-red-500 mr-1 cursor-pointer">{(product?.discount / 100).toLocaleString('ko-kr', { maximumFractionDigits: 0 })}%</label>

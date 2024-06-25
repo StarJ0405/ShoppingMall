@@ -216,7 +216,7 @@ export default function Page(props: pageProps) {
                                 <div className="flex w-[450px]">
                                     <img src={product?.imageUrl ? product?.imageUrl : '/empty_product.png'} className="w-[24px] h-[24px]" />
                                     <div className="flex flex-col px-2 text-start">
-                                    <a href={'/product/'+product?.productId} className="hover:underline">{product?.title}</a>
+                                    <a href={'/product/'+product?.productId} className="hover:underline">{product?.title?product?.title:'제목 없음'}</a>
                                         {(product?.paymentProductDetailResponseDTOList as any[]).map((option, index) =>
                                             <label className="text-xs" key={index}>
                                                 {option.optionListName} : {option.optionName} (<label className="font-bold">{option.optionPrice.toLocaleString('ko-kr')}</label>원)
@@ -227,7 +227,7 @@ export default function Page(props: pageProps) {
                                     <label className="font-bold">{getDiscountPrice(product).toLocaleString('ko-kr', { maximumFractionDigits: 0 })}</label>원
                                 </div>
                                 <div className="w-[50px]">
-                                    <label className="font-bold">{product.count}</label> 개
+                                    <label className="font-bold">{product.count.toLocaleString('ko-kr')}</label> 개
                                 </div>
                                 <div className="w-[50px]">
                                     <button className="btn btn-xs" onClick={() => { setReview(product); setSelectPayment(null); deleteImageList(); }}>리뷰</button>
