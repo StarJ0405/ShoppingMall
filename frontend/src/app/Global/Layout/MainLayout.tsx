@@ -15,6 +15,7 @@ interface pageInterface {
   recentList: any[];
   setRecentList: (data: any) => void;
   categories: any[];
+  keyword?:string;
 }
 
 export default function Main(props: Readonly<pageInterface>) {
@@ -56,7 +57,7 @@ export default function Main(props: Readonly<pageInterface>) {
         <button onClick={() => setIsSideOpen(true)}><img src='/expand_button.png' className='w-[36px] h-[36px]' /></button>
         <a className='ml-10' href='/'><img src='/logo.png' className='w-[64px] h-[40px]' /></a>
         <div className='flex items-center border-2 border-gray-300 rounded-full px-5 ml-4'>
-          <input id="keyword" type='text' className='text-xl bg-transparent w-[480px] mr-[20px] outline-none' placeholder='검색' onKeyDown={e => { if (e.key == 'Enter') document.getElementById('search')?.click() }}></input>
+          <input id="keyword" type='text' className='text-xl bg-transparent w-[480px] mr-[20px] outline-none' defaultValue={props?.keyword} placeholder='검색' onKeyDown={e => { if (e.key == 'Enter') document.getElementById('search')?.click() }}></input>
           <button id='search' onClick={() => { const value = (document.getElementById('keyword') as HTMLInputElement)?.value; location.href = '/search?keyword=' + (value ? value : '') }}>
             <img src='/search.png' className='w-[50px] h-[50px]' />
           </button>

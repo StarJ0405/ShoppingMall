@@ -47,7 +47,7 @@ export default function Page(props: pageProps) {
         return value.map((v, index) => <button className="btn btn-xs btn-outline" key={index} disabled={v == props.page} onClick={() => window.location.href = "/search?keyword=" + props.keyword + "&page=" + v + "&sort=" + props.sort}>{v + 1}</button>);
     }
     const sortName = ['최근 등록순', '높은 가격순', '낮은 가격순', '리뷰 많은순']
-    return <Main categories={props.categories} user={user} recentList={recentList} setRecentList={setRecentList}>
+    return <Main categories={props.categories} user={user} recentList={recentList} setRecentList={setRecentList} keyword={props.keyword}>
         <div className="flex flex-col w-[1240px]">
             <div className="flex justify-between">
                 <label>검색 결과 {search.totalElements.toLocaleString('ko-kr')}건</label>
