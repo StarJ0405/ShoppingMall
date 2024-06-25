@@ -6,10 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="896430db-190c-47f3-9b43-d1c8610f775f" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/Controllers/ReviewController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/Controllers/ReviewController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/Repositories/Custom/Impls/ReviewRepositoryImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/Repositories/Custom/Impls/ReviewRepositoryImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/Repositories/Custom/ReviewRepositoryCustom.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/Repositories/Custom/ReviewRepositoryCustom.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/Services/Module/ReviewService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/Services/Module/ReviewService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/Services/MultiService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/Services/MultiService.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
