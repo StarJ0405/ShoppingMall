@@ -1,5 +1,5 @@
 'use client'
-import { deleteImage, deleteImageList, getRecent, getUser, productRegist, saveImage, saveImageList } from '@/app/API/UserAPI';
+import { deleteImage, deleteImageList, getRecent, getUser, prodcutUpdate, saveImage, saveImageList } from '@/app/API/UserAPI';
 import Main from '@/app/Global/Layout/MainLayout';
 import Modal from '@/app/Global/Modal';
 import { redirect } from 'next/navigation';
@@ -7,41 +7,41 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import 'react-quill/dist/quill.snow.css';
 import QuillNoSSRWrapper from '@/app/Global/QuillNoSSRWrapper';
 import ReactQuill from 'react-quill';
+import { getDateTimeFormatInput } from '@/app/Global/Method';
 
-interface pageProps{
-    categories:any[]
+interface pageProps {
+    categories: any[]
+    product: any;
 }
 
-export default function Page(props:pageProps) {
+export default function Page(props: pageProps) {
     const [user, setUser] = useState(null as any);
+    const product = props.product;
     const categories = props.categories;
     const [isImageHover, setIsImageHover] = useState(false);
-
-    const [firstCategory, setFirstCategory] = useState(-1);
-    const [secondCategory, setSecondCategory] = useState(-1);
-    const [category, setCategory] = useState(-1);
-    const [url, setUrl] = useState('');
-    const [title, setTitle] = useState('');
-    const [simpleDescription, setSimpleDescription] = useState('');
-    const [dateLimit, setDateLimit] = useState(null as any);
-    const [remain, setRemain] = useState(0);
-    const [price, setPrice] = useState(0);
-    const [delivery, setDelivery] = useState('택배');
-    const [address, setAddress] = useState('전국(제주 도서산간지역 제외)');
-    const [receipt, setReceipt] = useState('국내거주해외셀러 : 구매대행 수수료에 대한 현금영수증만 발행이 가능하며, 판매자에게 직접 발행 요청 필요(11번가 발행불가)\n해외거주해외셀러 : 온라인 현금영수증 발급 불가, 신용카드 전표 정보는 나의 11번가 PC참조');
-    const [a_s, setAS] = useState('');
-    const [brand, setBrand] = useState('');
-    const [tags, setTags] = useState([] as string[]);
-    const [detail, setDetail] = useState('');
-    const [options, setOptions] = useState([] as any[][])
+    const [firstCategory, setFirstCategory] = useState(categories.findIndex(category => category?.name == product?.topCategoryName));
+    const [secondCategory, setSecondCategory] = useState((categories[firstCategory].categoryResponseDTOList as any[]).findIndex(category => category?.name == product?.middleCategoryName));
+    const [lastCategory, setLastCategory] = useState((categories[firstCategory].categoryResponseDTOList[secondCategory].categoryResponseDTOList as any[]).findIndex(category => category.name == product?.categoryName));
+    const [url, setUrl] = useState(product?.url ? product?.url : '');
+    const [title, setTitle] = useState(product?.title ? product?.title : '');
+    const [simpleDescription, setSimpleDescription] = useState(product?.description ? product?.description : '');
+    const [dateLimit, setDateLimit] = useState(new Date(product?.dateLimit));
+    const [remain, setRemain] = useState(product?.remain ? product?.remain : 0);
+    const [price, setPrice] = useState(product?.price ? product?.price : 0);
+    const [delivery, setDelivery] = useState(product?.delivery ? product?.delivery : '');
+    const [address, setAddress] = useState(product?.address ? product?.address : '');
+    const [receipt, setReceipt] = useState(product?.receipt ? product?.receipt : '');
+    const [a_s, setAS] = useState(product?.a_s ? product?.a_s : '');
+    const [brand, setBrand] = useState(product?.brand ? product?.brand : '');
+    const [tags, setTags] = useState((product?.tagList ? product?.tagList : []) as string[]);
+    const [detail, setDetail] = useState(product?.detail ? product?.detail : '');
+    const [options, setOptions] = useState(product?.optionListResponseDTOList ? product?.optionListResponseDTOList : [] as any[][])
     const [selectedOptionList, setSelectedOptionList] = useState([] as any[]);
     const [selectedOption, setSelectedOption] = useState(null as any);
     const [isModalOpen, setISModalOpen] = useState(-1);
     const [recentList, setRecentList] = useState(null as unknown as any[]);
     const quillInstance = useRef<ReactQuill>(null);
-
     const ACCESS_TOKEN = typeof window == 'undefined' ? null : localStorage.getItem('accessToken');
-
     const imageHandler = () => {
         const input = document.createElement('input') as HTMLInputElement;
         input.setAttribute('type', 'file');
@@ -110,17 +110,19 @@ export default function Page(props:pageProps) {
                         .catch(e => console.log(e));
                     deleteImage();
                     deleteImageList();
+                    console.log(product);
                 })
                 .catch(e => console.log(e));
         else
             redirect('/account/login');
     }, [ACCESS_TOKEN]);
     function Regist() {
-        if (category != -1)
-            productRegist({ categoryId: category, price: price, description: simpleDescription, detail: detail, dateLimit: dateLimit, remain: remain, title: title, delivery: delivery, address: address, receipt: receipt, a_s: a_s, brand: brand, tagList: tags, url: url, optionLists: options })
-                .then(() => window.location.href = '/')
+        if (lastCategory != -1) {
+            const categoryId = categories[firstCategory].categoryResponseDTOList[secondCategory].categoryResponseDTOList[lastCategory].id;
+            prodcutUpdate({ productId: product.id, categoryId: categoryId, price: price, description: simpleDescription, detail: detail, dateLimit: dateLimit, remain: remain, title: title, delivery: delivery, address: address, receipt: receipt, a_s: a_s, brand: brand, tagList: tags, url: url, optionLists: options })
+                .then(() => window.location.href = '/product/' + product.id)
                 .catch(e => console.log(e))
-        else alert('카테고리를 선택해주세요.');
+        } else alert('카테고리를 선택해주세요.');
     }
     function Change(file: any) {
         const formData = new FormData();
@@ -151,22 +153,22 @@ export default function Page(props:pageProps) {
                     <tr>
                         <th className='border border-black w-[150px]'>카테고리</th>
                         <td className='w-[1090px] px-2'>
-                            <select defaultValue={-1} autoFocus onChange={e => { setFirstCategory(Number(e.target.selectedOptions[0].value)); setSecondCategory(-1); setCategory(-1); }}>
+                            <select autoFocus defaultValue={firstCategory} onChange={e => { setFirstCategory(Number(e.target.selectedOptions[0].value)); setSecondCategory(-1); setLastCategory(-1); }}>
                                 <option value={-1} disabled>최상위 카테고리를 골라주세요.</option>
                                 {categories?.map((category, index) => <option key={index} value={index}>{category.name}</option>)}
                             </select>
                             {firstCategory >= 0 ?
-                                <select defaultValue={0} className='ml-2' onChange={e => { setSecondCategory(Number(e.target.selectedOptions[0].value)); setCategory(-1) }}>
-                                    <option value={0} disabled>상위 카테고리를 골라주세요.</option>
+                                <select defaultValue={secondCategory} className='ml-2' onChange={e => { setSecondCategory(Number(e.target.selectedOptions[0].value)); setLastCategory(-1) }}>
+                                    <option value={-1} disabled>상위 카테고리를 골라주세요.</option>
                                     {(categories[firstCategory].categoryResponseDTOList as any[])?.map((category, index) => <option key={index} value={index}>{category.name}</option>)}
                                 </select>
                                 :
                                 <></>
                             }
                             {secondCategory >= 0 ?
-                                <select defaultValue={0} className='ml-2' onChange={e => setCategory(Number(e.target.selectedOptions[0].value))}>
-                                    <option value={0} disabled>하위 카테고리를 골라주세요.</option>
-                                    {(categories[firstCategory].categoryResponseDTOList[secondCategory].categoryResponseDTOList as any[])?.map((category, index) => <option key={index} value={category.id}>{category.name}</option>)}
+                                <select defaultValue={lastCategory} className='ml-2' onChange={e => setLastCategory(Number(e.target.selectedOptions[0].value))}>
+                                    <option value={-1} disabled>하위 카테고리를 골라주세요.</option>
+                                    {(categories[firstCategory].categoryResponseDTOList[secondCategory].categoryResponseDTOList as any[])?.map((category, index) => <option key={index} value={index}>{category.name}</option>)}
                                 </select>
                                 :
                                 <></>
@@ -191,7 +193,7 @@ export default function Page(props:pageProps) {
                     </tr>
                     <tr>
                         <th className='border border-black'>판매 종료일</th>
-                        <td className='px-2'><input type='datetime-local' placeholder='판매 기간' defaultValue={dateLimit} onChange={e => setDateLimit(e.target.value)} max="9999-12-31T23:59" /></td>
+                        <td className='px-2'><input type='datetime-local' placeholder='판매 기간' defaultValue={getDateTimeFormatInput(product?.dateLimit)} onChange={e => setDateLimit(new Date(e.target.value))} max="9999-12-31T23:59" /></td>
                     </tr>
                     <tr>
                         <th className='border border-black'>판매 수량</th>
@@ -203,16 +205,16 @@ export default function Page(props:pageProps) {
                     </tr>
                     <tr>
                         <th className='border border-black'>배송방법</th>
-                        <td className='px-2'><input type='text' placeholder='배송 방법..' defaultValue={'택배'} onChange={e => setDelivery(e.target.value)} /></td>
+                        <td className='px-2'><input type='text' placeholder='배송 방법..' defaultValue={delivery} onChange={e => setDelivery(e.target.value)} /></td>
                     </tr>
                     <tr>
                         <th className='border border-black'>배송가능지역</th>
-                        <td className='px-2'><input type='text' placeholder='배송가능 지역 입력..' defaultValue={'전국(제주 도서산간지역 제외)'} onChange={e => setAddress(e.target.value)} /></td>
+                        <td className='px-2'><input type='text' placeholder='배송가능 지역 입력..' defaultValue={address} onChange={e => setAddress(e.target.value)} /></td>
                     </tr>
                     <tr>
                         <th className='border border-black'>영수증발행</th>
                         <td className='px-2'>
-                            <textarea placeholder='영수발행 방법..' className='w-full' defaultValue={'국내거주해외셀러 : 구매대행 수수료에 대한 현금영수증만 발행이 가능하며, 판매자에게 직접 발행 요청 필요(11번가 발행불가)\n해외거주해외셀러 : 온라인 현금영수증 발급 불가, 신용카드 전표 정보는 나의 11번가 PC참조'} onChange={e => setReceipt(e.target.value)}></textarea>
+                            <textarea placeholder='영수발행 방법..' className='w-full' defaultValue={receipt} onChange={e => setReceipt(e.target.value)}></textarea>
                         </td>
                     </tr>
                     <tr>
@@ -244,7 +246,7 @@ export default function Page(props:pageProps) {
                                         :
                                         <option value={-1} disabled>옵션 목록을 선택해주세요</option>
                                     }
-                                    {options?.map((option: any, index) => <option key={index} value={index}>{option.name}</option>)}
+                                    {/* {options?.map((option: any, index) => <option key={index} value={index}>{option.name}</option>)} */}
                                 </select>
                                 <button className='btn btn-xs btn-info' onClick={() => openModal(0)}>옵션 목록 추가</button>
                                 <button className='btn btn-xs btn-error' disabled={selectedOptionList.length <= 0} onClick={() => {
@@ -295,7 +297,7 @@ export default function Page(props:pageProps) {
                 </tbody>
             </table>
             <div className=''>
-                <button className='btn btn-xs btn-info' onClick={() => Regist()}>상품 등록</button><button className='btn btn-xs btn-error'>취소</button>
+                <button className='btn btn-xs btn-info' onClick={() => Regist()}>상품 수정</button><button className='btn btn-xs btn-error'>취소</button>
             </div>
         </div>
         <Modal open={isModalOpen > -1} onClose={() => setISModalOpen(-1)} className='w-[300px] h-[150px] flex flex-col justify-center items-center' escClose={true} outlineClose={true} >

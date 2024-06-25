@@ -12,7 +12,7 @@ interface pageProps {
 export default function Page(props: pageProps) {
     const [user, setUser] = useState(null as any);
     const [productList, setProductList] = useState(props.productList.content);
-    const [maxPage,setMaxPage] = useState(props.productList.totalPages);
+    const [maxPage, setMaxPage] = useState(props.productList.totalPages);
     const ACCESS_TOKEN = typeof window === 'undefined' ? null : localStorage.getItem('accessToken');
     const [recentList, setRecentList] = useState(null as unknown as any[]);
     const [page, setPage] = useState(0);
@@ -34,11 +34,10 @@ export default function Page(props: pageProps) {
             const windowHeight = window.innerHeight;
             const fullHeight = document.body.scrollHeight;
 
-            if (scrollLocation + windowHeight >= fullHeight && page < maxPage-1) {
+            if (!isLoading && scrollLocation + windowHeight >= fullHeight && page < maxPage - 1) {
                 setIsLoading(true);
                 getProductRecentList(page + 1)
                     .then(response => {
-                        console.log(page,"test",response);
                         if (response.size > 0) {
                             const newlist = [...productList, ...response.content];
                             setProductList(newlist);
@@ -63,7 +62,7 @@ export default function Page(props: pageProps) {
                     <a href={'/product/' + product.id} key={index} className='mr-4'>
                         <div className='w-[394px] h-[431px] flex flex-col p-4 hover:border border-gray-500'>
                             <img src={product?.url ? product.url : '/empty_product.png'} className='w-[190px] h-[190px]' />
-                            <label className='text-lg mt-2'>{product?.title}</label>
+                            <label className='text-lg mt-2'>{product?.title?product?.title:'제목 없음'}</label>
                             {/* <span className='text-xl mt-2'><label className='text-red-500 text-2xl'>9% </label> <label className='font-bold text-2xl'>10,400원</label>~ <label className='text-gray-300 line-through'>11,550원</label></span> */}
                             <label className='text-xl mt-2 font-bold text-2xl'>{product?.price.toLocaleString('ko-KR')}원</label>
                             <div className='mt-2 flex'>

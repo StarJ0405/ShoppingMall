@@ -109,6 +109,28 @@ export const productRegist = async (data: productProps) => {
     const response = await UserApi.post('/api/product', data);
     return response.data;
 }
+interface updateProductProps {
+    productId:number,
+    categoryId: number,
+    price: number,
+    description: string,
+    detail: string,
+    dateLimit: Date,
+    remain: number,
+    title: string,
+    delivery: string,
+    address: string,
+    receipt: string,
+    a_s: string,
+    brand: string,
+    tagList: string[],
+    url: string,
+    optionLists: any
+}
+export const prodcutUpdate = async(data: updateProductProps)=>{
+    const response = await UserApi.put('/api/product', data);
+    return response.data;
+}
 export const deleteImage = async () => {
     const response = await UserApi.delete('/api/image');
     return response.data;
@@ -222,5 +244,9 @@ interface postReview {
 }
 export const postReview = async (data: postReview) => {
     const response = await UserApi.post('/api/review', data);
+    return response.data;
+}
+export const getMyProducts = async () => {
+    const response = await UserApi.get('/api/product/myProducts');
     return response.data;
 }
