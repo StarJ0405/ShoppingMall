@@ -636,7 +636,7 @@ public class MultiService {
         for (CartItem cartItem : cartItemList) {
             Double discount = this.getProductDiscount(cartItem.getProduct());
             Integer discountPrice = this.getProductDiscountPrice(cartItem.getProduct(), discount);
-            maxPoint += discountPrice;
+            maxPoint += (long) discountPrice * cartItem.getCount();
         }
 
 

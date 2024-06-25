@@ -4,18 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="896430db-190c-47f3-9b43-d1c8610f775f" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/generated/com/team/shopping/Domains/QPaymentProduct.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/generated/com/team/shopping/Domains/QPaymentProduct.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/Controllers/ReviewController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/Controllers/ReviewController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/DTOs/PaymentProductResponseDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/DTOs/PaymentProductResponseDTO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/DTOs/ReviewRequestDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/DTOs/ReviewRequestDTO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/Domains/PaymentProduct.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/Domains/PaymentProduct.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/Repositories/ReviewRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/Repositories/ReviewRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/Services/Module/PaymentProductService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/Services/Module/PaymentProductService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/Services/Module/ReviewService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/Services/Module/ReviewService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/Services/MultiService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/Services/MultiService.java" afterDir="false" />
-    </list>
+    <list default="true" id="896430db-190c-47f3-9b43-d1c8610f775f" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
