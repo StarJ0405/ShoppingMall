@@ -90,9 +90,9 @@ public class UserService {
     }
 
     public void otherCheck(String email, String nickname, String phone) {
-        if (userRepository.isDuplicateEmail(email)) throw new DataDuplicateException("email");
-        if (userRepository.isDuplicateNickname(nickname)) throw new DataDuplicateException("nickname");
-        if (userRepository.isDuplicatePhone(phone)) throw new DataDuplicateException("phone");
+        if (userRepository.isDuplicateEmail(email).size()>1) throw new DataDuplicateException("email");
+        if (userRepository.isDuplicateNickname(nickname).size()>1) throw new DataDuplicateException("nickname");
+        if (userRepository.isDuplicatePhone(phone).size()>1) throw new DataDuplicateException("phone");
     }
 
     public boolean isMatch(String password1, String password2) {
