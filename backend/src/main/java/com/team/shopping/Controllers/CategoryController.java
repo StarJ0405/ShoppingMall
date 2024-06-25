@@ -22,7 +22,7 @@ public class CategoryController {
 
     @GetMapping("/search")
     public ResponseEntity<?> searchedProductList (@RequestHeader("Page") int page,
-                                                  @RequestParam(value = "Keyword", defaultValue = "") String keyword,
+                                                  @RequestHeader(value = "Keyword", defaultValue = "") String keyword,
                                                   @RequestHeader("Sort") int sort,
                                                   @RequestHeader("CategoryId") Long categoryId){
         try {
