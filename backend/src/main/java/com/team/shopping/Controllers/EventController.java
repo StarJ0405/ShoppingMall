@@ -55,7 +55,7 @@ public class EventController {
         return tokenRecord.getResponseEntity();
     }
 
-    @GetMapping
+    @GetMapping("/list")
     public ResponseEntity<?> getEventList (@RequestHeader("Authorization") String accessToken) {
         TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
         try {
@@ -66,13 +66,15 @@ public class EventController {
             }
         }catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("제품을 찾지 못했습니다.");
+        }catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("권한이 없습니다.");
         }
         return tokenRecord.getResponseEntity();
     }
 
-    @GetMapping("/id")
+    @GetMapping
     public ResponseEntity<?> getEvent (@RequestHeader("Authorization") String accessToken,
-                                       @RequestParam("EventId")Long eventId) {
+                                       @RequestHeader("EventId")Long eventId) {
         TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
         try {
             if (tokenRecord.isOK()) {
@@ -82,6 +84,8 @@ public class EventController {
             }
         }catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("제품을 찾지 못했습니다.");
+        }catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("권한이 없습니다.");
         }
         return tokenRecord.getResponseEntity();
     }

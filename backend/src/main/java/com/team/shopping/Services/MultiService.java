@@ -1444,6 +1444,9 @@ public class MultiService {
         List<EventResponseDTO> eventResponseDTOList = new ArrayList<>();
         List<Event> eventList = this.eventService.getMyList(user);
         for (Event event : eventList) {
+            if (!user.equals(event.getCreator())) {
+                throw new IllegalArgumentException("not role");
+            }
             eventResponseDTOList.add(this.getEventDTO(event));
         }
         return eventResponseDTOList;
@@ -1451,9 +1454,11 @@ public class MultiService {
 
     @Transactional
     public EventResponseDTO getEvent(String username, Long eventId) {
-
+        SiteUser user = this.userService.get(username);
         Event event = this.eventService.get(eventId);
-
+        if (!user.equals(event.getCreator())) {
+            throw new IllegalArgumentException("not role");
+        }
         return this.getEventDTO(event);
     }
 
