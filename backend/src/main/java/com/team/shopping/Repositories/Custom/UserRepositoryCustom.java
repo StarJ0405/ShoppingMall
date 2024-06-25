@@ -1,9 +1,13 @@
 package com.team.shopping.Repositories.Custom;
 
+import com.team.shopping.Domains.SiteUser;
+
+import java.util.List;
+
 public interface UserRepositoryCustom {
 
     boolean isDuplicateUsername(String username);
-    boolean isDuplicateNickname(String nickname);
-    boolean isDuplicateEmail(String email);
-    boolean isDuplicatePhone(String phone);
+    List<SiteUser> isDuplicateNickname(String nickname);
+    List<SiteUser> isDuplicateEmail(String email);
+    List<SiteUser> isDuplicatePhone(String phone);
 }

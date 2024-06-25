@@ -2,8 +2,11 @@ package com.team.shopping.Repositories.Custom.Impls;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.team.shopping.Domains.QSiteUser;
+import com.team.shopping.Domains.SiteUser;
 import com.team.shopping.Repositories.Custom.UserRepositoryCustom;
 import lombok.RequiredArgsConstructor;
+
+import java.util.List;
 
 @RequiredArgsConstructor
 public class UserRepositoryImpl implements UserRepositoryCustom {
@@ -16,17 +19,17 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
     }
 
     @Override
-    public boolean isDuplicateNickname(String nickname) {
-        return !jpaQueryFactory.select(qSiteUser).from(qSiteUser).where(qSiteUser.nickname.eq(nickname)).fetch().isEmpty();
+    public List<SiteUser> isDuplicateNickname(String nickname) {
+        return jpaQueryFactory.select(qSiteUser).from(qSiteUser).where(qSiteUser.nickname.eq(nickname)).fetch();
     }
 
     @Override
-    public boolean isDuplicateEmail(String email) {
-        return !jpaQueryFactory.select(qSiteUser).from(qSiteUser).where(qSiteUser.email.eq(email)).fetch().isEmpty();
+    public List<SiteUser> isDuplicateEmail(String email) {
+        return jpaQueryFactory.select(qSiteUser).from(qSiteUser).where(qSiteUser.email.eq(email)).fetch();
     }
 
     @Override
-    public boolean isDuplicatePhone(String phone) {
-        return !jpaQueryFactory.select(qSiteUser).from(qSiteUser).where(qSiteUser.password.eq(phone)).fetch().isEmpty();
+    public List<SiteUser> isDuplicatePhone(String phone) {
+        return jpaQueryFactory.select(qSiteUser).from(qSiteUser).where(qSiteUser.password.eq(phone)).fetch();
     }
 }

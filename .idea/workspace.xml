@@ -5,12 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="896430db-190c-47f3-9b43-d1c8610f775f" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/Controllers/ProductController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/Controllers/ProductController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/Domains/PaymentProductDetail.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/Domains/PaymentProductDetail.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/Enums/ImageKey.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/Enums/ImageKey.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/Enums/PaymentStatus.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/Enums/PaymentStatus.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/Repositories/Custom/Impls/UserRepositoryImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/Repositories/Custom/Impls/UserRepositoryImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/Repositories/Custom/UserRepositoryCustom.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/Repositories/Custom/UserRepositoryCustom.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/Services/Module/UserService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/Services/Module/UserService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/Services/MultiService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/Services/MultiService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/app/product/create/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/app/product/create/page.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -25,9 +24,12 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 0
-}]]></component>
+  <component name="ProjectCodeStyleSettingsMigration">
+    <option name="version" value="2" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 0
+}</component>
   <component name="ProjectId" id="2hlbSbSRc0Oqdid8GI0QKRbBfOI" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -35,11 +37,35 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "Application.ShoppingApplication.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "main",
-    "kotlin-language-version-configured": "true"
+    "git-widget-placeholder": "LEE",
+    "kotlin-language-version-configured": "true",
+    "project.structure.last.edited": "Modules",
+    "project.structure.proportion": "0.0",
+    "project.structure.side.proportion": "0.0"
   }
 }]]></component>
+  <component name="RunManager">
+    <configuration name="ShoppingApplication" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="com.team.shopping.ShoppingApplication" />
+      <module name="shopping.main" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.team.shopping.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Application.ShoppingApplication" />
+      </list>
+    </recent_temporary>
+  </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
