@@ -35,8 +35,8 @@ public class EventService {
                 .build());
     }
 
-    public void disableActive (Event event) {
-        event.setActive(false);
+    public void changeActive (Event event) {
+        event.setActive(!event.getActive());
         this.eventRepository.save(event);
     }
 
@@ -45,7 +45,11 @@ public class EventService {
     }
 
     public List<Event> findByEndDateAfter (LocalDateTime now) {
-        return this.eventRepository.findByEndDateAfter (now);
+        return this.eventRepository.findByEndDateGreaterThanEqual(now);
+    }
+
+    public List<Event> findByStartDateAfter (LocalDateTime now) {
+        return this.eventRepository.findByStartDateGreaterThanEqual(now);
     }
 
     public void delete (Event event) {
