@@ -20,7 +20,7 @@ public class Review {
     @ManyToOne(fetch = FetchType.LAZY)
     private SiteUser author;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY )
     private Product product;
 
     @Column(length = 50)

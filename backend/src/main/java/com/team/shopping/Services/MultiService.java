@@ -65,6 +65,8 @@ public class MultiService {
     private final MultiKeyService multiKeyService;
     private final EventService eventService;
     private final EventProductService eventProductService;
+    private final ChatRoomService chatRoomService;
+    private final ChatMessageService chatMessageService;
 
 
     /**
@@ -1560,7 +1562,6 @@ public class MultiService {
                 eventProductService.delete(eventProduct);
             }
         }
-
     }
 
     // 초 분 시 일 월 주
@@ -1710,6 +1711,57 @@ public class MultiService {
         }
     }
 
+    /**
+     * Chat
+     */
+
+    @Transactional
+    public ChatRoomResponseDTO ChatRoom(String username, String targetName) {
+        SiteUser sendUser = userService.get(username);
+        SiteUser acceptUser = userService.get(targetName);
+
+        if (sendUser != null && acceptUser != null) {
+            Optional<ChatRoom> _chatRoom = chatRoomService.getChatRoom(sendUser, acceptUser);
+            if (_chatRoom.isEmpty())
+                _chatRoom = Optional.ofNullable(chatRoomService.save(sendUser, acceptUser));
+
+            if (_chatRoom.isPresent())
+                return ChatRoomResponseDTO.builder().id(_chatRoom.get().getId())
+                        .sendUsername(_chatRoom.get().getUser1().getUsername())
+                        .acceptUsername(_chatRoom.get().getUser2().getUsername())
+                        .createDate(this.dateTimeTransfer(_chatRoom.get().getCreateDate()))
+                        .modifyDate(this.dateTimeTransfer(_chatRoom.get().getModifyDate()))
+                        .build();
+        }
+        return null;
+    }
+
+    @Transactional
+    public ChatRoomResponseDTO saveChatMessage(Long roomId, String message, String sender, int type) {
+        SiteUser senderUser = userService.get(sender);
+        ChatRoom chatRoom = chatRoomService.get(roomId);
+        if (chatRoom != null && senderUser != null) {
+            chatMessageService.save(chatRoom, senderUser, message, type);
+            List<ChatMessage> chatMessages = chatMessageService.getChatList(chatRoom);
+            List<ChatMessageResponseDTO> list = new ArrayList<>();
+            for (ChatMessage chatMessage : chatMessages) {
+                ChatMessageResponseDTO chatMessageResponseDTO = ChatMessageResponseDTO.builder()
+                        .message(chatMessage.getMessage())
+                        .sender(chatMessage.getSender().getUsername())
+                        .createDate(this.dateTimeTransfer(chatMessage.getCreateDate())).build();
+                list.add(chatMessageResponseDTO);
+            }
+            return ChatRoomResponseDTO.builder()
+                    .id(chatRoom.getId())
+                    .sendUsername(chatRoom.getUser1().getUsername())
+                    .acceptUsername(chatRoom.getUser2().getUsername())
+                    .createDate(this.dateTimeTransfer(chatRoom.getCreateDate()))
+                    .modifyDate(this.dateTimeTransfer(chatRoom.getModifyDate()))
+                    .chats(list)
+                    .build();
+        }
+        return null;
+    }
 
 }
 
