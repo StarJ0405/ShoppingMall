@@ -63,6 +63,8 @@ public class MultiService {
     private final MultiKeyService multiKeyService;
     private final EventService eventService;
     private final EventProductService eventProductService;
+    private final ChatRoomService chatRoomService;
+    private final ChatMessageService chatMessageService;
 
 
     /**
@@ -188,7 +190,7 @@ public class MultiService {
      * address
      */
 
-    private List<AddressResponseDTO> getAddressDTOList (SiteUser user) {
+    private List<AddressResponseDTO> getAddressDTOList(SiteUser user) {
         List<AddressResponseDTO> addressResponseDTOList = new ArrayList<>();
         List<Address> addressList = this.addressService.getList(user);
 
@@ -342,11 +344,12 @@ public class MultiService {
         }
         return responseDTOList;
     }
+
     @Transactional
     public void deleteCart(Product product) {
         Optional<CartItem> _cartItem = cartItemService.findByProduct(product);
         // 카트아이템 찾아서 카트 디테일도 먼저 삭제시키고 진행해야함
-        if (_cartItem.isPresent()){
+        if (_cartItem.isPresent()) {
             List<CartItemDetail> cartItemDetailList = cartItemDetailService.getList(_cartItem.get());
             if (cartItemDetailList != null) {
                 for (CartItemDetail cartItemDetail : cartItemDetailList)
@@ -723,8 +726,6 @@ public class MultiService {
     }
 
 
-
-
     @Transactional
     public void saveProduct(ProductCreateRequestDTO requestDTO, String username) {
         SiteUser user = this.userService.get(username);
@@ -944,6 +945,7 @@ public class MultiService {
         if (product != null)
             this.productQAService.update(requestDTO.getContent(), user, _productQA.get());
     }
+
     @Transactional
     public void deleteProductQA(Product product) {
         Optional<ProductQA> _productQA = productQAService.findByProduct(product);
@@ -1432,6 +1434,7 @@ public class MultiService {
         Event updatedEvent = this.eventService.updateEvent(_event, eventRequestDTO);
         return this.getEventDTO(updatedEvent, productResponseDTOList, user);
     }
+
     @Transactional
     public void deleteByEventProduct(Product product) {
         List<EventProduct> eventProductList = eventProductService.findByProduct(product);
@@ -1440,7 +1443,6 @@ public class MultiService {
                 eventProductService.delete(eventProduct);
             }
         }
-
     }
 
     // 초 분 시 일 월 주
@@ -1569,6 +1571,58 @@ public class MultiService {
             }
             file.delete();
         }
+    }
+
+    /**
+     * Chat
+     */
+
+    @Transactional
+    public ChatRoomResponseDTO ChatRoom(String username, String targetName) {
+        SiteUser sendUser = userService.get(username);
+        SiteUser acceptUser = userService.get(targetName);
+
+        if (sendUser != null && acceptUser != null) {
+            Optional<ChatRoom> _chatRoom = chatRoomService.getChatRoom(sendUser, acceptUser);
+            if (_chatRoom.isEmpty())
+                _chatRoom = Optional.ofNullable(chatRoomService.save(sendUser, acceptUser));
+
+            if (_chatRoom.isPresent())
+                return ChatRoomResponseDTO.builder().id(_chatRoom.get().getId())
+                        .sendUsername(_chatRoom.get().getUser1().getUsername())
+                        .acceptUsername(_chatRoom.get().getUser2().getUsername())
+                        .createDate(this.dateTimeTransfer(_chatRoom.get().getCreateDate()))
+                        .modifyDate(this.dateTimeTransfer(_chatRoom.get().getModifyDate()))
+                        .build();
+        }
+        return null;
+    }
+
+    @Transactional
+    public ChatRoomResponseDTO saveChatMessage(Long roomId, String message, String sender, int type) {
+        SiteUser senderUser = userService.get(sender);
+        ChatRoom chatRoom = chatRoomService.get(roomId);
+        if (chatRoom != null && senderUser != null) {
+            chatMessageService.save(chatRoom, senderUser, message, type);
+            List<ChatMessage> chatMessages = chatMessageService.getChatList(chatRoom);
+            List<ChatMessageResponseDTO> list = new ArrayList<>();
+            for (ChatMessage chatMessage : chatMessages) {
+                ChatMessageResponseDTO chatMessageResponseDTO = ChatMessageResponseDTO.builder()
+                        .message(chatMessage.getMessage())
+                        .sender(chatMessage.getSender().getUsername())
+                        .createDate(this.dateTimeTransfer(chatMessage.getCreateDate())).build();
+                list.add(chatMessageResponseDTO);
+            }
+            return ChatRoomResponseDTO.builder()
+                    .id(chatRoom.getId())
+                    .sendUsername(chatRoom.getUser1().getUsername())
+                    .acceptUsername(chatRoom.getUser2().getUsername())
+                    .createDate(this.dateTimeTransfer(chatRoom.getCreateDate()))
+                    .modifyDate(this.dateTimeTransfer(chatRoom.getModifyDate()))
+                    .chats(list)
+                    .build();
+        }
+        return null;
     }
 
 }

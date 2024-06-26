@@ -1,6 +1,7 @@
 package com.team.shopping.Domains;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -26,4 +27,11 @@ public class ChatRoom {
     private LocalDateTime createDate;
 
     private LocalDateTime modifyDate;
+
+    @Builder
+    public ChatRoom(SiteUser user1, SiteUser user2) {
+        this.user1 = user1;
+        this.user2 = user2;
+        this.createDate = LocalDateTime.now();
+    }
 }

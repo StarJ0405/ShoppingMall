@@ -6,4 +6,7 @@ import lombok.Getter;
 @Getter
 public enum Type {
     REPORT, FAQ, NOTICE
+    //
+    ;
+
 }

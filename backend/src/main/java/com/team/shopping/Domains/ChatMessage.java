@@ -2,6 +2,7 @@ package com.team.shopping.Domains;
 
 import com.team.shopping.Enums.Type;
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -30,4 +31,13 @@ public class ChatMessage {
     private Type type;
 
     private LocalDateTime createDate;
+
+    @Builder
+    public ChatMessage(SiteUser sender, ChatRoom chatRoom, String message, Type type) {
+        this.sender = sender;
+        this.chatRoom = chatRoom;
+        this.message = message;
+        this.type = type;
+        this.createDate = LocalDateTime.now();
+    }
 }
