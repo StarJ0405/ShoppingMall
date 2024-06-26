@@ -1328,6 +1328,25 @@ public class MultiService {
      */
 
     @Transactional
+    public List<ArticleResponseDTO> getMyArticle(String username, int _type) {
+
+        SiteUser user = this.userService.get(username);
+        Type type = Type.values()[_type];
+        List<ArticleResponseDTO> articleResponseDTOList = new ArrayList<>();
+        List<Article> articleList = this.articleService.getMyArticleList(user, type);
+
+        if (articleList.isEmpty()) {
+            return articleResponseDTOList;
+        }
+
+            for (Article article : articleList) {
+                articleResponseDTOList.add(this.getArticleResponseDTO(article));
+            }
+        return articleResponseDTOList;
+        }
+
+
+    @Transactional
     public void deleteArticle(String username, Long articleId) {
         SiteUser user = this.userService.get(username);
         Article article = this.articleService.get(articleId);
@@ -1366,7 +1385,11 @@ public class MultiService {
     }
 
     private ArticleResponseDTO getArticleResponseDTO(Article article) {
-        return ArticleResponseDTO.builder().article(article).siteUser(article.getAuthor()).createDate(this.dateTimeTransfer(article.getCreateDate())).modifyDate(this.dateTimeTransfer(article.getModifyDate())).build();
+        return ArticleResponseDTO.builder()
+                .article(article).siteUser(article.getAuthor())
+                .createDate(this.dateTimeTransfer(article.getCreateDate()))
+                .modifyDate(this.dateTimeTransfer(article.getModifyDate()))
+                .build();
     }
 
     /**
@@ -1688,6 +1711,7 @@ public class MultiService {
             file.delete();
         }
     }
+
 
 
 }

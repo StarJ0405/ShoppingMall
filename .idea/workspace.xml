@@ -5,9 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="896430db-190c-47f3-9b43-d1c8610f775f" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/Domains/Event.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/Domains/Event.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/Repositories/EventRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/Repositories/EventRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/Services/Module/EventService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/Services/Module/EventService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/Repositories/Custom/ArticleRepositoryCustom.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/Repositories/Custom/Impls/ArticleRepositoryImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/Controllers/ArticleController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/Controllers/ArticleController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/Repositories/ArticleRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/Repositories/ArticleRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/Services/Module/ArticleService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/Services/Module/ArticleService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/Services/MultiService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/Services/MultiService.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -19,6 +22,14 @@
     <projectState path="$PROJECT_DIR$/backend">
       <ProjectState />
     </projectState>
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Interface" />
+        <option value="Class" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
