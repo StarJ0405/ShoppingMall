@@ -11,6 +11,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -61,4 +62,8 @@ public class ArticleService {
     }
 
 
+    public List<Article> getMyArticleList(SiteUser user, Type type) {
+
+        return this.articleRepository.findMyArticleList(user, type);
+    }
 }
