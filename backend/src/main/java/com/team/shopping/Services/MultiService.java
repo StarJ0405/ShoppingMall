@@ -511,8 +511,6 @@ public class MultiService {
     }
 
 
-
-
     @Transactional
     public PaymentLogResponseDTO addPaymentLog(String username, PaymentLogRequestDTO paymentLogRequestDTO) {
         SiteUser user = this.userService.get(username);
@@ -602,7 +600,7 @@ public class MultiService {
         return paymentLogResponseDTO;
     }
 
-    private Long pointCal (SiteUser user, PaymentLogRequestDTO paymentLogRequestDTO) {
+    private Long pointCal(SiteUser user, PaymentLogRequestDTO paymentLogRequestDTO) {
 
         Long point = paymentLogRequestDTO.getPoint();
         List<CartItem> cartItemList = new ArrayList<>();
@@ -1339,11 +1337,11 @@ public class MultiService {
             return articleResponseDTOList;
         }
 
-            for (Article article : articleList) {
-                articleResponseDTOList.add(this.getArticleResponseDTO(article));
-            }
-        return articleResponseDTOList;
+        for (Article article : articleList) {
+            articleResponseDTOList.add(this.getArticleResponseDTO(article));
         }
+        return articleResponseDTOList;
+    }
 
 
     @Transactional
@@ -1360,7 +1358,7 @@ public class MultiService {
 
     @Transactional
     public Page<ArticleResponseDTO> getArticleList(int type, int page) {
-        Page<Article> articleList = this.articleService.getArticleList(Type.values()[type],page);
+        Page<Article> articleList = this.articleService.getArticleList(Type.values()[type], page);
         return articleList.map(this::getArticleResponseDTO);
     }
 
@@ -1711,7 +1709,6 @@ public class MultiService {
             file.delete();
         }
     }
-
 
 
 }
