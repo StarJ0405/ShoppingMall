@@ -83,18 +83,33 @@ export default function Page(props: pageProps) {
                     </tr>)}
                 </tbody>
             </table>
-            <button className="btn btn-info btn-sm w-[100px] self-end text-white mb-4" onClick={() => { setIsEventModal(true); setSelectedList([]); setStartDate(null); setEndDate(null); setDiscount(0); setIsModify(false); setEventId(-1); }}>이벤트 등록</button>
+            <button className="btn btn-info btn-sm w-[100px] self-end text-white mb-4" onClick={() => { setIsEventModal(true); setSelectedList([]); setStartDate(new Date()); setEndDate(new Date()); setDiscount(0); setIsModify(false); setEventId(-1); }}>이벤트 등록</button>
             <Modal open={isEventModal} onClose={() => setIsEventModal(false)} className="" escClose={true} outlineClose={true}>
                 <div className="flex flex-col w-[744px] h-[752px]">
                     <div className="text-white bg-red-500 h-[37px] py-2 px-4 font-bold">이벤트 등록</div>
                     <div className="px-4 flex flex-col text-center">
                         <div className="flex mt-5">
                             <div className="w-[100px]">시작일</div>
-                            <input className="input input-bordered input-sm" type="datetime-local" defaultValue={getDateTimeFormatInput(startDate)} onChange={e => setStartDate(e.target.value)} max="9999-12-31T23:59" />
+                            <input className="input input-bordered input-sm" type="datetime-local" defaultValue={getDateTimeFormatInput(startDate)} onChange={e => {
+                                let value = e.target.value;
+                                if(value == '' )
+                                    return;
+                                value = value.split(":")[0] + ":00"
+                                e.target.value = value;
+                                setStartDate(value)
+                            }} max="9999-12-31T23:59" />
                         </div>
                         <div className="flex mt-5">
                             <div className="w-[100px]">종료일</div>
-                            <input className="input input-bordered input-sm" type="datetime-local" defaultValue={getDateTimeFormatInput(endDate)} onChange={e => setEndDate(e.target.value)} max="9999-12-31T23:59" />
+                            <input className="input input-bordered input-sm" type="datetime-local" defaultValue={getDateTimeFormatInput(endDate)} onChange={e => {
+                                let value = e.target.value;
+                                if(value == '' )
+                                    return;
+                                console.log(value);
+                                value = value.split(":")[0] + ":00"
+                                e.target.value = value;
+                                setEndDate(e.target.value);
+                            }} max="9999-12-31T23:59" />
                         </div>
                         <div className="flex mt-5">
                             <div className="w-[100px]">할인율</div>
