@@ -1,10 +1,11 @@
 'use client'
-import { getRecent, getUser, saveImage, updateUser, updateUserPassword } from '@/app/API/UserAPI';
+import { getCartList, getRecent, getUser, saveImage, updateUser, updateUserPassword } from '@/app/API/UserAPI';
 import { Check, PhoneNumberCheck, PhoneString, checkInput } from '@/app/Global/Method';
 import { redirect } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Profile from '@/app/Global/Layout/ProfileLayout';
 import Modal from '@/app/Global/Modal';
+import { getCategories } from '@/app/API/NonUserAPI';
 interface pageProps {
   categories: any[]
 }
@@ -21,6 +22,7 @@ export default function Page(props: pageProps) {
   const [canShow, setCanShow] = useState(false);
   const [passwordError, setPasswordError] = useState('');
   const [recentList, setRecentList] = useState(null as unknown as any[]);
+  const [categories, setCategories] = useState(props.categories);
   function Change(file: any) {
     const formData = new FormData();
     formData.append('file', file);
@@ -43,6 +45,9 @@ export default function Page(props: pageProps) {
           getRecent()
             .then(r => setRecentList(r))
             .catch(e => console.log(e));
+          getCategories()
+            .then(r => setCategories(r))
+            .then(e => console.log(e));
         })
         .catch(e => console.log(e));
     else
@@ -104,7 +109,7 @@ export default function Page(props: pageProps) {
 
       });
   }
-  return <Profile user={user} recentList={recentList} setRecentList={setRecentList} categories={props.categories}>
+  return <Profile user={user} recentList={recentList} setRecentList={setRecentList} categories={categories}>
     <div className='flex items-end'>
       <label className='text-xl font-bold'><label className='text-xl text-red-500 font-bold'>회원정보</label> 변경</label>
       <label className='text-xs h-[14px] border-l-2 border-gray-400 ml-2 mb-[5px] pl-2'>고객님의 회원정보를 수정하실 수 있습니다. 회원정보를 변경하시고 반드시 하단에 있는 <label className='font-bold'>확인</label> 버튼을 클릭해 주셔야 합니다.</label>

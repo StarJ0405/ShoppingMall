@@ -1,5 +1,6 @@
 'use client'
 
+import { getCategories } from '@/app/API/NonUserAPI';
 import { deleteCartList, getCartList, getRecent, getUser, updateCartList } from '@/app/API/UserAPI';
 import Main from '@/app/Global/Layout/MainLayout';
 import { redirect } from 'next/navigation';
@@ -15,6 +16,8 @@ export default function Page(props: pageProps) {
     const [cartList, setCartList] = useState(null as unknown as any[]);
     const [price, setPrice] = useState(0);
     const [discountedPrice, setDisCountedPrice] = useState(0);
+    const [categories, setCategories] = useState(props.categories);
+
     useEffect(() => {
         if (ACCESS_TOKEN)
             getUser()
@@ -26,6 +29,9 @@ export default function Page(props: pageProps) {
                     getCartList()
                         .then(r => setCartList(r))
                         // .then(r => { setCartList(r); console.log(r) })
+                        .catch(e => console.log(e));
+                    getCategories()
+                        .then(r => setCategories(r))
                         .catch(e => console.log(e));
                     localStorage.removeItem('order');
                 })
@@ -83,7 +89,7 @@ export default function Page(props: pageProps) {
         });
         return price * cart.count;
     }
-    return <Main recentList={recentList} setRecentList={setRecentList} user={user} categories={props.categories}>
+    return <Main recentList={recentList} setRecentList={setRecentList} user={user} categories={categories}>
         <div className='flex flex-col w-[1240px]'>
             <div className='divider'></div>
             <div className='flex justify-between'>
@@ -119,7 +125,7 @@ export default function Page(props: pageProps) {
                                         <a className='hover:underline' href={'/product/' + cart.productId}>{cart.productTitle}</a>
                                         {(cart?.cartItemDetailResponseDTOList as any[]).map((option, index) => <label className='text-xs' key={index}>
                                             {option.optionName} ( <label className='font-bold'>{option.optionPrice.toLocaleString('ko-kr')}</label>원)
-                                            </label>)}
+                                        </label>)}
                                         <input className='input input-info input-sm w-[124px] mt-2' type='number' defaultValue={cart.count} onChange={(e) => updateCartList(cart.cartItemId, Number(e.target.value)).then(r => setCartList(r)).catch(error => {
                                             if (error.response.status == 403 && (error.response.data != "")) {
                                                 alert(error.response.data);

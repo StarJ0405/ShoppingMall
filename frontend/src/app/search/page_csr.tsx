@@ -1,12 +1,11 @@
 "use client";
 
-import { redirect } from "next/navigation";
 import Main from "../Global/Layout/MainLayout";
 import { getRecent, getUser } from "../API/UserAPI";
 import { useEffect, useState } from "react";
 import { MonthDate } from "../Global/Method";
 import DropDown, { Direcion } from "../Global/DropDown";
-import { getProductList } from "../API/NonUserAPI";
+import { getSearch } from "../API/NonUserAPI";
 
 interface pageProps {
     categories: any[];
@@ -19,8 +18,9 @@ export default function Page(props: pageProps) {
     const [user, setUser] = useState(null as any);
     const ACCESS_TOKEN = typeof window == 'undefined' ? null : localStorage.getItem('accessToken');
     const [recentList, setRecentList] = useState(null as unknown as any[]);
-    const search = props.search;
+    const [search, setSearch] = props.search;
     const [openSort, setOpenSort] = useState(false);
+    const [categories, setCategories] = useState(props.categories);
     useEffect(() => {
         if (ACCESS_TOKEN)
             getUser()
@@ -29,16 +29,15 @@ export default function Page(props: pageProps) {
                     getRecent()
                         .then(r => setRecentList(r))
                         .catch(e => console.log(e));
+                    getSearch({ Page: props.page, Sort: props.sort, Keyword: encodeURIComponent(props.keyword) }).then(r => setSearch(r)).catch(e => console.log(e));
                 })
                 .catch(e => console.log(e));
-        else
-            redirect("/account/login");
     }, [ACCESS_TOKEN]);
     function Pages() {
         const start = props.page - (props.page % 10);
         const value = [] as number[];
         for (let i = start; i < start + 10; i++) {
-            if (i  == search.totalPages)
+            if (i == search.totalPages)
                 break;
             else
                 value.push(i);
@@ -48,7 +47,7 @@ export default function Page(props: pageProps) {
         return value.map((v, index) => <button className="btn btn-xs btn-outline" key={index} disabled={v == props.page} onClick={() => window.location.href = "/search?keyword=" + props.keyword + "&page=" + v + "&sort=" + props.sort}>{v + 1}</button>);
     }
     const sortName = ['최근 등록순', '높은 가격순', '낮은 가격순', '리뷰 많은순']
-    return <Main categories={props.categories} user={user} recentList={recentList} setRecentList={setRecentList} keyword={props.keyword}>
+    return <Main categories={categories} user={user} recentList={recentList} setRecentList={setRecentList} keyword={props.keyword}>
         <div className="flex flex-col w-[1240px]">
             <div className="flex justify-between">
                 <label>검색 결과 {search.totalElements.toLocaleString('ko-kr')}건</label>

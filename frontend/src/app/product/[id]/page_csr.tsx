@@ -4,7 +4,7 @@ import Main from '@/app/Global/Layout/MainLayout';
 import { checkWish, deleteWish, getUser, postAnswer, postCartList, postQuestion, postRecent, postWish } from '@/app/API/UserAPI';
 import DropDown, { Direcion } from '@/app/Global/DropDown';
 import { MonthDate, getDateTimeFormat } from '@/app/Global/Method';
-import { getProductQAList, getReviews } from '@/app/API/NonUserAPI';
+import { getCategories, getProduct, getProductQAList, getReviews, getWho } from '@/app/API/NonUserAPI';
 import Modal from '@/app/Global/Modal';
 import 'react-quill/dist/quill.snow.css';
 import QuillNoSSRWrapper from '@/app/Global/QuillNoSSRWrapper';
@@ -28,11 +28,11 @@ export default function Page(props: pageProps) {
     const [reviews, setReviews] = useState(null as unknown as any[]);
     const [recentList, setRecentList] = useState(null as unknown as any[]);
     const [productQAList, setProductQAList] = useState(null as unknown as any[]);
-    //const [product,setProduct] = useState(props.product);
-    const product = props.product;
-    const seller = props.seller;
-    const topCategory = props.topCategory;
-    const middleCategory = props.middleCategory;
+    const [categories, setCategories] = useState(props.categories);
+    const [product, setProduct] = useState(props.product);
+    const [seller, setSeller] = useState(props.seller);
+    const [topCategory, setTopCategory] = useState(props.topCategory);
+    const [middleCategory, setMiddleCategory] = useState(props.middleCategory);
     const grade0 = product?.numOfGrade['0'];
     const grade1 = product?.numOfGrade['0.5~1'];
     const grade2 = product?.numOfGrade['1.5~2'];
@@ -99,15 +99,21 @@ export default function Page(props: pageProps) {
                         .then(r => setProductQAList(r))
                         .catch(e => console.log(e));
                     setMounted(true);
+                    getProduct(product?.id).then(r => setProduct(r)).catch(e => console.log(e));
+                    getWho(product.authorUsername).then(r => setSeller(r)).catch(e => console.log(e));
+                    getCategories().then(r => {
+                        setCategories(r);
+                        const topCategory = r.filter((cateogry: any) => cateogry.name == product.topCategoryName)[0]
+                        setTopCategory(topCategory);
+                        setMiddleCategory(topCategory?.categoryResponseDTOList.filter((category: any) => category.name == product.middleCategoryName)[0]);
+                    }).catch(e => console.log(e));
+                    getReviews(product.id)
+                    .then(r => setReviews(r))
+                    .catch(e => console.log(e));
                 })
                 .catch(e => console.log(e));
     }, [ACCESS_TOKEN]);
 
-    useEffect(() => {
-        getReviews(product.id)
-            .then(r => setReviews(r))
-            .catch(e => console.log(e));
-    }, []);
     function Move(data: number) {
         setFocus(data);
         document.getElementById(String(data))?.scrollIntoView();
@@ -197,7 +203,7 @@ export default function Page(props: pageProps) {
         return productQAList?.length > 0 ? answer / productQAList.length * 100 : 0;
     }
 
-    return <Main user={user} recentList={recentList} setRecentList={setRecentList} categories={props.categories}>
+    return <Main user={user} recentList={recentList} setRecentList={setRecentList} categories={categories}>
         <div className='flex flex-col w-[1240px] min-h-[670px]'>
             <div className='text-sm flex'>
                 <label className='text-2xl font-bold'>{props.seller.nickname}</label>

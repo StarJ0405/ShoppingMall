@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @Setter
-@NoArgsConstructor // 다른곳에서 필드값이 없어도 생성 할 수있다 . @AllArgsConstructor은 모두있어야함 , 저둘다없으면 생성못함
+@NoArgsConstructor
 public class Article {
 
     @Id
@@ -35,12 +35,12 @@ public class Article {
 
 
 
-    @Builder //이런방식으로하면 엔티티에 저장될거란뜻 , 구조를 정해주는것
+    @Builder
     public Article (ArticleRequestDTO articleRequestDTO, SiteUser siteUser ){
         this.title= articleRequestDTO.getTitle();
         this.content= articleRequestDTO.getContent();
         this.author=siteUser;
-        this.type= Type.values()[articleRequestDTO.getType()]; //숫자형태를 Type으로 바꿔 저장해준다.
+        this.type= Type.values()[articleRequestDTO.getType()];
         this.createDate=LocalDateTime.now();
 
 

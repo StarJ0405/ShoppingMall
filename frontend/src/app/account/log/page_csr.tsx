@@ -24,6 +24,7 @@ export default function Page(props: pageProps) {
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
     const [grade, setGrade] = useState(0);
+    const [categories, setCategories] = useState(props.categories);
     const quillInstance = useRef<ReactQuill>(null);
     const imageHandler = () => {
         const input = document.createElement('input') as HTMLInputElement;
@@ -125,7 +126,7 @@ export default function Page(props: pageProps) {
             return;
         putReview({ reviewId: review?.reviewResponseDTO?.id, paymentProductId: review.paymentProductId, title: title, content: content, grade: grade }).then(r => { setReview(null); setPlayments(r) }).catch(e => console.log(e));
     }
-    return <Profile categories={props.categories} recentList={recentList} setRecentList={setRecentList} user={user}>
+    return <Profile categories={categories} recentList={recentList} setRecentList={setRecentList} user={user}>
         <label className="font-bold text-2xl"><label className="text-red-500">주문/배송</label>조회</label>
         <table>
             <thead>
@@ -159,6 +160,9 @@ export default function Page(props: pageProps) {
                 </tr>)}
             </tbody>
         </table>
+        <div className="flex justify-center font-bold text-2xl mt-8">
+            {payments?.length == 0 ? <label>구매 내역이 없습니다.</label> : <></>}
+        </div>
         <Modal open={selectPayment != null} onClose={() => setSelectPayment(null)} outlineClose={true} escClose={true} className="">
             <div className="flex flex-col w-[744px] h-[752px]">
                 <div className="text-white bg-red-500 h-[37px] py-2 px-4">구매 상세 기록</div>

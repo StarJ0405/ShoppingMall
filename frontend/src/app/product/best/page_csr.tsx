@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import Main from '@/app/Global/Layout/MainLayout';
 import { getRecent, getUser } from '@/app/API/UserAPI';
+import { getProductBest } from '@/app/API/NonUserAPI';
 
 interface pageProps {
     bestList: any[];
@@ -11,8 +12,9 @@ interface pageProps {
 export default function Page(props: pageProps) {
     const [user, setUser] = useState(null as any);
     const ACCESS_TOKEN = typeof window === 'undefined' ? null : localStorage.getItem('accessToken');
-    const bestList = props.bestList;
+    const [bestList, setBestList] = useState(props.bestList);
     const [recentList, setRecentList] = useState(null as unknown as any[]);
+    const [categories, setCategories] = useState(props.categories);
     useEffect(() => {
         if (ACCESS_TOKEN)
             getUser()
@@ -21,11 +23,12 @@ export default function Page(props: pageProps) {
                     getRecent()
                         .then(r => setRecentList(r))
                         .catch(e => console.log(e));
+                    getProductBest().then(r => setBestList(r)).catch(e => console.log(e));
                 })
                 .catch(e => console.log(e));
     }, [ACCESS_TOKEN]);
 
-    return <Main user={user} recentList={recentList} setRecentList={setRecentList} categories={props.categories}>
+    return <Main user={user} recentList={recentList} setRecentList={setRecentList} categories={categories}>
         <div className='w-full h-full flex justify-center'>
             <div className='flex flex-wrap w-[1240px]'>
                 {bestList.map((product, index) =>

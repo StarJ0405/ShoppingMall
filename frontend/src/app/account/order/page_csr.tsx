@@ -1,4 +1,5 @@
 "use client";
+import { getCategories } from "@/app/API/NonUserAPI";
 import { getAddress, getRecent, getUser, postPayment } from "@/app/API/UserAPI";
 import Main from "@/app/Global/Layout/MainLayout";
 import { MonthDate, PhoneNumberCheck } from "@/app/Global/Method";
@@ -27,6 +28,7 @@ export default function Page(props: pageProps) {
     const [delivery, setDelivery] = useState('');
     const [mounted, setMounted] = useState(false);
     const [point, setPoint] = useState(0);
+    const [categories, setCategories] = useState(props.categories);
     useEffect(() => {
         if (ACCESS_TOKEN)
             getUser()
@@ -52,6 +54,9 @@ export default function Page(props: pageProps) {
                     getAddress()
                         .then(r => setAddresses(r))
                         .catch(e => console.log(e))
+                    getCategories()
+                        .then(r => setCategories(r))
+                        .catch(e => console.log(e));
                 })
                 .catch(e => console.log(e));
         else
@@ -62,7 +67,7 @@ export default function Page(props: pageProps) {
             return;
         let list = [] as number[];
         ORDER?.forEach(order => list.push(order.cartItemId));
-        postPayment({ cartItemIdList: list, recipient: who, phoneNumber: phoneNumber, mainAddress: address, addressDetail: detail, postNumber: postNumber.toString().padStart(5, '0'), deliveryMessage: delivery, point: point }).then(() => window.location.href = "/account/log").catch(e=>console.log(e));
+        postPayment({ cartItemIdList: list, recipient: who, phoneNumber: phoneNumber, mainAddress: address, addressDetail: detail, postNumber: postNumber.toString().padStart(5, '0'), deliveryMessage: delivery, point: point }).then(() => window.location.href = "/account/log").catch(e => console.log(e));
     }
     function getPrice(order: any) {
         let price = order?.productPrice;
@@ -81,7 +86,7 @@ export default function Page(props: pageProps) {
     function getMaxPoint() {
         return user?.point > discountedPrice ? discountedPrice : user?.point;
     }
-    return <Main categories={props.categories} recentList={recentList} setRecentList={setRecentList} user={user} >
+    return <Main categories={categories} recentList={recentList} setRecentList={setRecentList} user={user} >
         <div className='flex flex-col w-[1240px]'>
             <div className='divider'></div>
             <div className='flex justify-between'>

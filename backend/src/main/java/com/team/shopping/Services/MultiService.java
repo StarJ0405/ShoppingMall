@@ -805,7 +805,7 @@ public class MultiService {
             }
         }
         Optional<MultiKey> _multiKey = multiKeyService.get(ImageKey.TEMP.getKey(username));
-        this.updateProductContent(username, product, _multiKey.get());
+        _multiKey.ifPresent(multiKey -> this.updateProductContent(username, product, multiKey));
     }
 
     @Transactional

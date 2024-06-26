@@ -1,5 +1,6 @@
 "use client"
 
+import { getCategories } from "@/app/API/NonUserAPI";
 import { deleteAddress, getAddress, getRecent, getUser, postAddress, updateAddress } from "@/app/API/UserAPI";
 import Profile from "@/app/Global/Layout/ProfileLayout";
 import { PhoneNumberCheck } from "@/app/Global/Method";
@@ -26,6 +27,7 @@ export default function Page(props: pageProps) {
     const [delivery, setDelivery] = useState('');
     const [selectAddress, setSelectAddress] = useState(null as any);
     const ACCESS_TOKEN = typeof window == 'undefined' ? null : localStorage.getItem('accessToken');
+    const [categories, setCategories] = useState(props.categories);
     useEffect(() => {
         if (ACCESS_TOKEN)
             getUser()
@@ -36,6 +38,9 @@ export default function Page(props: pageProps) {
                         .catch(e => console.log(e));
                     getAddress()
                         .then(r => setAddresses(r))
+                        .catch(e => console.log(e));
+                    getCategories()
+                        .then(r => setCategories(r))
                         .catch(e => console.log(e));
                 })
                 .catch(e => console.log(e));
@@ -62,7 +67,7 @@ export default function Page(props: pageProps) {
         setDelivery(target.deliveryMessage)
         setSelectAddress(target);
     }
-    return <Profile recentList={recentList} categories={props.categories} setRecentList={setRecentList} user={user}>
+    return <Profile recentList={recentList} categories={categories} setRecentList={setRecentList} user={user}>
         <label className="text-xl font-bold"><label className="text-red-500">배송지 </label>관리</label>
         <table className="text-center">
             <thead>

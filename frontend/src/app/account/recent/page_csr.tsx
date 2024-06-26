@@ -1,5 +1,6 @@
 "use client"
 
+import { getCategories } from "@/app/API/NonUserAPI";
 import { getRecent, getUser, postCartList, postWish } from "@/app/API/UserAPI";
 import Profile from "@/app/Global/Layout/ProfileLayout";
 import { redirect } from "next/navigation";
@@ -11,6 +12,7 @@ export default function Page(props: pageProps) {
     const [user, setUser] = useState(null as any);
     const ACCESS_TOKEN = typeof window == 'undefined' ? null : localStorage.getItem('accessToken');
     const [recentList, setRecentList] = useState(null as unknown as any[]);
+    const [categories, setCategories] = useState(props.categories);
     useEffect(() => {
         if (ACCESS_TOKEN)
             getUser()
@@ -19,6 +21,7 @@ export default function Page(props: pageProps) {
                     getRecent()
                         .then(r => setRecentList(r))
                         .catch(e => console.log(e));
+                    getCategories().then(r => setCategories(r)).catch(e => console.log(e));
                 })
                 .catch(e => console.log(e));
         else
@@ -42,7 +45,7 @@ export default function Page(props: pageProps) {
                 )
                 : null);
     }
-    return <Profile user={user} recentList={recentList} setRecentList={setRecentList} categories={props.categories}>
+    return <Profile user={user} recentList={recentList} setRecentList={setRecentList} categories={categories}>
         <label className="font-bold text-xl"><label className="text-red-500">찜한</label> 상품</label>
         <li className="list-disc text-xs">최근 상품은 등록일로부터 <label className="font-bold">최대 1년간</label> 저장됩니다.</li>
         <table>
@@ -69,7 +72,7 @@ export default function Page(props: pageProps) {
                         <td >{recent?.price?.grade}</td>
                         <td className="text-xs">
                             <button className="px-2 border border-black mb-1 btn btn-xs" onClick={() => addCart(recent?.productId)}>장바구니</button>
-                            <button className="px-2 border border-black btn btn-xs" onClick={() => { postWish(recent?.productId).then(()=>alert('찜목록에 추가하였습니다.')).catch(e => alert('이미 찜목록에 추가되어있습니다.')) }}>찜하기</button>
+                            <button className="px-2 border border-black btn btn-xs" onClick={() => { postWish(recent?.productId).then(() => alert('찜목록에 추가하였습니다.')).catch(e => alert('이미 찜목록에 추가되어있습니다.')) }}>찜하기</button>
                         </td>
                     </tr>
                 )}
