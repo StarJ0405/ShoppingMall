@@ -35,7 +35,7 @@ export default function Page(props: pageProps) {
                             <img src={product?.url ? product.url : '/empty_product.png'} className='w-[275px] h-[275px]' />
                             <label className='mt-5 hover:underline'>{product?.title}</label>
                             <div className='flex mt-2 items-center'>
-                                <label className='text-red-500 font-bold text-xl'><label className='text-3xl'>22</label>%</label>
+                                <label className='text-red-500 font-bold text-xl'><label className='text-3xl'>{product?.discount}</label>%</label>
                                 <div className='flex flex-col justify-center ml-4'>
                                     <label className='line-through text-gray-500 text-sm'>{Number(product?.price).toLocaleString('ko-kr')}원</label>
                                     <label className='font-bold text-lg'>{Number(product?.price * 0.78).toLocaleString('ko-kr', { maximumFractionDigits: 0 })}원</label>

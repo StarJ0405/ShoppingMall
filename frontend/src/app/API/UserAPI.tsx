@@ -248,6 +248,10 @@ export const postReview = async (data: postReview) => {
     const response = await UserApi.post('/api/review', data);
     return response.data;
 }
+export const getMyReviews = async () => {
+    const response = await UserApi.get('/api/review/my');
+    return response.data;
+}
 interface putReview {
     reviewId: number;
     paymentProductId: number;
@@ -295,7 +299,7 @@ export const postEvent = async (data: postEvent) => {
     return response.data;
 }
 interface updateEvent {
-    eventId:number;
+    eventId: number;
     startDate: Date;
     endDate: Date;
     discount: number;

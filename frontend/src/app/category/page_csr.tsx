@@ -42,7 +42,7 @@ export default function Page(props: pageProps) {
         const start = props.page - (props.page % 10);
         const value = [] as number[];
         for (let i = start; i < start + 10; i++) {
-            if (i + 1 == search.totalPages)
+            if (i  == search.totalPages)
                 break;
             else
                 value.push(i);
@@ -71,7 +71,7 @@ export default function Page(props: pageProps) {
                 <div className="flex flex-col h-[200px] w-full">
                     <label className="text-lg font-bold bg-gray-700 text-white p-2">중간 카테고리</label>
                     <div className="flex flex-col overflow-y-scroll">
-                        {(props.topCategory.categoryResponseDTOList as any[]).map((second, index) => <label key={index} className={"p-2 cursor-pointer" + (second.id == props.secondCategory.id ? ' text-red-500' : '')} onClick={() => setSecondCategory(second)}>
+                        {(props.topCategory.categoryResponseDTOList as any[]).map((second, index) => <label key={index} className={"p-2 cursor-pointer" + (second.id == props.secondCategory.id ? ' text-red-500' : '') + (second?.id == secondCategory?.id ? ' bg-orange-300' : '')} onClick={() => setSecondCategory(second)}>
                             {second.name}
                         </label>)}
                     </div>

@@ -144,7 +144,7 @@ export default function Main(props: Readonly<pageInterface>) {
         }
       </nav>
       {props.children}
-      <footer className='flex flex-col w-[1240px] mt-16'>
+      <footer className='flex flex-col w-[1240px] mt-16 mb-8'>
         <div className='flex justify-between'>
           <div className='flex font-bold'>상호명 및 호스팅 서비스 제공 : <div className='flex flex-col ml-2'> 오이번가(주) <img src="/logo_text.png" className='w-[200px] mr-[160px]' /></div></div>
           <a href="/help" className='mr-[296px] hover:underline'>고객센터</a>
