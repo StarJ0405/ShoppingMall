@@ -36,7 +36,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
     public Page<Product> searchByKeyword(Pageable pageable, String keyword, Sorts sorts) {
         JPAQuery<Product> query = jpaQueryFactory
                 .selectFrom(qProduct).distinct()
-                .join(qTag).on(qTag.product.id.eq(qProduct.id))
+                .leftJoin(qTag).on(qTag.product.id.eq(qProduct.id))
                 .where(qProduct.title.contains(keyword).or(qTag.name.contains(keyword).or(qProduct.seller.nickname.eq(keyword))))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize());
@@ -70,7 +70,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
     public Page<Product> findByTitleOrTagGroupByCategory(Pageable pageable, String keyword, Long categoryId, Sorts sorts) {
         JPAQuery<Product> query = jpaQueryFactory
                 .selectFrom(qProduct).distinct()
-                .join(qTag).on(qTag.product.id.eq(qProduct.id))
+                .leftJoin(qTag).on(qTag.product.id.eq(qProduct.id))
                 .join(qCategory).on(qCategory.id.eq(qProduct.category.id))
                 .where(qCategory.id.eq(categoryId).and(qProduct.title.contains(keyword).or(qTag.name.contains(keyword))))
                 .offset(pageable.getOffset())

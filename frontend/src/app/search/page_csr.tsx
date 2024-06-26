@@ -5,7 +5,7 @@ import { getRecent, getUser } from "../API/UserAPI";
 import { useEffect, useState } from "react";
 import { MonthDate } from "../Global/Method";
 import DropDown, { Direcion } from "../Global/DropDown";
-import { getSearch } from "../API/NonUserAPI";
+import { getCategories, getSearch } from "../API/NonUserAPI";
 
 interface pageProps {
     categories: any[];
@@ -18,7 +18,7 @@ export default function Page(props: pageProps) {
     const [user, setUser] = useState(null as any);
     const ACCESS_TOKEN = typeof window == 'undefined' ? null : localStorage.getItem('accessToken');
     const [recentList, setRecentList] = useState(null as unknown as any[]);
-    const [search, setSearch] = props.search;
+    const [search, setSearch] = useState(props.search);
     const [openSort, setOpenSort] = useState(false);
     const [categories, setCategories] = useState(props.categories);
     useEffect(() => {
@@ -29,7 +29,8 @@ export default function Page(props: pageProps) {
                     getRecent()
                         .then(r => setRecentList(r))
                         .catch(e => console.log(e));
-                    getSearch({ Page: props.page, Sort: props.sort, Keyword: encodeURIComponent(props.keyword) }).then(r => setSearch(r)).catch(e => console.log(e));
+                    getSearch({ Page: props.page, Sort: props.sort, Keyword: encodeURIComponent(props.keyword) }).then(r => {setSearch(r); console.log(r)}).catch(e => console.log(e));
+                    getCategories().then(r => setCategories).catch(e => console.log(e));
                 })
                 .catch(e => console.log(e));
     }, [ACCESS_TOKEN]);
@@ -98,7 +99,7 @@ export default function Page(props: pageProps) {
                 </div>
             </div>)
                 :
-                <div className="m-auto text-2xl text-gray-600 mb-16"><label className="font-bold text-black">{props.keyword}</label>의 검색 결과가 없습니다</div>
+                <div className="m-auto text-2xl text-gray-600 mb-16"><label className="font-bold text-black">{props.keyword}</label>{props.keyword != "" ? '의' : ""} 검색 결과가 없습니다</div>
             }
         </div>
         <div className="flex">
