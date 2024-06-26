@@ -15,6 +15,8 @@ public class PaymentProductResponseDTO {
 
     private Long productId;
 
+    private Long paymentProductId;
+
     private String seller;
 
     private int productPrice;
@@ -37,11 +39,16 @@ public class PaymentProductResponseDTO {
 
     private int withOptionPrice;
 
+    private Boolean reviewStatus;
+
+    private ReviewResponseDTO reviewResponseDTO;
+
     @Builder
     public PaymentProductResponseDTO (PaymentProduct paymentProduct,
                                       List<PaymentProductDetailResponseDTO> paymentProductDetailResponseDTOList,
-                                      int withOptionPrice, String imageUrl, int discountPrice) {
+                                      int withOptionPrice, String imageUrl, int discountPrice, ReviewResponseDTO responseDTO) {
         this.productId = paymentProduct.getProductId();
+        this.paymentProductId = paymentProduct.getId();
         this.seller = paymentProduct.getSeller();
         this.productPrice = paymentProduct.getPrice();
         this.withOptionPrice = withOptionPrice;
@@ -53,6 +60,8 @@ public class PaymentProductResponseDTO {
         this.discountPrice = discountPrice;
         this.paymentProductDetailResponseDTOList = paymentProductDetailResponseDTOList;
         this.imageUrl = imageUrl;
+        this.reviewStatus = paymentProduct.getReviewStatus();
+        this.reviewResponseDTO = responseDTO;
 
     }
 }

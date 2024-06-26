@@ -1,3 +1,4 @@
+import exp from 'constants';
 import { getAPI } from './AxiosAPI';
 
 
@@ -84,7 +85,7 @@ export const deleteWish = async (data: number) => {
     return response.data;
 }
 export const deleteWishList = async (data: any[]) => {
-    const response = await UserApi.delete('/api/user/wishList/Multi', { headers: { 'productIdList': data } });
+    const response = await UserApi.delete('/api/user/wishList/multi', { headers: { 'productIdList': data } });
     return response.data;
 }
 
@@ -107,6 +108,28 @@ interface productProps {
 }
 export const productRegist = async (data: productProps) => {
     const response = await UserApi.post('/api/product', data);
+    return response.data;
+}
+interface updateProductProps {
+    productId: number,
+    categoryId: number,
+    price: number,
+    description: string,
+    detail: string,
+    dateLimit: Date,
+    remain: number,
+    title: string,
+    delivery: string,
+    address: string,
+    receipt: string,
+    a_s: string,
+    brand: string,
+    tagList: string[],
+    url: string,
+    optionLists: any
+}
+export const prodcutUpdate = async (data: updateProductProps) => {
+    const response = await UserApi.put('/api/product', data);
     return response.data;
 }
 export const deleteImage = async () => {
@@ -194,5 +217,129 @@ export const deleteAddress = async (numbers: number[]) => {
 }
 export const updateAddress = async (id: number, data: addressProps) => {
     const response = await UserApi.put('/api/address', { addressId: id, ...data });
+    return response.data;
+}
+interface postPayment {
+    cartItemIdList: number[];
+    recipient: string;
+    phoneNumber: string;
+    mainAddress: string;
+    addressDetail: string;
+    postNumber: string;
+    deliveryMessage: string;
+    point: number;
+}
+export const postPayment = async (data: postPayment) => {
+    const response = await UserApi.post('/api/payment/logList', data);
+    return response.data;
+}
+export const getPayment = async () => {
+    const response = await UserApi.get('/api/payment/logList');
+    return response.data;
+}
+interface postReview {
+    paymentProductId: number;
+    productId: number;
+    title: string;
+    content: string;
+    grade: number;
+}
+export const postReview = async (data: postReview) => {
+    const response = await UserApi.post('/api/review', data);
+    return response.data;
+}
+export const getMyReviews = async () => {
+    const response = await UserApi.get('/api/review/my');
+    return response.data;
+}
+interface putReview {
+    reviewId: number;
+    paymentProductId: number;
+    title: string;
+    content: string;
+    grade: number;
+}
+export const putReview = async (data: putReview) => {
+    const response = await UserApi.put('/api/review', data);
+    return response.data;
+}
+export const getMyProducts = async () => {
+    const response = await UserApi.get('/api/product/myProducts');
+    return response.data;
+}
+interface question {
+    productId: number;
+    title: string;
+    content: string;
+}
+
+export const postQuestion = async (data: question) => {
+    const response = await UserApi.post('/api/product/question', data);
+    return response.data;
+}
+interface answer {
+    productId: number;
+    answer: string;
+    productQAId: number;
+}
+export const postAnswer = async (data: answer) => {
+    const response = await UserApi.post('/api/product/answer', data);
+    return response.data;
+}
+
+interface postEvent {
+    startDate: Date;
+    endDate: Date;
+    discount: number;
+    productIdList: number[];
+}
+
+export const postEvent = async (data: postEvent) => {
+    const response = await UserApi.post('/api/event', data);
+    return response.data;
+}
+interface updateEvent {
+    eventId: number;
+    startDate: Date;
+    endDate: Date;
+    discount: number;
+    productIdList: number[];
+}
+
+export const updateEvent = async (data: updateEvent) => {
+    const response = await UserApi.put('/api/event', data);
+    return response.data;
+}
+
+export const getEventList = async () => {
+    const response = await UserApi.get('/api/event/list');
+    return response.data;
+}
+
+interface postArticle {
+    title: String;
+    content: String;
+    type: number;
+}
+
+export const postArticle = async (data: postArticle) => {
+    const response = await UserApi.post('/api/article', data);
+    return response.data;
+}
+
+export const deleteArticle = async (data: number) => {
+    const response = await UserApi.delete('/api/article', { headers: { ArticleId: data } });
+    return response.data;
+}
+
+interface putArticle {
+    articleId: number;
+    title: String;
+    content: String;
+    type: number;
+}
+
+export const updateArticle = async (data: putArticle) => {
+    const response = await UserApi.put('/api/article', data);
     return response.data;
 }

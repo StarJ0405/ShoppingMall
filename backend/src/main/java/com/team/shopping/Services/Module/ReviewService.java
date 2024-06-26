@@ -27,6 +27,7 @@ public class ReviewService {
                 .product(product)
                 .title(reviewRequestDTO.getTitle())
                 .content(reviewRequestDTO.getContent())
+                .paymentProductId(reviewRequestDTO.getPaymentProductId())
                 .build());
     }
 
@@ -39,6 +40,10 @@ public class ReviewService {
 
     public List<Review> getList (Product product) {
         return this.reviewRepository.findByProductOrderByCreateDateDesc(product);
+    }
+
+    public List<Review> getMyReviewByProduct (SiteUser user, Product product) {
+        return this.reviewRepository.findByAuthorAndProduct(user, product);
     }
 
     public Review get (Long reviewId) {
@@ -67,5 +72,18 @@ public class ReviewService {
 
     public Optional<Review> findByProduct(Product product) {
         return reviewRepository.findByProduct(product);
+    }
+
+    public void updateContent(Review reviewKey, String detail) {
+        reviewKey.setContent(detail);
+        this.reviewRepository.save(reviewKey);
+    }
+
+    public Optional<Review> findByPaymentProductId (Long id) {
+        return this.reviewRepository.findByPaymentProductId(id);
+    }
+
+    public List<Review> getMyReview(SiteUser user) {
+        return reviewRepository.getMyReview(user);
     }
 }

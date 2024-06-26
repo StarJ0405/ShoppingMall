@@ -13,7 +13,8 @@ import lombok.Setter;
 public class ReviewResponseDTO {
 
     private Long id;
-
+    private Long productId;
+    private String productTitle;
     private String username;
 
     private String nickname;
@@ -32,9 +33,11 @@ public class ReviewResponseDTO {
 
 
     @Builder
-    public ReviewResponseDTO (SiteUser user, Review review,  String profileUrl,
-                              Long createDate, Long modifyDate) {
+    public ReviewResponseDTO(SiteUser user, Review review, String profileUrl,
+                             Long createDate, Long modifyDate) {
         this.id = review.getId();
+        this.productId = review.getProduct().getId();
+        this.productTitle = review.getProduct().getTitle();
         this.nickname = user.getNickname();
         this.username = user.getUsername();
         this.title = review.getTitle();

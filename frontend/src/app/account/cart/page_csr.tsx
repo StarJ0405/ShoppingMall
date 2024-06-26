@@ -1,5 +1,6 @@
 'use client'
 
+import { getCategories } from '@/app/API/NonUserAPI';
 import { deleteCartList, getCartList, getRecent, getUser, updateCartList } from '@/app/API/UserAPI';
 import Main from '@/app/Global/Layout/MainLayout';
 import { redirect } from 'next/navigation';
@@ -15,6 +16,8 @@ export default function Page(props: pageProps) {
     const [cartList, setCartList] = useState(null as unknown as any[]);
     const [price, setPrice] = useState(0);
     const [discountedPrice, setDisCountedPrice] = useState(0);
+    const [categories, setCategories] = useState(props.categories);
+
     useEffect(() => {
         if (ACCESS_TOKEN)
             getUser()
@@ -26,6 +29,9 @@ export default function Page(props: pageProps) {
                     getCartList()
                         .then(r => setCartList(r))
                         // .then(r => { setCartList(r); console.log(r) })
+                        .catch(e => console.log(e));
+                    getCategories()
+                        .then(r => setCategories(r))
                         .catch(e => console.log(e));
                     localStorage.removeItem('order');
                 })
@@ -40,8 +46,8 @@ export default function Page(props: pageProps) {
             check.checked = e.target.checked;
             if (e.target.checked) {
                 const index = Number(check.id);
-                price += cartList[index]?.productPrice * cartList[index]?.count;
-                discountedPrice += cartList[index]?.discountPrice * cartList[index]?.count;
+                price += getPrice(cartList[index]);
+                discountedPrice += getDiscountPrice(cartList[index]);
             }
         });
         setPrice(price);
@@ -69,7 +75,21 @@ export default function Page(props: pageProps) {
             window.location.href = '/account/order';
         }
     }
-    return <Main recentList={recentList} setRecentList={setRecentList} user={user} categories={props.categories}>
+    function getPrice(cart: any) {
+        let price = cart?.productPrice;
+        (cart?.cartItemDetailResponseDTOList as any[]).forEach(option => {
+            price += option.optionPrice;
+        });
+        return price * cart.count;
+    }
+    function getDiscountPrice(cart: any) {
+        let price = cart?.productPrice * (100 - cart.discount) / 100;
+        (cart?.cartItemDetailResponseDTOList as any[]).forEach(option => {
+            price += option.optionPrice;
+        });
+        return price * cart.count;
+    }
+    return <Main recentList={recentList} setRecentList={setRecentList} user={user} categories={categories}>
         <div className='flex flex-col w-[1240px]'>
             <div className='divider'></div>
             <div className='flex justify-between'>
@@ -98,13 +118,15 @@ export default function Page(props: pageProps) {
                         </thead>
                         <tbody className='text-center'>
                             {cartList?.map((cart, index) => <tr key={index} className='min-h-[104px]'>
-                                <td><input name="check" type="checkbox" id={index.toString()} onChange={e => select(e, cart.productPrice * cart.count, cart.discountPrice * cart.count)} /></td>
+                                <td><input name="check" type="checkbox" id={index.toString()} onChange={e => select(e, getPrice(cart), getDiscountPrice(cart))} /></td>
                                 <td className='flex items-center'>
-                                    <img src={cart?.productUrl ? cart.productUrl : '/empty_product.png'} className='w-[120px] h-[120px] mr-2' />
+                                    <img src={cart?.imageUrl ? cart.imageUrl : '/empty_product.png'} className='w-[120px] h-[120px] mr-2' />
                                     <div className='flex flex-col items-start'>
                                         <a className='hover:underline' href={'/product/' + cart.productId}>{cart.productTitle}</a>
-                                        {(cart?.cartItemDetailResponseDTOList as any[]).map((option, index) => <label key={index}>{option.optionName}</label>)}
-                                        <input className='input input-info input-sm w-[124px]' type='number' defaultValue={cart.count} onChange={(e) => updateCartList(cart.cartItemId, Number(e.target.value)).then(r => setCartList(r)).catch(error => {
+                                        {(cart?.cartItemDetailResponseDTOList as any[]).map((option, index) => <label className='text-xs' key={index}>
+                                            {option.optionName} ( <label className='font-bold'>{option.optionPrice.toLocaleString('ko-kr')}</label>원)
+                                        </label>)}
+                                        <input className='input input-info input-sm w-[124px] mt-2' type='number' defaultValue={cart.count} onChange={(e) => updateCartList(cart.cartItemId, Number(e.target.value)).then(r => setCartList(r)).catch(error => {
                                             if (error.response.status == 403 && (error.response.data != "")) {
                                                 alert(error.response.data);
                                                 e.target.value = cart.remain;
@@ -115,11 +137,12 @@ export default function Page(props: pageProps) {
                                 <td>
                                     {cart.discount > 0 ?
                                         <div className='flex flex-col'>
-                                            <label><label className='text-lg font-bold'>{(cart?.discountPrice * cart.count).toLocaleString('ko-kr', { maximumFractionDigits: 0 })}</label>원</label>
-                                            <label className='text-gray-500 line-through text-sm'>{(cart?.productPrice * cart.count).toLocaleString('ko-kr', { maximumFractionDigits: 0 })}원</label>
+                                            <label><label className='text-lg font-bold'>{getDiscountPrice(cart).toLocaleString('ko-kr', { maximumFractionDigits: 0 })}</label>원</label>
+                                            <label className='text-gray-500 line-through text-sm'>{getPrice(cart).toLocaleString('ko-kr', { maximumFractionDigits: 0 })}원</label>
                                         </div>
                                         :
-                                        <label><label className='text-lg font-bold'>{(cart?.productPrice * cart.count).toLocaleString('ko-kr', { maximumFractionDigits: 0 })}</label>원</label>
+                                        <label><label className='text-lg font-bold'>{getPrice(cart).toLocaleString('ko-kr', { maximumFractionDigits: 0 })
+                                        }</label>원</label>
                                     }
                                 </td>
                                 <td >
@@ -140,11 +163,15 @@ export default function Page(props: pageProps) {
                         <label className='text-xl font-bold'>결제 예정금액</label>
                         <div className='flex justify-between mt-2'>
                             <label>상품금액</label>
-                            <label>{price.toLocaleString('ko-kr', { maximumFractionDigits: 0 })}원</label>
+                            <label><label className='font-bold text-lg'>{price.toLocaleString('ko-kr', { maximumFractionDigits: 0 })}</label>원</label>
                         </div>
                         <div className='flex justify-between mt-2'>
                             <label>할인금액</label>
-                            <label className='text-red-500'>{discountedPrice.toLocaleString('ko-kr', { maximumFractionDigits: 0 })}원</label>
+                            <label className='text-red-500'><label className='font-bold text-lg'>{(discountedPrice - price).toLocaleString('ko-kr', { maximumFractionDigits: 0 })}</label>원</label>
+                        </div>
+                        <div className='flex justify-between mt-2'>
+                            <label className='text-red-500'>합계</label>
+                            <label className='text-red-500'><label className='font-bold text-2xl'>{(discountedPrice).toLocaleString('ko-kr', { maximumFractionDigits: 0 })}</label>원</label>
                         </div>
                         <button className='btn btn-error text-white mt-5 text-lg' onClick={order}>주문하기</button>
                     </div>

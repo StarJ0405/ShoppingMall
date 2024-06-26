@@ -1,10 +1,11 @@
 'use client'
-import { getRecent, getUser, saveImage, updateUser, updateUserPassword } from '@/app/API/UserAPI';
+import { getCartList, getRecent, getUser, saveImage, updateUser, updateUserPassword } from '@/app/API/UserAPI';
 import { Check, PhoneNumberCheck, PhoneString, checkInput } from '@/app/Global/Method';
 import { redirect } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Profile from '@/app/Global/Layout/ProfileLayout';
 import Modal from '@/app/Global/Modal';
+import { getCategories } from '@/app/API/NonUserAPI';
 interface pageProps {
   categories: any[]
 }
@@ -21,6 +22,7 @@ export default function Page(props: pageProps) {
   const [canShow, setCanShow] = useState(false);
   const [passwordError, setPasswordError] = useState('');
   const [recentList, setRecentList] = useState(null as unknown as any[]);
+  const [categories, setCategories] = useState(props.categories);
   function Change(file: any) {
     const formData = new FormData();
     formData.append('file', file);
@@ -43,6 +45,9 @@ export default function Page(props: pageProps) {
           getRecent()
             .then(r => setRecentList(r))
             .catch(e => console.log(e));
+          getCategories()
+            .then(r => setCategories(r))
+            .then(e => console.log(e));
         })
         .catch(e => console.log(e));
     else
@@ -104,14 +109,14 @@ export default function Page(props: pageProps) {
 
       });
   }
-  return <Profile user={user} recentList={recentList} setRecentList={setRecentList} categories={props.categories}>
+  return <Profile user={user} recentList={recentList} setRecentList={setRecentList} categories={categories}>
     <div className='flex items-end'>
       <label className='text-xl font-bold'><label className='text-xl text-red-500 font-bold'>회원정보</label> 변경</label>
       <label className='text-xs h-[14px] border-l-2 border-gray-400 ml-2 mb-[5px] pl-2'>고객님의 회원정보를 수정하실 수 있습니다. 회원정보를 변경하시고 반드시 하단에 있는 <label className='font-bold'>확인</label> 버튼을 클릭해 주셔야 합니다.</label>
     </div>
     <div className='divider divider-neutral m-0'></div>
     <ul className='list-disc text-xs ml-5'>
-      <li>11번가는 회원님의 개인정보를 신중히 취급하며, 회원님의 동의 없이는 기재하신 회원정보가 공개되지 않습니다.</li>
+      <li>52번가는 회원님의 개인정보를 신중히 취급하며, 회원님의 동의 없이는 기재하신 회원정보가 공개되지 않습니다.</li>
       <li>보다 다양한 서비스를 받으시려면 정확한 정보를 항상 유지해 주셔야합니다.</li>
       <li>전문적인 영업 목적의 경우나 사업자등록증을 보유한 경우에는 반드시 사업자셀러 회원으로 전환하여 판매하셔야 합니다.</li>
       <li>사업자셀러 회원은 전환 신청 후 증빙서류를 업로드 하셔야하며, 구비서류 승인전까지 개인셀러 회원으로 판매 가능합니다.</li>
@@ -119,7 +124,7 @@ export default function Page(props: pageProps) {
       <li className='text-red-500'>행정구역이 변경되어 사용할 수 없는 주소는 회원정보에서 삭제됩니다.</li>
     </ul>
     <div className='mt-3 flex flex-col'>
-      <label className='font-bold text-lg'>{user?.nickname}님의 11번가 기본정보</label>
+      <label className='font-bold text-lg'>{user?.nickname}님의 52번가 기본정보</label>
       <label className='text-xs font-bold text-red-500'>{error}</label>
       <table className='text-left text-base'>
         <tbody>

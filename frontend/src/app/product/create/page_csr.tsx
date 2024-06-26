@@ -1,5 +1,4 @@
 'use client'
-import { getCategories } from '@/app/API/NonUserAPI';
 import { deleteImage, deleteImageList, getRecent, getUser, productRegist, saveImage, saveImageList } from '@/app/API/UserAPI';
 import Main from '@/app/Global/Layout/MainLayout';
 import Modal from '@/app/Global/Modal';
@@ -8,15 +7,14 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import 'react-quill/dist/quill.snow.css';
 import QuillNoSSRWrapper from '@/app/Global/QuillNoSSRWrapper';
 import ReactQuill from 'react-quill';
-// const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
-interface pageProps{
-    categories:any[]
+import { getCategories } from '@/app/API/NonUserAPI';
+
+interface pageProps {
+    categories: any[]
 }
 
-export default function Page(props:pageProps) {
+export default function Page(props: pageProps) {
     const [user, setUser] = useState(null as any);
-    // const [categories, setCategories] = useState(null as unknown as any[]);
-    const categories = props.categories;
     const [isImageHover, setIsImageHover] = useState(false);
 
     const [firstCategory, setFirstCategory] = useState(-1);
@@ -30,7 +28,7 @@ export default function Page(props:pageProps) {
     const [price, setPrice] = useState(0);
     const [delivery, setDelivery] = useState('택배');
     const [address, setAddress] = useState('전국(제주 도서산간지역 제외)');
-    const [receipt, setReceipt] = useState('국내거주해외셀러 : 구매대행 수수료에 대한 현금영수증만 발행이 가능하며, 판매자에게 직접 발행 요청 필요(11번가 발행불가)\n해외거주해외셀러 : 온라인 현금영수증 발급 불가, 신용카드 전표 정보는 나의 11번가 PC참조');
+    const [receipt, setReceipt] = useState('국내거주해외셀러 : 구매대행 수수료에 대한 현금영수증만 발행이 가능하며, 판매자에게 직접 발행 요청 필요(52번가 발행불가)\n해외거주해외셀러 : 온라인 현금영수증 발급 불가, 신용카드 전표 정보는 나의 52번가 PC참조');
     const [a_s, setAS] = useState('');
     const [brand, setBrand] = useState('');
     const [tags, setTags] = useState([] as string[]);
@@ -40,8 +38,9 @@ export default function Page(props:pageProps) {
     const [selectedOption, setSelectedOption] = useState(null as any);
     const [isModalOpen, setISModalOpen] = useState(-1);
     const [recentList, setRecentList] = useState(null as unknown as any[]);
-    const quillInstance = useRef<ReactQuill>(null);
+    const [categories, setCategories] = useState(props.categories);
 
+    const quillInstance = useRef<ReactQuill>(null);
     const ACCESS_TOKEN = typeof window == 'undefined' ? null : localStorage.getItem('accessToken');
 
     const imageHandler = () => {
@@ -112,6 +111,7 @@ export default function Page(props:pageProps) {
                         .catch(e => console.log(e));
                     deleteImage();
                     deleteImageList();
+                    getCategories().then(r => setCategories(r)).catch(e => console.log(e));
                 })
                 .catch(e => console.log(e));
         else
@@ -214,7 +214,7 @@ export default function Page(props:pageProps) {
                     <tr>
                         <th className='border border-black'>영수증발행</th>
                         <td className='px-2'>
-                            <textarea placeholder='영수발행 방법..' className='w-full' defaultValue={'국내거주해외셀러 : 구매대행 수수료에 대한 현금영수증만 발행이 가능하며, 판매자에게 직접 발행 요청 필요(11번가 발행불가)\n해외거주해외셀러 : 온라인 현금영수증 발급 불가, 신용카드 전표 정보는 나의 11번가 PC참조'} onChange={e => setReceipt(e.target.value)}></textarea>
+                            <textarea placeholder='영수발행 방법..' className='w-full' defaultValue={'국내거주해외셀러 : 구매대행 수수료에 대한 현금영수증만 발행이 가능하며, 판매자에게 직접 발행 요청 필요(52번가 발행불가)\n해외거주해외셀러 : 온라인 현금영수증 발급 불가, 신용카드 전표 정보는 나의 52번가 PC참조'} onChange={e => setReceipt(e.target.value)}></textarea>
                         </td>
                     </tr>
                     <tr>
@@ -283,7 +283,6 @@ export default function Page(props:pageProps) {
                     <tr>
                         <th className='border border-black'>상세설명</th>
                         <td className='px-2 flex pb-[50px] min-h-[350px]' >
-                            {/* <ReactQuill modules={modules} formats={formats} className='min-h-[300px] w-full' placeholder='상세 설명 작성..' onChange={(e: any) => setDetail(e)} value={detail} /> */}
                             <QuillNoSSRWrapper
                                 forwardedRef={quillInstance}
                                 value={detail}

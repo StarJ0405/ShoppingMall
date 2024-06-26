@@ -42,7 +42,7 @@ public class QSiteUser extends EntityPathBase<SiteUser> {
 
     public final StringPath phoneNumber = createString("phoneNumber");
 
-    public final NumberPath<Integer> point = createNumber("point", Integer.class);
+    public final NumberPath<Long> point = createNumber("point", Long.class);
 
     public final EnumPath<com.team.shopping.Enums.UserRole> role = createEnum("role", com.team.shopping.Enums.UserRole.class);
 

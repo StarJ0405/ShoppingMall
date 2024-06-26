@@ -1,10 +1,14 @@
 'use client'
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Main from '@/app/Global/Layout/MainLayout';
-import { checkWish, deleteWish, getUser, postCartList, postRecent, postWish } from '@/app/API/UserAPI';
+import { checkWish, deleteWish, getUser, postAnswer, postCartList, postQuestion, postRecent, postWish } from '@/app/API/UserAPI';
 import DropDown, { Direcion } from '@/app/Global/DropDown';
-import { MonthDate } from '@/app/Global/Method';
-import { getReviews } from '@/app/API/NonUserAPI';
+import { MonthDate, getDateTimeFormat } from '@/app/Global/Method';
+import { getCategories, getProduct, getProductQAList, getReviews, getWho } from '@/app/API/NonUserAPI';
+import Modal from '@/app/Global/Modal';
+import 'react-quill/dist/quill.snow.css';
+import QuillNoSSRWrapper from '@/app/Global/QuillNoSSRWrapper';
+import ReactQuill from 'react-quill';
 
 interface pageProps {
     product: any;
@@ -23,11 +27,12 @@ export default function Page(props: pageProps) {
     const [focus, setFocus] = useState(0);
     const [reviews, setReviews] = useState(null as unknown as any[]);
     const [recentList, setRecentList] = useState(null as unknown as any[]);
-    //const [product,setProduct] = useState(props.product);
-    const product = props.product;
-    const seller = props.seller;
-    const topCategory = props.topCategory;
-    const middleCategory = props.middleCategory;
+    const [productQAList, setProductQAList] = useState(null as unknown as any[]);
+    const [categories, setCategories] = useState(props.categories);
+    const [product, setProduct] = useState(props.product);
+    const [seller, setSeller] = useState(props.seller);
+    const [topCategory, setTopCategory] = useState(props.topCategory);
+    const [middleCategory, setMiddleCategory] = useState(props.middleCategory);
     const grade0 = product?.numOfGrade['0'];
     const grade1 = product?.numOfGrade['0.5~1'];
     const grade2 = product?.numOfGrade['1.5~2'];
@@ -37,6 +42,48 @@ export default function Page(props: pageProps) {
     const [options, setOptions] = useState(null as unknown as number[])
     const [option, setOption] = useState(-1);
     const [count, setCount] = useState(product?.remain >= 1 ? 1 : product?.remain);
+    const [mounted, setMounted] = useState(false);
+    const [isQOpen, setIsQOpen] = useState(false);
+    const [isAOpen, setIsAOpen] = useState(false);
+    const [title, setTitle] = useState('');
+    const [content, setContent] = useState('');
+    const [answer, setAnswer] = useState('');
+    const [focusQA, setFocustQA] = useState(-1);
+    const quillInstance = useRef<ReactQuill>(null);
+
+    const modules = useMemo(
+        () => ({
+            toolbar: {
+                container: [
+                    [{ header: '1' }, { header: '2' }],
+                    [{ size: [] }],
+                    ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+                    [{ list: 'ordered' }, { list: 'bullet' }, { align: [] }],
+
+                ],
+
+            },
+            clipboard: {
+                matchVisual: false,
+            },
+        }),
+        [],
+    );
+
+    const formats = [
+        'header',
+        'font',
+        'size',
+        'bold',
+        'italic',
+        'underline',
+        'strike',
+        'blockquote',
+        'list',
+        'bullet',
+        'align',
+        'image',
+    ];
     useEffect(() => {
         if (ACCESS_TOKEN)
             getUser()
@@ -48,14 +95,25 @@ export default function Page(props: pageProps) {
                     postRecent(product.id)
                         .then(r => setRecentList(r))
                         .catch(e => console.log(e));
+                    getProductQAList(product.id)
+                        .then(r => setProductQAList(r))
+                        .catch(e => console.log(e));
+                    setMounted(true);
+                    getProduct(product?.id).then(r => setProduct(r)).catch(e => console.log(e));
+                    getWho(product.authorUsername).then(r => setSeller(r)).catch(e => console.log(e));
+                    getCategories().then(r => {
+                        setCategories(r);
+                        const topCategory = r.filter((cateogry: any) => cateogry.name == product.topCategoryName)[0]
+                        setTopCategory(topCategory);
+                        setMiddleCategory(topCategory?.categoryResponseDTOList.filter((category: any) => category.name == product.middleCategoryName)[0]);
+                    }).catch(e => console.log(e));
+                    getReviews(product.id)
+                    .then(r => setReviews(r))
+                    .catch(e => console.log(e));
                 })
                 .catch(e => console.log(e));
     }, [ACCESS_TOKEN]);
-    useEffect(() => {
-        getReviews(product.id)
-            .then(r => setReviews(r))
-            .catch(e => console.log(e));
-    }, []);
+
     function Move(data: number) {
         setFocus(data);
         document.getElementById(String(data))?.scrollIntoView();
@@ -104,6 +162,16 @@ export default function Page(props: pageProps) {
         });
         return product.price + optionPrice;
     }
+    function getDiscountPrice() {
+        let optionPrice = 0;
+        (product?.optionListResponseDTOList as any[])?.forEach(optionList => {
+            (optionList.optionResponseDTOList as any[])?.forEach(option => {
+                if (options?.includes(option.optionId))
+                    optionPrice += option.optionPrice;
+            })
+        });
+        return product.price * (100 - product?.discount) / 100 + optionPrice;
+    }
     function getMax() {
         let max = product.remain;
         (product?.optionListResponseDTOList as any[])?.forEach(optionList => {
@@ -114,32 +182,56 @@ export default function Page(props: pageProps) {
         });
         return max;
     }
-    return <Main user={user} recentList={recentList} setRecentList={setRecentList} categories={props.categories}>
+    function getGood() {
+        return product?.reviewSize > 0 ? (product?.numOfGrade['3.5~4'] + product?.numOfGrade['4.5~5']) / product?.reviewSize * 100 : 0;
+    }
+    function openQModal() {
+        setIsQOpen(true);
+        setTitle('');
+        setContent('');
+    }
+    function openAModal() {
+        setIsAOpen(true);
+        setAnswer('');
+    }
+    function getPercent() {
+        let answer = 0;
+        productQAList?.forEach(productQA => {
+            if (productQA?.answer != null)
+                answer++;
+        })
+        return productQAList?.length > 0 ? answer / productQAList.length * 100 : 0;
+    }
+
+    return <Main user={user} recentList={recentList} setRecentList={setRecentList} categories={categories}>
         <div className='flex flex-col w-[1240px] min-h-[670px]'>
             <div className='text-sm flex'>
                 <label className='text-2xl font-bold'>{props.seller.nickname}</label>
                 <label className='ml-2 text-gray-500'>긍정 리뷰</label>
-                <label className='ml-2'>93.1%</label>
+                <label className='ml-2'>{getGood().toLocaleString('ko-kr', { maximumFractionDigits: 0 })}%</label>
                 <div className='divider divider-horizontal h-[20px] mx-0'></div>
                 <label className='text-gray-500'>응답률 </label>
-                <label className='ml-2'>100%</label>
+                <label className='ml-2'>{getPercent().toLocaleString('ko-kr', { maximumFractionDigits: 0 })}%</label>
             </div>
             <div className='mt-10 flex'>
                 <div className='w-[880px] h-full'>
-                    <div className='flex'>
-                        <button id='middle' className='flex' onClick={() => setMiddleCategoryDropdown(!middleCategoryDropdown)}>{product.middleCategoryName}<img src={middleCategoryDropdown ? '/up.png' : '/down.png'} className='ml-1 w-[24px] h-[24px]' alt='dropdown' /></button>
-                        <button id='bottom' className='flex ml-4' onClick={() => setBottomCategoryDropdown(!bottomCategoryDropdownm)}>{product.categoryName}<img src={bottomCategoryDropdownm ? '/up.png' : '/down.png'} className='ml-1 w-[24px] h-[24px]' alt='dropdown' /></button>
-                        <DropDown open={middleCategoryDropdown} onClose={() => setMiddleCategoryDropdown(false)} background='main' button='middle' className='overflow-y-scroll bg-white' defaultDriection={Direcion.DOWN} width={140} height={180}>
-                            <div className='max-w-[120px] max-h-[180px] flex flex-col'>
-                                {(topCategory?.categoryResponseDTOList as any[])?.map((middle, index) => <a key={index} href={'/'} className={'' + (middle.name == product.middleCategoryName ? ' text-red-500' : '')}>{middle.name}</a>)}
-                            </div>
-                        </DropDown>
-                        <DropDown open={bottomCategoryDropdownm} onClose={() => setBottomCategoryDropdown(false)} background='main' button='bottom' className='overflow-y-scroll bg-white' defaultDriection={Direcion.DOWN} width={200} height={180}>
-                            <div className='max-w-[180px] max-h-[200px] flex flex-col'>
-                                {(middleCategory?.categoryResponseDTOList as any[])?.map((bottom, index) => <a key={index} href={'/'} className={'' + (bottom.name == product.categoryName ? ' text-red-500' : '')}>{bottom.name}</a>)}
-                            </div>
-                        </DropDown>
+                    <div className='flex justify-between'>
+                        <div className='flex'>
+                            <button id='middle' className='flex' onClick={() => setMiddleCategoryDropdown(!middleCategoryDropdown)}>{product.middleCategoryName}<img src={middleCategoryDropdown ? '/up.png' : '/down.png'} className='ml-1 w-[24px] h-[24px]' alt='dropdown' /></button>
+                            <button id='bottom' className='flex ml-4' onClick={() => setBottomCategoryDropdown(!bottomCategoryDropdownm)}>{product.categoryName}<img src={bottomCategoryDropdownm ? '/up.png' : '/down.png'} className='ml-1 w-[24px] h-[24px]' alt='dropdown' /></button>
+                        </div>
+                        {seller?.username == user?.username ? <a href={"/product/modify?id=" + product?.id} className='btn btn-error btn-xs text-white'>수정하기</a> : <></>}
                     </div>
+                    <DropDown open={middleCategoryDropdown} onClose={() => setMiddleCategoryDropdown(false)} background='main' button='middle' className='overflow-y-scroll bg-white' defaultDriection={Direcion.DOWN} width={140} height={180}>
+                        <div className='max-w-[120px] max-h-[180px] flex flex-col'>
+                            {(topCategory?.categoryResponseDTOList as any[])?.map((middle, index) => <a key={index} href={'/'} className={'' + (middle.name == product.middleCategoryName ? ' text-red-500' : '')}>{middle.name}</a>)}
+                        </div>
+                    </DropDown>
+                    <DropDown open={bottomCategoryDropdownm} onClose={() => setBottomCategoryDropdown(false)} background='main' button='bottom' className='overflow-y-scroll bg-white' defaultDriection={Direcion.DOWN} width={200} height={180}>
+                        <div className='max-w-[180px] max-h-[200px] flex flex-col'>
+                            {(middleCategory?.categoryResponseDTOList as any[])?.map((bottom, index) => <a key={index} href={'/'} className={'' + (bottom.name == product.categoryName ? ' text-red-500' : '')}>{bottom.name}</a>)}
+                        </div>
+                    </DropDown>
                     <div className='flex mt-2'>
                         <div className='min-w-[410px] min-h-[410px] w-[410px] h-[410px] flex items-center justify-center'><img src={product?.url ? product.url : '/empty_product.png'} className='w-[300px] h-[300px]' /></div>
                         <div className='flex flex-col ml-2 w-full'>
@@ -160,14 +252,24 @@ export default function Page(props: pageProps) {
                                 <a onClick={e => Move(1)} className='ml-2 cursor-pointer'>{product?.reviewSize.toLocaleString("ko-kr") + ' 리뷰보기 >'}</a>
                             </div>
                             <div className='mt-4 flex justify-between w-full'>
-                                <label className='text-3xl'>{product?.title}</label>
+                                <div>
+                                    <label className={'text-3xl' + (product?.remain > 0 ? '' : ' line-through text-gray-500')}>{product?.title ? product?.title : '제목 없음'}</label>
+                                </div>
                                 <button className='min-w-[44px] min-h-[44px] w-[44px] h-[44px] border border-gray-500 rounded-full flex items-center justify-center' onClick={() => Wish()}><img src={love ? '/heart_on.png' : '/heart_off.png'} className='w-[24px] h-[24px]' /></button>
                             </div>
                             <label className='text-gray-500 text-lg'>원산지:상세설명 참조</label>
-                            <label className='text-xl mt-2'><label className='text-2xl font-bold'>{product?.price.toLocaleString('ko-kr')}</label>원</label>
+                            {product?.discount > 0 ?
+                                <div className='flex flex-col'>
+                                    <label className='text-sm mt-2 text-gray-500 line-through'>{getPrice().toLocaleString('ko-kr')}원</label>
+                                    <label className='text-xl mt-2 font-bold'><label className='text-2xl'>{product?.discount}% {getDiscountPrice().toLocaleString('ko-kr', { maximumFractionDigits: 0 })}</label>원</label>
+                                </div>
+                                :
+                                <label className='text-xl mt-2 font-bold'><label className='text-2xl font-bold'>{getPrice().toLocaleString('ko-kr')}</label>원</label>
+                            }
+
                             <div className='flex justify-between mt-auto'>
                                 <label className='flex items-center'><div className='border border-black rounded-full w-[20px] h-[20px] flex items-center justify-center mr-2'>p</div>최대 적립 포인트</label>
-                                <label className='font-bold'>{(product?.price / 100).toLocaleString('ko-kr', { maximumFractionDigits: 0 })}P</label>
+                                <label className='font-bold'>{(getDiscountPrice() / 100).toLocaleString('ko-kr', { maximumFractionDigits: 0 })}P</label>
                             </div>
                             <label className='mt-auto flex items-center'><div className='border border-black rounded-full w-[20px] h-[20px] flex items-center justify-center mr-2'>%</div>최대 22개월 무이자 할부</label>
                             <label className='mt-auto'>무료배송 | CJ대한통운</label>
@@ -211,7 +313,7 @@ export default function Page(props: pageProps) {
                         </table>
                         <div className='w-[860px] h-[100px] flex justify-center items-center text-gray-600 text-xl bg-gray-200 font-bold'>
                             <img src={'/exclamation.png'} className='w-[30px] h-[30px] mr-2' />
-                            판매자가<label className='text-black ml-2'>현금결제를 요구하면 거부</label>하시고 즉시 <a href='?' className='underline'>11번가로 신고</a>해 주세요.
+                            판매자가<label className='text-black ml-2'>현금결제를 요구하면 거부</label>하시고 즉시 <a href='?' className='underline'>52번가로 신고</a>해 주세요.
                         </div>
                         <div id='0' className='p-4'>
                             <div dangerouslySetInnerHTML={{ __html: product.detail }} />
@@ -239,17 +341,19 @@ export default function Page(props: pageProps) {
                             </div>
                             <div className='divider divider-horizontal'></div>
                             <div className='flex items-center flex-col justify-center'>
-                                <label className='flex items-center text-gray-500'>5점<progress className='progress progress-info w-[300px] h-[18px] mx-3' value={grade5} max={product?.reviewSize} /><label className='text-blue-400 w-[32px]'>{(grade5 / product?.reviewSize * 100).toLocaleString('ko-kr', { maximumFractionDigits: 0 })}%</label></label>
-                                <label className='flex items-center text-gray-500'>4점<progress className='progress progress-info w-[300px] h-[18px] mx-3' value={grade4} max={product?.reviewSize} /><label className='text-blue-400 w-[32px]'>{(grade4 / product?.reviewSize * 100).toLocaleString('ko-kr', { maximumFractionDigits: 0 })}%</label></label>
-                                <label className='flex items-center text-gray-500'>3점<progress className='progress progress-info w-[300px] h-[18px] mx-3' value={grade3} max={product?.reviewSize} /><label className='text-blue-400 w-[32px]'>{(grade3 / product?.reviewSize * 100).toLocaleString('ko-kr', { maximumFractionDigits: 0 })}%</label></label>
-                                <label className='flex items-center text-gray-500'>2점<progress className='progress progress-info w-[300px] h-[18px] mx-3' value={grade2} max={product?.reviewSize} /><label className='text-blue-400 w-[32px]'>{(grade2 / product?.reviewSize * 100).toLocaleString('ko-kr', { maximumFractionDigits: 0 })}%</label></label>
-                                <label className='flex items-center text-gray-500'>1점<progress className='progress progress-info w-[300px] h-[18px] mx-3' value={grade1} max={product?.reviewSize} /><label className='text-blue-400 w-[32px]'>{(grade1 / product?.reviewSize * 100).toLocaleString('ko-kr', { maximumFractionDigits: 0 })}%</label></label>
-                                <label className='flex items-center text-gray-500'>0점<progress className='progress progress-info w-[300px] h-[18px] mx-3' value={grade0} max={product?.reviewSize} /><label className='text-blue-400 w-[32px]'>{(grade0 / product?.reviewSize * 100).toLocaleString('ko-kr', { maximumFractionDigits: 0 })}%</label></label>
+                                <label className='flex items-center text-gray-500'>5점<progress className='progress progress-info w-[300px] h-[18px] mx-3' value={grade5} max={product?.reviewSize} /><label className='text-blue-400 w-[32px]'>{(product?.reviewSize > 0 ? grade5 / product?.reviewSize * 100 : 0).toLocaleString('ko-kr', { maximumFractionDigits: 0 })}%</label></label>
+                                <label className='flex items-center text-gray-500'>4점<progress className='progress progress-info w-[300px] h-[18px] mx-3' value={grade4} max={product?.reviewSize} /><label className='text-blue-400 w-[32px]'>{(product?.reviewSize > 0 ? grade4 / product?.reviewSize * 100 : 0).toLocaleString('ko-kr', { maximumFractionDigits: 0 })}%</label></label>
+                                <label className='flex items-center text-gray-500'>3점<progress className='progress progress-info w-[300px] h-[18px] mx-3' value={grade3} max={product?.reviewSize} /><label className='text-blue-400 w-[32px]'>{(product?.reviewSize > 0 ? grade3 / product?.reviewSize * 100 : 0).toLocaleString('ko-kr', { maximumFractionDigits: 0 })}%</label></label>
+                                <label className='flex items-center text-gray-500'>2점<progress className='progress progress-info w-[300px] h-[18px] mx-3' value={grade2} max={product?.reviewSize} /><label className='text-blue-400 w-[32px]'>{(product?.reviewSize > 0 ? grade2 / product?.reviewSize * 100 : 0).toLocaleString('ko-kr', { maximumFractionDigits: 0 })}%</label></label>
+                                <label className='flex items-center text-gray-500'>1점<progress className='progress progress-info w-[300px] h-[18px] mx-3' value={grade1} max={product?.reviewSize} /><label className='text-blue-400 w-[32px]'>{(product?.reviewSize > 0 ? grade1 / product?.reviewSize * 100 : 0).toLocaleString('ko-kr', { maximumFractionDigits: 0 })}%</label></label>
+                                <label className='flex items-center text-gray-500'>0점<progress className='progress progress-info w-[300px] h-[18px] mx-3' value={grade0} max={product?.reviewSize} /><label className='text-blue-400 w-[32px]'>{(product?.reviewSize > 0 ? grade0 / product?.reviewSize * 100 : 0).toLocaleString('ko-kr', { maximumFractionDigits: 0 })}%</label></label>
                             </div>
                         </div>
                         <div className='divider'></div>
                         <label className='font-bold text-2xl'>전체리뷰<label className='font-normal text-sm ml-2'>{product?.reviewSize.toLocaleString("ko-kr")}건</label></label>
-
+                        {reviews?.length == 0 ?
+                            <div className='h-[100px] flex items-center justify-center'>등록된 리뷰가 없습니다.</div>
+                            : <></>}
                         {reviews?.map((review, index) => <div key={index} className='w-full'>
                             <div className='flex'>
                                 <img className='min-w-[52px] w-[52px] min-h-[52px] h-[52px]' src={review?.url ? review.url : '/base_profile.png'} />
@@ -281,20 +385,98 @@ export default function Page(props: pageProps) {
                             <div className='divider'></div>
                         </div>)}
                     </div>
-                    {/* <table>
-                        <thead>
-                            <tr>
-                                <th>문의/답변</th>
-                                <th>작성자</th>
-                                <th>작성일</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td></td>
-                            </tr>
-                        </tbody>
-                    </table> */}
+                    <label className='font-bold text-2xl'>문의/답변<label className='font-normal text-sm ml-2'>{product?.reviewSize.toLocaleString("ko-kr")}건</label></label>
+                    <div className='flex text-center mb-2'>
+                        <div className='w-[604px]'>문의/답변</div>
+                        <div className='w-[96px]'>작성자</div>
+                        <div className='w-[150px]'>작성일</div>
+                    </div>
+                    {productQAList?.map((productQA, index) => <div key={index} className='flex'>
+                        <div className='flex flex-col text-center mb-2'>
+                            <div className='flex items-center'>
+                                <div className='w-[604px] text-start flex items-center'>
+                                    {productQA.answer != null ? <label className='text-blue-500 border border-blue-500 p-1 text-xs mr-2'>답변완료</label> : <label className='text-red-500 border border-red-500 p-1 text-xs mr-2'>확인중</label>}
+                                    <label className='hover:underline cursor-pointer' onClick={() => setFocustQA(index)}>{productQA?.title}</label>
+                                </div>
+                                <div className='w-[96px]'>{productQA?.author}</div>
+                                <div className='w-[150px]'>{getDateTimeFormat(productQA?.createDate)}</div>
+                            </div>
+                            {focusQA == index ?
+                                <div className='flex flex-col'>
+                                    <div className='flex items-center'>
+                                        <label className='text-blue-500 font-bold text-3xl mr-2'>Q</label>
+                                        <label dangerouslySetInnerHTML={{ __html: productQA?.content }} />
+                                    </div>
+                                    {productQA.answer != null ?
+                                        <>
+                                            <div className='flex items-center mt-4'>
+                                                <label className='text-red-500 font-bold text-3xl mr-2'>A</label>
+                                                <label dangerouslySetInnerHTML={{ __html: productQA?.answer }} />
+                                            </div>
+                                            {/* {user.unsername == seller.unsername ? <button className='self-end btn btn-xs btn-error text-white w-[100px]' onClick={openAModal}>수정하기</button> : <></>} */}
+                                        </>
+                                        :
+                                        <>
+                                            {user.unsername == seller.unsername ? <button className='self-end btn btn-xs btn-error text-white w-[100px]' onClick={openAModal}>답변하기</button> : <></>}
+                                        </>
+                                    }
+
+                                </div>
+                                : <></>
+                            }
+                        </div>
+                    </div>)}
+                    <div className='min-h-[100px] w-full flex flex-col items-center justify-center'>
+                        {productQAList && productQAList.length <= 0 ? <label>등록된 Q&A가 없습니다.</label> : <></>}
+                        <button className='btn btn-warning ml-auto btn-sm text-white' onClick={openQModal}>상품 문의하기</button>
+                    </div>
+                    <Modal open={isQOpen} onClose={() => setIsQOpen(false)} className='' escClose={true} outlineClose={true}>
+                        <div className="flex flex-col w-[744px] h-[552px]">
+                            <div className="text-white bg-red-500 h-[37px] py-2 px-4">상품 문의하기</div>
+                            <div className="px-4 flex flex-col">
+                                <input id="title" type="text" className="input input-bordered mt-4" placeholder="문의 제목.." defaultValue={title} onChange={e => setTitle(e.target.value)} />
+                                <QuillNoSSRWrapper
+                                    forwardedRef={quillInstance}
+                                    defaultValue={content}
+                                    onChange={(e: any) => setContent(e)}
+                                    modules={modules}
+                                    theme="snow"
+                                    className='w-full h-[300px] mt-2'
+                                    placeholder="문의 내용을 입력해주세요."
+                                />
+                                <div className='flex justify-center mt-16'>
+                                    <button className='btn btn-info btn-xs mr-2 text-white' disabled={title == "" || content == ""} onClick={() => {
+                                        postQuestion({ productId: product.id, title: title, content: content }).then(r => { setProductQAList(r); setIsQOpen(false) }).catch(e => console.log(e));
+                                    }}>등록</button>
+                                    <button className='btn btn-error btn-xs text-white' onClick={() => setIsQOpen(false)}>취소</button>
+                                </div>
+                            </div>
+                        </div>
+                    </Modal>
+                    <Modal open={isAOpen} onClose={() => setIsAOpen(false)} className='' escClose={true} outlineClose={true}>
+                        <div className="flex flex-col w-[744px] h-[752px]">
+                            <div className="text-white bg-red-500 h-[37px] py-2 px-4">상품 문의하기</div>
+                            <div className="px-4 flex flex-col">
+                                <div className="w-[712px] h-[48px] p-2 border border-black mt-4 rounded-lg flex items-center">{focusQA > 0 ? productQAList[focusQA]?.title : ''}</div>
+                                <div className='w-[712px] h-[300px] p-2 border border-black mt-4 rounded-lg'> {focusQA > 0 ? <div dangerouslySetInnerHTML={{ __html: productQAList[focusQA]?.content }} ></div> : <></>}</div>
+                                <QuillNoSSRWrapper
+                                    forwardedRef={quillInstance}
+                                    defaultValue={answer}
+                                    onChange={(e: any) => setAnswer(e)}
+                                    modules={modules}
+                                    theme="snow"
+                                    className='w-full h-[200px] mt-2'
+                                    placeholder="답변 내용을 입력해주세요."
+                                />
+                                <div className='flex justify-center mt-16'>
+                                    <button className='btn btn-info btn-xs mr-2 text-white' disabled={answer == ""} onClick={() => {
+                                        postAnswer({ productId: product.id, answer: answer, productQAId: productQAList[focusQA].productQAId }).then(r => { setProductQAList(r); setIsAOpen(false) }).catch(e => console.log(e));
+                                    }}>등록</button>
+                                    <button className='btn btn-error btn-xs text-white' onClick={() => setIsQOpen(false)}>취소</button>
+                                </div>
+                            </div>
+                        </div>
+                    </Modal>
                 </div>
                 <div className='w-[300px] h-full ml-[60px] relative' >
                     <div className='w-[300px] fixed h-[650px]'>
@@ -309,7 +491,7 @@ export default function Page(props: pageProps) {
                                     }}>
                                         {list.optionListName}
                                     </div>
-                                    <div className={(option == index ? '' : ' hidden')}>
+                                    {mounted ? <div className={(option == index ? '' : ' hidden')}>
                                         <div className={'flex relative flex-col mt-2' + (typeof window !== "undefined" && (document?.getElementById(list.optionListName) as HTMLInputElement)?.checked ? " bg-red-500 text-white" : "")}>
                                             <label className='mt-2 px-2'>{'옵션 미선택'}</label>
                                             <input type='radio' id={list.optionListName} name={list.optionListName} className='opacity-0 z-1 absolute w-full h-full cursor-pointer' onChange={updateOptions} defaultChecked={true} />
@@ -321,19 +503,27 @@ export default function Page(props: pageProps) {
                                                 <input type='radio' id={list.optionListName + '§' + opt.optionId} name={list.optionListName} className='opacity-0 z-1 absolute w-full h-full cursor-pointer' onChange={updateOptions} />
                                             </div>)}
                                     </div>
+                                        : <></>
+                                    }
                                 </div>)}
                         </div>
                         <div className='flex justify-between'>
                             <label>총 <input type='number' id="count" className='[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none m-0 input input-sm min-w-[30px]' defaultValue={product?.remain >= 1 ? 1 : product?.remain} min={product?.remain >= 1 ? 1 : product?.remain} max={getMax()} onChange={(e) => { let value = Number(e.target.value); if (value > getMax()) value = getMax(); else if (value < 0) value = 0; e.target.value = value.toString(); setCount(value); }} />개</label>
-                            <label>{(getPrice() * count).toLocaleString('ko-kr')}원</label>
+                            <label>{(getDiscountPrice() * count).toLocaleString('ko-kr')}원</label>
                         </div>
-                        <button className='btn btn-error text-white w-full btn mt-2' onClick={() =>
-                            postCartList({ productId: product.id, optionIdList: options, count: count }).then(() => window.location.href = "/account/cart").catch(e => console.log(e))
-                        }>장바구니 담기</button>
+                        {product?.remain > 0 ?
+                            <button className='btn btn-error text-white w-full mt-2' onClick={() =>
+                                postCartList({ productId: product.id, optionIdList: options, count: count }).then(() => window.location.href = "/account/cart").catch(e => console.log(e))
+                            }>장바구니 담기</button>
+                            :
+                            <button className='btn w-full mt-2' disabled>재입고 예정</button>
+                        }
                     </div>
                 </div>
             </div>
+            <div className='w-[880px] text-xs flex justify-end'>
+                {(product?.tagList as String[])?.map((tag, index) => <label key={index} className='btn btn-xs' onClick={() => location.href = "/search?keyword=" + tag}>{tag}</label>)}
+            </div>
         </div>
     </Main>
-
 }

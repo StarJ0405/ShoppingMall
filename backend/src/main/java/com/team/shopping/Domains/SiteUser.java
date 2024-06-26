@@ -43,7 +43,7 @@ public class SiteUser {
 
     private Gender gender;
 
-    private int point;
+    private Long point;
 
     private LocalDateTime createDate;
 

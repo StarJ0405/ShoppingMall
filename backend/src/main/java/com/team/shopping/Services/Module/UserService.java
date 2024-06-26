@@ -1,6 +1,7 @@
 package com.team.shopping.Services.Module;
 
 
+import com.team.shopping.DTOs.PaymentLogResponseDTO;
 import com.team.shopping.DTOs.SignupRequestDTO;
 import com.team.shopping.DTOs.UserRequestDTO;
 import com.team.shopping.Domains.SiteUser;
@@ -13,6 +14,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Optional;
 
 @Service
@@ -44,8 +47,6 @@ public class UserService {
         siteUser.setName(userRequestDTO.getName());
         siteUser.setPhoneNumber(userRequestDTO.getPhoneNumber());
         siteUser.setNickname(userRequestDTO.getNickname());
-        {
-        }
         siteUser.setEmail(userRequestDTO.getEmail());
 
         return this.userRepository.save(siteUser);
@@ -62,6 +63,18 @@ public class UserService {
     public SiteUser get(String value) throws IllegalArgumentException {
         return this.userRepository.findById(value).orElse(null);
     }
+    @Transactional
+    public SiteUser addToPoint(SiteUser user, PaymentLogResponseDTO paymentLog) {
+
+        BigDecimal totalPrice = BigDecimal.valueOf(paymentLog.getTotalPrice());
+        BigDecimal onePercent = totalPrice.multiply(BigDecimal.valueOf(0.01)).setScale(0, RoundingMode.HALF_UP);
+        long onePercentAsLong = onePercent.longValueExact(); // 변환 시 예외 처리
+
+        long newPoint = user.getPoint() + onePercentAsLong;
+        user.setPoint(newPoint);
+        return this.userRepository.save(user);
+    }
+
 
     public Optional<SiteUser> getOptional(String value) {
         return this.userRepository.findById(value);
@@ -77,9 +90,9 @@ public class UserService {
     }
 
     public void otherCheck(String email, String nickname, String phone) {
-        if (userRepository.isDuplicateEmail(email)) throw new DataDuplicateException("email");
-        if (userRepository.isDuplicateNickname(nickname)) throw new DataDuplicateException("nickname");
-        if (userRepository.isDuplicatePhone(phone)) throw new DataDuplicateException("phone");
+        if (userRepository.isDuplicateEmail(email).size()>1) throw new DataDuplicateException("email");
+        if (userRepository.isDuplicateNickname(nickname).size()>1) throw new DataDuplicateException("nickname");
+        if (userRepository.isDuplicatePhone(phone).size()>1) throw new DataDuplicateException("phone");
     }
 
     public boolean isMatch(String password1, String password2) {
@@ -92,6 +105,11 @@ public class UserService {
         userRepository.deleteByUsername(user.getUsername());
     }
 
+    @Transactional
+    public void useToPoint(SiteUser user, Long useToPoint) {
+        user.setPoint(user.getPoint() - useToPoint);
+        this.userRepository.save(user);
+    }
 
 }
 

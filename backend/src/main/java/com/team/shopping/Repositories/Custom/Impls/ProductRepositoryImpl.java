@@ -71,7 +71,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
         JPAQuery<Product> query = jpaQueryFactory
                 .selectFrom(qProduct).distinct()
                 .leftJoin(qTag).on(qTag.product.id.eq(qProduct.id))
-                .leftJoin(qCategory).on(qCategory.id.eq(qProduct.category.id))
+                .join(qCategory).on(qCategory.id.eq(qProduct.category.id))
                 .where(qCategory.id.eq(categoryId).and(qProduct.title.contains(keyword).or(qTag.name.contains(keyword))))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize());

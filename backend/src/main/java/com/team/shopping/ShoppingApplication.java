@@ -5,8 +5,10 @@ import com.team.shopping.Exceptions.DataNotFoundException;
 import lombok.Getter;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
+@EnableScheduling
 public class ShoppingApplication {
 	@Getter
 	private static OsType osType;

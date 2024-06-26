@@ -6,6 +6,8 @@ import com.team.shopping.Domains.SiteUser;
 import com.team.shopping.Enums.Type;
 import com.team.shopping.Repositories.ArticleRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -55,10 +57,13 @@ public class ArticleService {
         return this.articleRepository.findById(articleId).orElseThrow();
     }
 
-    public List<Article> getArticleList(Type type) {
-
-        return articleRepository.findByType(type);
+    public Page<Article> getArticleList(Type type, int page) {
+        return articleRepository.findByType(type, PageRequest.of(page,5));
     }
 
 
+    public List<Article> getMyArticleList(SiteUser user, Type type) {
+
+        return this.articleRepository.findMyArticleList(user, type);
+    }
 }

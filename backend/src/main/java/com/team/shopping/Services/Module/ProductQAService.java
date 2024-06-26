@@ -9,6 +9,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -18,17 +19,18 @@ public class ProductQAService {
 
 
     @Transactional
-    public void save(String value, SiteUser user, Product product) {
+    public void save(String value, String content, SiteUser user, Product product) {
         this.productQARepository.save(ProductQA.builder()
                 .title(value)
                 .product(product)
                 .author(user)
+                .content(content)
                 .build());
     }
 
-    public void update(String content, SiteUser user, ProductQA productQA) {
+    public void update(String answer, SiteUser user, ProductQA productQA) {
         productQA.setSeller(user);
-        productQA.setContent(content);
+        productQA.setAnswer(answer);
         productQARepository.save(productQA);
     }
 
@@ -36,7 +38,7 @@ public class ProductQAService {
         return productQARepository.findById(productQAId);
     }
 
-    public Optional<ProductQA> findByProduct(Product product) {
+    public List<ProductQA> findByProduct(Product product) {
         return productQARepository.findByProduct(product);
     }
 

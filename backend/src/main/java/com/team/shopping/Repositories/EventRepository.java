@@ -10,5 +10,7 @@ import java.util.List;
 
 @Repository
 public interface EventRepository extends JpaRepository<Event, Long>, EventRepositoryCustom {
-    List<Event> findByEndDateAfter(LocalDateTime endDate);
+    List<Event> findByEndDateGreaterThanEqual(LocalDateTime endDate);
+
+    List<Event> findByStartDateGreaterThanEqual(LocalDateTime now);
 }

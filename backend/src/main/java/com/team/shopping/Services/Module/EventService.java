@@ -18,6 +18,10 @@ public class EventService {
 
     private final EventRepository eventRepository;
 
+    public List<Event> getMyList (SiteUser user) {
+        return this.eventRepository.findMyList(user);
+    }
+
     public Event saveEvent (SiteUser creator, EventRequestDTO eventRequestDTO) {
         Double discount = eventRequestDTO.getDiscount();
         if (discount < 0.0) {
@@ -31,12 +35,21 @@ public class EventService {
                 .build());
     }
 
+    public void changeActive (Event event) {
+        event.setActive(!event.getActive());
+        this.eventRepository.save(event);
+    }
+
     public List<Event> findByProduct (Product product) {
         return this.eventRepository.findByProduct(product);
     }
 
     public List<Event> findByEndDateAfter (LocalDateTime now) {
-        return this.eventRepository.findByEndDateAfter (now);
+        return this.eventRepository.findByEndDateGreaterThanEqual(now);
+    }
+
+    public List<Event> findByStartDateAfter (LocalDateTime now) {
+        return this.eventRepository.findByStartDateGreaterThanEqual(now);
     }
 
     public void delete (Event event) {

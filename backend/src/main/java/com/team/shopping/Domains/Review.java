@@ -31,17 +31,20 @@ public class Review {
 
     private Double grade;
 
+    private Long paymentProductId;
+
     private LocalDateTime createDate;
 
     private LocalDateTime modifyDate;
 
     @Builder
-    public Review (SiteUser author, Product product, String title, String content, Double grade) {
+    public Review (SiteUser author, Product product, String title, String content, Double grade, Long paymentProductId) {
         this.author = author;
         this.product = product;
         this.title = title;
         this.content = content;
         this.grade = grade;
+        this.paymentProductId = paymentProductId;
         this.createDate = LocalDateTime.now();
     }
 }

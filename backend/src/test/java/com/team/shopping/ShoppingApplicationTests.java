@@ -12,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -37,7 +38,15 @@ class ShoppingApplicationTests {
     }
     @Test
     void modify(){
-
+        List<Category> categories = new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            Category firstCategory = categoryRepository.save(Category.builder().name("top" + i).build());
+            for (int j = 0; j < 5; j++) {
+                Category secondCategory = categoryRepository.save(Category.builder().name("top"+i+"-"+ "middle"+j).parent(firstCategory).build());
+                for (int k = 0; k < 10; k++)
+                    categories.add(categoryRepository.save(Category.builder().name("top"+i+"-"+ "middle"+j+"-"+ "bottom" + k).parent(secondCategory).build()));
+            }
+        }
     }
     @Test
     void insertData() {
@@ -56,14 +65,17 @@ class ShoppingApplicationTests {
                     categories.add(categoryRepository.save(Category.builder().name("top"+i+"-"+ "middle"+j+"-"+ "bottom" + k).parent(secondCategory).build()));
             }
         }
-
-        for (int i = 0; i < 200; i++) {
+        Collections.shuffle(categories);
+        for (int i = 0; i < 2500; i++) {
             SiteUser seller = sellers.get(r.nextInt(sellers.size()));
-            Product product = productRepository.save(Product.builder().seller(seller).category(categories.get(r.nextInt(categories.size()))).price(r.nextInt(1000, 1000000000)).description("이것은 설명").detail("이것은 자세한 내용").dateLimit(LocalDateTime.now().plusDays(r.nextInt(5000))).remain(r.nextInt(5000)).title(i + "번째 물건 팝니다.").delivery("배달은 어떻게 할까요~").address("전국 처리는 요렇게").receipt("영수증 발행은 알아서").a_s(seller.getPhoneNumber()).brand(seller.getNickname()).build());
+            Product product = productRepository.save(Product.builder().seller(seller).category(categories.get(i%categories.size())).price(r.nextInt(1000, 1000000000)).description("이것은 설명").detail("이것은 자세한 내용").dateLimit(LocalDateTime.now().plusDays(r.nextInt(5000))).remain(2500+r.nextInt(5001)).title(i + "번째 물건 팝니다.").delivery("배달은 어떻게 할까요~").address("전국 처리는 요렇게").receipt("영수증 발행은 알아서").a_s(seller.getPhoneNumber()).brand(seller.getNickname()).build());
             for (int j = 0; j < r.nextInt(5); j++) {
                 OptionList optionList = optionListRepository.save(OptionList.builder().name("옵션 목록" + j).product(product).build());
                 for (int k = 0; k < (3 + r.nextInt(8)); k++)
-                    optionsRepository.save(Options.builder().name("옵션" + k).count(r.nextInt(product.getRemain())).price(r.nextInt(product.getPrice() / 10, product.getPrice() / 5)).optionList(optionList).build());
+                    optionsRepository.save(Options.builder().name("옵션" + k)
+                            .count(product.getRemain()+r.nextInt(product.getRemain()/2+1))
+                            .price(r.nextInt(product.getPrice() / 10, product.getPrice() / 5))
+                            .optionList(optionList).build());
             }
             for(int j=0; j<(5+r.nextInt(11));j++)
                 tagRepository.save(Tag.builder().name("태그"+(j*(1+r.nextInt(15))*(1+r.nextInt(15)))).product(product).build());

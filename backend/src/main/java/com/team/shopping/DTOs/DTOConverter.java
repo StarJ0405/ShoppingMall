@@ -25,7 +25,8 @@ public class DTOConverter {
         Long createDate = dateTimeTransfer(_createDate);
 
         List<CartItemDetailResponseDTO> cartItemDetailResponseDTOList = new ArrayList<>();
-        long totalPrice =  ((long)discountPrice * cartItem.getCount());
+        long totalPrice = 0L;
+        totalPrice += (long)discountPrice * cartItem.getCount();
 
         for (CartItemDetail cartItemDetail : cartItemDetails) {
             Options option = cartItemDetail.getOptions();
@@ -51,7 +52,7 @@ public class DTOConverter {
 
     public static PaymentProductResponseDTO toPaymentProductResponseDTO (PaymentProduct paymentProduct,
                                                                          List<PaymentProductDetail> paymentProductDetailList,
-                                                                         String imageUrl) {
+                                                                         String imageUrl, ReviewResponseDTO reviewResponseDTO) {
         List<PaymentProductDetailResponseDTO> paymentProductDetailResponseDTOList = new ArrayList<>();
 
         double discount = (paymentProduct.getDiscount() != null) ? paymentProduct.getDiscount() : 0.0;
@@ -70,6 +71,7 @@ public class DTOConverter {
                 .discountPrice(discountPrice)
                 .imageUrl(imageUrl)
                 .paymentProductDetailResponseDTOList(paymentProductDetailResponseDTOList)
+                .responseDTO(reviewResponseDTO)
                 .build();
     }
 
@@ -82,6 +84,7 @@ public class DTOConverter {
         for (PaymentProductResponseDTO paymentProductResponseDTO : paymentProductResponseDTOList) {
             totalPrice += paymentProductResponseDTO.getWithOptionPrice();
         }
+        totalPrice -= paymentLog.getUsedPoint();
         return PaymentLogResponseDTO.builder()
                 .totalPrice(totalPrice)
                 .paymentLog(paymentLog)

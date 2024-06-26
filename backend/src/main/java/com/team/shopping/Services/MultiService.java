@@ -27,6 +27,8 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -162,19 +164,17 @@ public class MultiService {
             File old = new File(path + _fileSystem.get().getV());
             if (old.exists()) old.delete();
         }
-        String newUrl = null;
         // 새로 생성
         if (newUserRequestDTO.getUrl() != null && !newUserRequestDTO.getUrl().isBlank()) {
-            String newFile = "/api/user" + "_" + siteUser.getUsername() + "/";
+            String newFile = "/api/user" + "/" + siteUser.getUsername() + "/";
             Optional<FileSystem> _ordFileSystem = fileSystemService.get(ImageKey.TEMP.getKey(username));
             if (_ordFileSystem.isPresent()) {
-                newUrl = this.fileMove(newUserRequestDTO.getUrl(), newFile, _ordFileSystem.get());
+                String newUrl = this.fileMove(newUserRequestDTO.getUrl(), newFile, _ordFileSystem.get());
                 if (newUrl != null) fileSystemService.save(ImageKey.USER.getKey(username), newUrl);
             }
         }
-        return UserResponseDTO.builder().username(siteUser.getUsername()).gender(siteUser.getGender().toString()).email(siteUser.getEmail()).point(siteUser.getPoint()).phoneNumber(siteUser.getPhoneNumber()).nickname(siteUser.getNickname()).birthday(this.dateTimeTransfer(siteUser.getBirthday())).createDate(this.dateTimeTransfer(siteUser.getCreateDate())).modifyDate(this.dateTimeTransfer(siteUser.getModifyDate())).url(newUrl).name(siteUser.getName()).build();
+        return UserResponseDTO.builder().username(siteUser.getUsername()).gender(siteUser.getGender().toString()).email(siteUser.getEmail()).point(siteUser.getPoint()).phoneNumber(siteUser.getPhoneNumber()).nickname(siteUser.getNickname()).birthday(this.dateTimeTransfer(siteUser.getBirthday())).createDate(this.dateTimeTransfer(siteUser.getCreateDate())).modifyDate(this.dateTimeTransfer(siteUser.getModifyDate())).url(_fileSystem.get().getV()).name(siteUser.getName()).build();
     }
-
 
     @Transactional
     public UserResponseDTO updatePassword(String username, UserRequestDTO userRequestDTO) {
@@ -199,9 +199,7 @@ public class MultiService {
 //        }
 
         for (Address address : addressList) {
-            addressResponseDTOList.add(AddressResponseDTO.builder()
-                    .address(address)
-                    .build());
+            addressResponseDTOList.add(AddressResponseDTO.builder().address(address).build());
         }
         return addressResponseDTOList;
     }
@@ -438,6 +436,7 @@ public class MultiService {
 
     @Transactional
     public List<CartResponseDTO> updateToCart(String username, CartRequestDTO cartRequestDTO) {
+
         SiteUser user = this.userService.get(username);
         CartItem cartItem = this.cartItemService.get(cartRequestDTO.getCartItemId());
 
@@ -510,26 +509,7 @@ public class MultiService {
         if (paymentLogList == null) {
             return null;
         }
-
-        List<PaymentLogResponseDTO> paymentLogResponseDTOList = new ArrayList<>();
-
-        for (PaymentLog paymentLog : paymentLogList) {
-            List<PaymentProduct> paymentProductList = this.paymentProductService.getList(paymentLog);
-            List<PaymentProductResponseDTO> paymentProductResponseDTOList = new ArrayList<>();
-
-            for (PaymentProduct paymentProduct : paymentProductList) {
-                List<PaymentProductDetail> paymentProductDetailList = this.paymentProductDetailService.getList(paymentProduct);
-                Product product = this.productService.getProduct(paymentProduct.getProductId());
-                String url = this.getImageUrl(product);
-                PaymentProductResponseDTO paymentProductResponseDTO = DTOConverter.toPaymentProductResponseDTO(paymentProduct, paymentProductDetailList, url);
-                paymentProductResponseDTOList.add(paymentProductResponseDTO);
-            }
-
-            PaymentLogResponseDTO paymentLogResponseDTO = DTOConverter.toPaymentLogResponseDTO(paymentLog, paymentProductResponseDTOList);
-            paymentLogResponseDTOList.add(paymentLogResponseDTO);
-        }
-
-        return paymentLogResponseDTOList;
+        return this.getPaymentLogList(paymentLogList);
     }
 
 
@@ -542,7 +522,8 @@ public class MultiService {
         if (cartItemList.isEmpty()) {
             throw new NoSuchElementException("Cart is empty, cannot proceed with payment.");
         }
-
+        long point = paymentLogRequestDTO.getPoint();
+        long maxPoint = 0L;
         // 상품 재고 및 장바구니 항목 수량 검증
         for (CartItem cartItem : cartItemList) {
             Product product = cartItem.getProduct();
@@ -556,7 +537,11 @@ public class MultiService {
             if (cartItem.getCount() == 0) {
                 throw new NoSuchElementException("Please set this product count");
             }
+            Double discount = this.getProductDiscount(cartItem.getProduct());
+            Integer discountPrice = this.getProductDiscountPrice(cartItem.getProduct(), discount);
+            maxPoint += (long) discountPrice * cartItem.getCount();
         }
+        point = Math.max(0, Math.min(maxPoint, Math.min(user.getPoint(), point)));
 
         // 결제 로그 생성
         PaymentLog paymentLog = this.paymentLogService.save(user, paymentLogRequestDTO);
@@ -599,11 +584,76 @@ public class MultiService {
             List<PaymentProductDetail> paymentProductDetailList = this.paymentProductDetailService.getList(paymentProduct);
             Product product = this.productService.getProduct(paymentProduct.getProductId());
             String url = this.getImageUrl(product);
-            PaymentProductResponseDTO paymentProductResponseDTO = DTOConverter.toPaymentProductResponseDTO(paymentProduct, paymentProductDetailList, url);
+            Optional<Review> review = this.reviewService.findByPaymentProductId(paymentProduct.getId());
+            ReviewResponseDTO reviewResponseDTO = null;
+            if (review.isPresent())
+                reviewResponseDTO = this.getReview(review.get());
+            PaymentProductResponseDTO paymentProductResponseDTO = DTOConverter.toPaymentProductResponseDTO(paymentProduct, paymentProductDetailList, url, reviewResponseDTO);
             paymentProductResponseDTOList.add(paymentProductResponseDTO);
         }
 
-        return DTOConverter.toPaymentLogResponseDTO(paymentLog, paymentProductResponseDTOList);
+
+        this.userService.useToPoint(user, point);
+        PaymentLog _paymentLog = this.paymentLogService.usedPoint(paymentLog, point);
+
+
+        PaymentLogResponseDTO paymentLogResponseDTO = DTOConverter.toPaymentLogResponseDTO(_paymentLog, paymentProductResponseDTOList);
+        this.userService.addToPoint(user, paymentLogResponseDTO);
+        return paymentLogResponseDTO;
+    }
+
+    private Long pointCal(SiteUser user, PaymentLogRequestDTO paymentLogRequestDTO) {
+
+        Long point = paymentLogRequestDTO.getPoint();
+        List<CartItem> cartItemList = new ArrayList<>();
+
+        for (Long cartItemId : paymentLogRequestDTO.getCartItemIdList()) {
+            cartItemList.add(this.cartItemService.get(cartItemId));
+        }
+        long maxPoint = 0L;
+        for (CartItem cartItem : cartItemList) {
+            Double discount = this.getProductDiscount(cartItem.getProduct());
+            Integer discountPrice = this.getProductDiscountPrice(cartItem.getProduct(), discount);
+            maxPoint += (long) discountPrice * cartItem.getCount();
+        }
+
+
+        if (user.getPoint() < point) {
+            point = user.getPoint();
+        }
+        if (point <= 0) {
+            point = 0L;
+        }
+        if (point > maxPoint) {
+            point = maxPoint;
+        }
+        return point;
+    }
+
+    private List<PaymentLogResponseDTO> getPaymentLogList(List<PaymentLog> paymentLogList) {
+
+        List<PaymentLogResponseDTO> paymentLogResponseDTOList = new ArrayList<>();
+
+        for (PaymentLog paymentLog : paymentLogList) {
+            List<PaymentProduct> paymentProductList = this.paymentProductService.getList(paymentLog);
+            List<PaymentProductResponseDTO> paymentProductResponseDTOList = new ArrayList<>();
+
+            for (PaymentProduct paymentProduct : paymentProductList) {
+                List<PaymentProductDetail> paymentProductDetailList = this.paymentProductDetailService.getList(paymentProduct);
+                Product product = this.productService.getProduct(paymentProduct.getProductId());
+                String url = this.getImageUrl(product);
+                Optional<Review> review = this.reviewService.findByPaymentProductId(paymentProduct.getId());
+                ReviewResponseDTO reviewResponseDTO = null;
+                if (review.isPresent())
+                    reviewResponseDTO = this.getReview(review.get());
+                PaymentProductResponseDTO paymentProductResponseDTO = DTOConverter.toPaymentProductResponseDTO(paymentProduct, paymentProductDetailList, url, reviewResponseDTO);
+                paymentProductResponseDTOList.add(paymentProductResponseDTO);
+            }
+
+            PaymentLogResponseDTO paymentLogResponseDTO = DTOConverter.toPaymentLogResponseDTO(paymentLog, paymentProductResponseDTOList);
+            paymentLogResponseDTOList.add(paymentLogResponseDTO);
+        }
+        return paymentLogResponseDTOList;
     }
 
     /**
@@ -616,10 +666,7 @@ public class MultiService {
 
         for (OptionList optionList : optionLists) {
             List<OptionResponseDTO> optionResponseDTOList = this.getOptionResponseDTOList(optionList);
-            optionListResponseDTOList.add(OptionListResponseDTO.builder()
-                    .optionResponseDTOList(optionResponseDTOList)
-                    .optionList(optionList)
-                    .build());
+            optionListResponseDTOList.add(OptionListResponseDTO.builder().optionResponseDTOList(optionResponseDTOList).optionList(optionList).build());
         }
         return optionListResponseDTOList;
     }
@@ -629,9 +676,7 @@ public class MultiService {
         List<Options> optionsList = this.optionsService.getList(optionList);
 
         for (Options options : optionsList) {
-            optionResponseDTOList.add(OptionResponseDTO.builder()
-                    .options(options)
-                    .build());
+            optionResponseDTOList.add(OptionResponseDTO.builder().options(options).build());
         }
 
         return optionResponseDTOList;
@@ -680,10 +725,9 @@ public class MultiService {
     @Transactional
     public void deleteTag(Product product) {
         List<Tag> tagList = tagService.getTagByProduct(product);
-        if (!tagList.isEmpty())
-            for (Tag tag : tagList) {
-                tagService.delete(tag);
-            }
+        if (!tagList.isEmpty()) for (Tag tag : tagList) {
+            tagService.delete(tag);
+        }
     }
 
     /**
@@ -714,7 +758,7 @@ public class MultiService {
             this.deleteOptionList(product);
             Optional<Review> _review = reviewService.findByProduct(product);
             _review.ifPresent(reviewService::delete);
-            this.deleteProductQA(product);
+            this.deleteQAByProductAll(product);
             this.deleteWish(product);
             this.deleteCart(product);
             this.deleteByEventProduct(product);
@@ -747,7 +791,7 @@ public class MultiService {
         }
         if (requestDTO.getUrl() != null && !requestDTO.getUrl().isBlank()) {
             Optional<FileSystem> _fileSystem = fileSystemService.get(ImageKey.TEMP.getKey(username));
-            String newFile = "/api/product" + "_" + product.getId() + "/";
+            String newFile = "/api/product" + "/" + product.getId() + "/";
             if (_fileSystem.isPresent()) {
                 String newUrl = this.fileMove(requestDTO.getUrl(), newFile, _fileSystem.get());
                 if (newUrl != null) {
@@ -760,28 +804,47 @@ public class MultiService {
                 }
             }
         }
-        String detail = product.getDetail();
         Optional<MultiKey> _multiKey = multiKeyService.get(ImageKey.TEMP.getKey(username));
-        if (_multiKey.isPresent()) {
-            for (String keyName : _multiKey.get().getVs()) {
-                Optional<MultiKey> _productMulti = multiKeyService.get(ImageKey.PRODUCT.getKey(product.getId().toString()));
-                Optional<FileSystem> _fileSystem = fileSystemService.get(keyName);
-                if (_fileSystem.isPresent()) {
-                    String newFile = "/api/product" + "_" + product.getId() + "/content/";
-                    String newUrl = this.fileMove(_fileSystem.get().getV(), newFile, _fileSystem.get());
-                    if (_productMulti.isEmpty()) {
-                        MultiKey multiKey = multiKeyService.save(ImageKey.PRODUCT.getKey(product.getId().toString()), ImageKey.PRODUCT.getKey(product.getId().toString()) + ".0");
-                        fileSystemService.save(multiKey.getVs().getLast(), newUrl);
-                    } else {
-                        multiKeyService.add(_productMulti.get(), ImageKey.PRODUCT.getKey(product.getId().toString()) + "." + _productMulti.get().getVs().size());
-                        fileSystemService.save(_productMulti.get().getVs().getLast(), newUrl);
-                    }
-                    detail = detail.replace(_fileSystem.get().getV(), newUrl);
-                }
+        _multiKey.ifPresent(multiKey -> this.updateProductContent(username, product, multiKey));
+    }
+
+    @Transactional
+    public ProductResponseDTO updateProduct(String username, ProductCreateRequestDTO requestDTO) {
+        Product product = productService.getProduct(requestDTO.getProductId());
+
+        if (product != null) {
+            Optional<MultiKey> _multiKey = multiKeyService.get(ImageKey.TEMP.getKey(username));
+            if (_multiKey.isPresent()) {
+                Category category = this.categoryService.get(requestDTO.getCategoryId());
+                Product newProduct = productService.updateProduct(product, requestDTO, category);
+                return getProduct(this.updateProductContent(username, newProduct, _multiKey.get()));
             }
-            productService.Update(product, detail);
-            multiKeyService.delete(_multiKey.get());
         }
+        return null;
+    }
+
+    private Product updateProductContent(String username, Product product, MultiKey multiKey) {
+        String detail = product.getDetail();
+        for (String keyName : multiKey.getVs()) {
+            Optional<MultiKey> _productMulti = multiKeyService.get(ImageKey.PRODUCT.getKey(product.getId().toString()));
+            Optional<FileSystem> _fileSystem = fileSystemService.get(keyName);
+            if (_fileSystem.isPresent()) {
+                String newFile = "/api/product" + "/" + product.getId() + "/content/";
+                String newUrl = this.fileMove(_fileSystem.get().getV(), newFile, _fileSystem.get());
+                if (_productMulti.isEmpty()) {
+                    MultiKey multiKey1 = multiKeyService.save(ImageKey.PRODUCT.getKey(product.getId().toString()), ImageKey.PRODUCT.getKey(product.getId().toString()) + ".0");
+                    fileSystemService.save(multiKey1.getVs().getLast(), newUrl);
+                } else {
+                    multiKeyService.add(_productMulti.get(), ImageKey.PRODUCT.getKey(product.getId().toString()) + "." + _productMulti.get().getVs().size());
+                    fileSystemService.save(_productMulti.get().getVs().getLast(), newUrl);
+                }
+                detail = detail.replace(_fileSystem.get().getV(), newUrl);
+            }
+        }
+        multiKeyService.delete(multiKey);
+        productService.Update(product, detail);
+
+        return product;
     }
 
 
@@ -814,21 +877,7 @@ public class MultiService {
         Double discount = this.getProductDiscount(product);
         int discountPrice = this.getProductDiscountPrice(product, discount);
 
-        return ProductResponseDTO
-                .builder()
-                .optionListResponseDTOList(optionListResponseDTOList)
-                .product(product)
-                .tagList(tagList)
-                .url(url)
-                .discount(discount)
-                .discountPrice(discountPrice)
-                .dateLimit(this.dateTimeTransfer(product.getDateLimit()))
-                .createDate(this.dateTimeTransfer(product.getCreateDate()))
-                .modifyDate(this.dateTimeTransfer(product.getModifyDate()))
-                .reviewList(reviewList)
-                .averageGrade(averageGrade)
-                .numOfGrade(numOfGrade)
-                .build();
+        return ProductResponseDTO.builder().optionListResponseDTOList(optionListResponseDTOList).product(product).tagList(tagList).url(url).discount(discount).discountPrice(discountPrice).dateLimit(this.dateTimeTransfer(product.getDateLimit())).createDate(this.dateTimeTransfer(product.getCreateDate())).modifyDate(this.dateTimeTransfer(product.getModifyDate())).reviewList(reviewList).averageGrade(averageGrade).numOfGrade(numOfGrade).build();
     }
 
     @Transactional
@@ -919,17 +968,21 @@ public class MultiService {
         return productResponseDTOList;
     }
 
+    public List<ProductQAResponseDTO> getQA(long productId) {
+        List<ProductQAResponseDTO> list = new ArrayList<>();
+        Product product = productService.getProduct(productId);
+        List<ProductQA> productQAList = productQAService.findByProduct(product);
+        for (ProductQA qa : productQAList)
+            list.add(ProductQAResponseDTO.builder().productId(qa.getProduct().getId()).productQAId(qa.getId()).title(qa.getTitle()).content(qa.getContent()).author(qa.getAuthor().getNickname()).answer(qa.getAnswer()).createDate(qa.getCreateDate()).build());
+        return list;
+    }
+
     @Transactional
     public void productQASave(String username, ProductQARequestDTO requestDTO) {
         SiteUser user = this.userService.get(username);
         Product product = productService.getProduct(requestDTO.getProductId());
-        if (user == null)
-            throw new NoSuchElementException("not user");
-        if (user.getRole() != UserRole.USER)
-            throw new IllegalArgumentException("not role");
-
-        if (product != null)
-            this.productQAService.save(requestDTO.getTitle(), user, product);
+        if (user == null) throw new NoSuchElementException("not user");
+        if (product != null) this.productQAService.save(requestDTO.getTitle(), requestDTO.getContent(), user, product);
     }
 
     @Transactional
@@ -937,19 +990,19 @@ public class MultiService {
         SiteUser user = this.userService.get(username);
         Optional<ProductQA> _productQA = productQAService.getProductQA(requestDTO.getProductQAId());
         Product product = productService.getProduct(requestDTO.getProductId());
-        if (user == null)
-            throw new NoSuchElementException("not user");
-        if (user.getRole() == UserRole.SELLER)
-            throw new IllegalArgumentException("not role");
-
-        if (product != null)
-            this.productQAService.update(requestDTO.getContent(), user, _productQA.get());
+        if (user == null) throw new NoSuchElementException("not user");
+        if (product == null)
+            throw new NoSuchElementException("not product");
+        if (!product.getSeller().getUsername().equals(user.getUsername()))
+            throw new IllegalArgumentException("not owner");
+        _productQA.ifPresent(productQA -> this.productQAService.update(requestDTO.getAnswer(), user, productQA));
     }
 
     @Transactional
-    public void deleteProductQA(Product product) {
-        Optional<ProductQA> _productQA = productQAService.findByProduct(product);
-        _productQA.ifPresent(productQAService::delete);
+    public void deleteQAByProductAll(Product product) {
+        List<ProductQA> productQAList = productQAService.findByProduct(product);
+        for (ProductQA qa : productQAList)
+            productQAService.delete(qa);
     }
 
     /**
@@ -997,7 +1050,7 @@ public class MultiService {
                 if (file.exists()) file.delete();
             }
             UUID uuid = UUID.randomUUID();
-            String fileLoc = "/api/user" + "_" + username + "/temp/" + uuid + "." + requestDTO.getFile().getContentType().split("/")[1];
+            String fileLoc = "/api/user" + "/" + username + "/temp/" + uuid + "." + requestDTO.getFile().getContentType().split("/")[1];
             File file = new File(path + fileLoc);
             if (!file.getParentFile().exists()) file.getParentFile().mkdirs();
             requestDTO.getFile().transferTo(file);
@@ -1035,7 +1088,7 @@ public class MultiService {
             String path = ShoppingApplication.getOsType().getLoc();
 
             UUID uuid = UUID.randomUUID();
-            String fileLoc = "/api/user" + "_" + username + "/temp_list/" + uuid + "." + requestDTO.getFile().getContentType().split("/")[1];
+            String fileLoc = "/api/user" + "/" + username + "/temp_list/" + uuid + "." + requestDTO.getFile().getContentType().split("/")[1];
             File file = new File(path + fileLoc);
             if (!file.getParentFile().exists()) file.getParentFile().mkdirs();
             requestDTO.getFile().transferTo(file);
@@ -1121,6 +1174,19 @@ public class MultiService {
      * Review
      */
 
+    @Transactional
+    public List<ReviewResponseDTO> getMyReview(String username) {
+        SiteUser user = userService.get(username);
+        if (user == null) {
+            throw new DataNotFoundException("not found user");
+        }
+        List<Review> reviewList = reviewService.getMyReview(user);
+        List<ReviewResponseDTO> responseDTOList = new ArrayList<>();
+        for (Review review : reviewList)
+            responseDTOList.add(this.getReview(review));
+        return responseDTOList;
+    }
+
     private ReviewResponseDTO getReview(Review review) {
         String _username = review.getAuthor().getUsername();
         Optional<FileSystem> _fileSystem = fileSystemService.get(ImageKey.USER.getKey(_username));
@@ -1145,19 +1211,22 @@ public class MultiService {
     }
 
     @Transactional
-    public List<ReviewResponseDTO> addToReview(String username, ReviewRequestDTO reviewRequestDTO) {
+    public void addToReview(String username, ReviewRequestDTO reviewRequestDTO) {
         List<ReviewResponseDTO> reviewResponseDTOList = new ArrayList<>();
         SiteUser user = this.userService.get(username);
         Product product = this.productService.getProduct(reviewRequestDTO.getProductId());
+        List<Review> _reviewList = this.reviewService.getMyReviewByProduct(user, product);
 
         // 사용자의 구매 기록을 가져옴
         List<PaymentLog> paymentLogList = this.paymentLogService.get(user);
+        List<PaymentProduct> _paymentProductList = new ArrayList<>();
         boolean hasPurchased = false;
 
         for (PaymentLog paymentLog : paymentLogList) {
             List<PaymentProduct> paymentProductList = this.paymentProductService.getList(paymentLog);
             for (PaymentProduct paymentProduct : paymentProductList) {
                 if (Objects.equals(paymentProduct.getProductId(), product.getId())) {
+                    _paymentProductList.add(paymentProduct);
                     hasPurchased = true;
                     break;
                 }
@@ -1172,38 +1241,50 @@ public class MultiService {
             throw new NoSuchElementException("your paymentLogs have not this product");
         }
 
+        // 구매기록에 해당 제품이 포함된 만큼만 리뷰 작성 가능
+        if (_reviewList.size() >= _paymentProductList.size()) {
+            throw new DataDuplicateException("1 paymentProduct by 1 review");
+        }
         // 구매 기록이 있는 경우에만 리뷰를 저장
-        Review reviewKey = this.reviewService.save(user, reviewRequestDTO, product);
 
+        Review reviewKey = this.reviewService.save(user, reviewRequestDTO, product);
+        this.paymentProductService.updateStatus(reviewRequestDTO.getPaymentProductId());
+        this.updateReviewContent(reviewKey, username);
+
+        // 리뷰 리스트를 가져와서 DTO로 변환하여 반환
+//        List<Review> reviewList = this.reviewService.getList(product);
+//        for (Review review : reviewList) {
+//            ReviewResponseDTO reviewResponseDTO = this.getReview(review);
+//            reviewResponseDTOList.add(reviewResponseDTO);
+//        }
+//
+//
+//        return reviewResponseDTOList;
+
+    }
+
+    private void updateReviewContent(Review reviewKey, String username) {
+        String detail = reviewKey.getContent();
         // 이미지 저장
         Optional<MultiKey> _multiKey = multiKeyService.get(ImageKey.TEMP.getKey(username));
         if (_multiKey.isPresent()) {
             for (String keyName : _multiKey.get().getVs()) {
                 Optional<MultiKey> _reviewMulti = multiKeyService.get(ImageKey.REVIEW.getKey(reviewKey.getId().toString()));
                 Optional<FileSystem> _fileSystem = fileSystemService.get(keyName);
+                String newFile = "/api/review" + "/" + reviewKey.getId() + "/";
+                String newPath = this.fileMove(_fileSystem.get().getV(), newFile, _fileSystem.get());
                 if (_reviewMulti.isEmpty()) {
                     MultiKey multiKey = multiKeyService.save(ImageKey.REVIEW.getKey(reviewKey.getId().toString()), ImageKey.REVIEW.getKey(reviewKey.getId().toString()) + ".0");
-                    fileSystemService.save(multiKey.getVs().getLast(), _fileSystem.get().getV());
+                    fileSystemService.save(multiKey.getVs().getLast(), newPath);
                 } else {
                     multiKeyService.add(_reviewMulti.get(), ImageKey.REVIEW.getKey(reviewKey.getId().toString()) + "." + _reviewMulti.get().getVs().size());
-                    fileSystemService.save(_reviewMulti.get().getVs().getLast(), _fileSystem.get().getV());
+                    fileSystemService.save(_reviewMulti.get().getVs().getLast(), newPath);
                 }
-                String newFile = "/api/review" + "_" + reviewKey.getId() + "/";
-                this.fileMove(_fileSystem.get().getV(), newFile, _fileSystem.get());
+                detail = detail.replace(_fileSystem.get().getV(), newPath);
             }
+            reviewService.updateContent(reviewKey, detail);
             multiKeyService.delete(_multiKey.get());
         }
-
-        // 리뷰 리스트를 가져와서 DTO로 변환하여 반환
-        List<Review> reviewList = this.reviewService.getList(product);
-        for (Review review : reviewList) {
-            ReviewResponseDTO reviewResponseDTO = this.getReview(review);
-            reviewResponseDTOList.add(reviewResponseDTO);
-        }
-
-
-        return reviewResponseDTOList;
-
     }
 
 
@@ -1231,8 +1312,9 @@ public class MultiService {
         if (review.getAuthor() != user && !user.getRole().equals(UserRole.ADMIN)) {
             throw new IllegalArgumentException("not yours");
         } else {
-            this.reviewService.update(review, reviewRequestDTO);
+            Review newReview = this.reviewService.update(review, reviewRequestDTO);
             List<Review> reviewList = this.reviewService.getList(review.getProduct());
+            this.updateReviewContent(newReview, username);
             for (Review _review : reviewList) {
                 ReviewResponseDTO reviewResponseDTO = this.getReview(_review);
                 reviewResponseDTOList.add(reviewResponseDTO);
@@ -1244,6 +1326,25 @@ public class MultiService {
     /**
      * article
      */
+
+    @Transactional
+    public List<ArticleResponseDTO> getMyArticle(String username, int _type) {
+
+        SiteUser user = this.userService.get(username);
+        Type type = Type.values()[_type];
+        List<ArticleResponseDTO> articleResponseDTOList = new ArrayList<>();
+        List<Article> articleList = this.articleService.getMyArticleList(user, type);
+
+        if (articleList.isEmpty()) {
+            return articleResponseDTOList;
+        }
+
+        for (Article article : articleList) {
+            articleResponseDTOList.add(this.getArticleResponseDTO(article));
+        }
+        return articleResponseDTOList;
+    }
+
 
     @Transactional
     public void deleteArticle(String username, Long articleId) {
@@ -1258,16 +1359,9 @@ public class MultiService {
     }
 
     @Transactional
-    public List<ArticleResponseDTO> getArticleList(int type) { // Long 을 Type 형식으로 바꿔야함
-        List<ArticleResponseDTO> articleResponseDTOList = new ArrayList<>();
-
-        List<Article> articleList = this.articleService.getArticleList(Type.values()[type]); // 예를들어 Type 인데 값이 1인거 ->결국 int 가아닌 Type이다
-        for (Article article : articleList) {
-            ArticleResponseDTO articleResponseDTO = this.getArticleResponseDTO(article);
-            articleResponseDTOList.add(articleResponseDTO);
-        }
-
-        return articleResponseDTOList;
+    public Page<ArticleResponseDTO> getArticleList(int type, int page) {
+        Page<Article> articleList = this.articleService.getArticleList(Type.values()[type], page);
+        return articleList.map(this::getArticleResponseDTO);
     }
 
     @Transactional
@@ -1291,7 +1385,11 @@ public class MultiService {
     }
 
     private ArticleResponseDTO getArticleResponseDTO(Article article) {
-        return ArticleResponseDTO.builder().article(article).siteUser(article.getAuthor()).createDate(this.dateTimeTransfer(article.getCreateDate())).modifyDate(this.dateTimeTransfer(article.getModifyDate())).build();
+        return ArticleResponseDTO.builder()
+                .article(article).siteUser(article.getAuthor())
+                .createDate(this.dateTimeTransfer(article.getCreateDate()))
+                .modifyDate(this.dateTimeTransfer(article.getModifyDate()))
+                .build();
     }
 
     /**
@@ -1322,6 +1420,9 @@ public class MultiService {
         List<Recent> recentList = recentService.getRecent(user);
         List<RecentResponseDTO> responseDTOList = new ArrayList<>();
         for (Recent recent : recentList) {
+            if (recent.getProduct().getRemain() <= 0) {
+                this.recentService.delete(recent);
+            }
             ProductResponseDTO responseDTO = this.getProduct(recent.getProduct().getId());
 
             responseDTOList.add(RecentResponseDTO.builder().price(responseDTO.getPrice()).title(responseDTO.getTitle()).grade(responseDTO.getGrade()).recentId(recent.getId()).productId(responseDTO.getId()).url(responseDTO.getUrl()).createDate(responseDTO.getCreateDate()).build());
@@ -1357,7 +1458,8 @@ public class MultiService {
     }
 
     @Transactional
-    public Page<ProductResponseDTO> categorySearchByKeyword(int page, String encodedKeyword, int sort, Long categoryId) {
+    public Page<ProductResponseDTO> categorySearchByKeyword(int page, String encodedKeyword, int sort, Long
+            categoryId) {
         String keyword = URLDecoder.decode(encodedKeyword, StandardCharsets.UTF_8);
         Sorts sorts = Sorts.values()[sort];
 
@@ -1375,6 +1477,30 @@ public class MultiService {
      * event
      */
 
+    @Transactional
+    public List<EventResponseDTO> getEventList(String username) {
+        SiteUser user = this.userService.get(username);
+        List<EventResponseDTO> eventResponseDTOList = new ArrayList<>();
+        List<Event> eventList = this.eventService.getMyList(user);
+        for (Event event : eventList) {
+            if (!user.equals(event.getCreator())) {
+                throw new IllegalArgumentException("not role");
+            }
+            eventResponseDTOList.add(this.getEventDTO(event));
+        }
+        return eventResponseDTOList;
+    }
+
+    @Transactional
+    public EventResponseDTO getEvent(String username, Long eventId) {
+        SiteUser user = this.userService.get(username);
+        Event event = this.eventService.get(eventId);
+        if (!user.equals(event.getCreator())) {
+            throw new IllegalArgumentException("not role");
+        }
+        return this.getEventDTO(event);
+    }
+
 
     @Transactional
     public EventResponseDTO createEvent(String username, EventRequestDTO eventRequestDTO) {
@@ -1385,15 +1511,12 @@ public class MultiService {
 
         Event event = this.eventService.saveEvent(user, eventRequestDTO);
         List<Long> productIdList = eventRequestDTO.getProductIdList();
-        List<ProductResponseDTO> productResponseDTOList = new ArrayList<>();
 
         for (Long productId : productIdList) {
             Product product = this.productService.getProduct(productId);
             this.eventProductService.saveEventProduct(event, product);
-            ProductResponseDTO productResponseDTO = this.getProduct(product);
-            productResponseDTOList.add(productResponseDTO);
         }
-        return this.getEventDTO(event, productResponseDTOList, user);
+        return this.getEventDTO(event);
     }
 
     @Transactional
@@ -1405,7 +1528,6 @@ public class MultiService {
             throw new IllegalArgumentException("not role");
         }
         List<Long> productIdList = eventRequestDTO.getProductIdList();
-        List<ProductResponseDTO> productResponseDTOList = new ArrayList<>();
 
 
         List<EventProduct> eventProductList = this.eventProductService.getList(_event);
@@ -1417,8 +1539,6 @@ public class MultiService {
             if (!productIdList.contains(productId)) {
                 this.eventProductService.delete(eventProduct);
                 iterator.remove();
-            } else {
-                productResponseDTOList.add(this.getProduct(eventProduct.getProduct()));
             }
         }
 
@@ -1427,12 +1547,11 @@ public class MultiService {
             if (!exists) {
                 Product product = this.productService.getProduct(productId);
                 this.eventProductService.saveEventProduct(_event, product);
-                productResponseDTOList.add(this.getProduct(product));
             }
         }
 
         Event updatedEvent = this.eventService.updateEvent(_event, eventRequestDTO);
-        return this.getEventDTO(updatedEvent, productResponseDTOList, user);
+        return this.getEventDTO(updatedEvent);
     }
 
     @Transactional
@@ -1446,23 +1565,32 @@ public class MultiService {
     }
 
     // 초 분 시 일 월 주
-    @Scheduled(cron = "0 0 * * * *")
-    public void deleteEventProduct() {
+
+    @Scheduled(cron = "0 0 0/1 * * *")
+    public void disableEvent() {
 
         LocalDateTime now = LocalDateTime.now();
         List<Event> eventList = this.eventService.findByEndDateAfter(now);
 
+        List<Event> _eventList = this.eventService.findByStartDateAfter(now);
+
         for (Event event : eventList) {
-            List<EventProduct> eventProductList = this.eventProductService.getList(event);
-            for (EventProduct eventProduct : eventProductList) {
-                this.eventProductService.delete(eventProduct);
-            }
-            this.eventService.delete(event);
+            this.eventService.changeActive(event);
         }
+        for (Event event : _eventList) {
+            this.eventService.changeActive(event);
+        }
+
     }
 
-    private EventResponseDTO getEventDTO(Event event, List<ProductResponseDTO> productResponseDTOList, SiteUser user) {
-        return EventResponseDTO.builder().startDate(this.dateTimeTransfer(event.getStartDate())).endDate(this.dateTimeTransfer(event.getEndDate())).productResponseDTOList(productResponseDTOList).user(user).event(event).createDate(this.dateTimeTransfer(event.getCreateDate())).modifyDate(this.dateTimeTransfer(event.getModifyDate())).build();
+    private EventResponseDTO getEventDTO(Event event) {
+
+        List<EventProduct> eventProductList = this.eventProductService.getList(event);
+        List<ProductResponseDTO> productResponseDTOList = new ArrayList<>();
+        for (EventProduct eventProduct : eventProductList) {
+            productResponseDTOList.add(this.getProduct(eventProduct.getProduct()));
+        }
+        return EventResponseDTO.builder().startDate(this.dateTimeTransfer(event.getStartDate())).endDate(this.dateTimeTransfer(event.getEndDate())).productResponseDTOList(productResponseDTOList).user(event.getCreator()).event(event).createDate(this.dateTimeTransfer(event.getCreateDate())).modifyDate(this.dateTimeTransfer(event.getModifyDate())).build();
     }
 
     /**
@@ -1486,33 +1614,43 @@ public class MultiService {
     }
 
     private Integer getProductDiscountPrice(Product product, Double discount) {
+        // 유효성 검사: 할인율이 음수인 경우 0으로 처리
         if (discount < 0.0) {
             discount = 0.0;
         }
-        double discountedPrice = product.getPrice() * (1 - discount / 100);
-        discountedPrice = Math.round(discountedPrice * 10) / 10.0;
-        return (int) Math.round(discountedPrice);
+
+        // 할인된 가격 계산 (부동소수점 정밀도 보장을 위해 BigDecimal 사용)
+        BigDecimal originalPrice = BigDecimal.valueOf(product.getPrice());
+        BigDecimal discountPercent = BigDecimal.valueOf(discount);
+        BigDecimal discountMultiplier = BigDecimal.ONE.subtract(discountPercent.divide(BigDecimal.valueOf(100)));
+        BigDecimal discountedPrice = originalPrice.multiply(discountMultiplier);
+
+        // 소수점 첫 번째 자리에서 반올림하여 정수로 변환
+
+        return discountedPrice.setScale(0, RoundingMode.HALF_UP).intValue();
     }
+
 
     private Double getProductDiscount(Product product) {
         List<Event> eventList = this.eventService.findByProduct(product);
-        Event maxDiscountEvent = null;
         double maxDiscount = 0.0;
         LocalDateTime now = LocalDateTime.now();
 
         for (Event event : eventList) {
-            if ((now.isEqual(event.getStartDate()) || now.isAfter(event.getStartDate())) && now.isBefore(event.getEndDate())) {
+            if (isActiveEvent(event, now)) {
                 double discount = event.getDiscount();
                 if (discount > maxDiscount) {
-                    maxDiscountEvent = event;
+                    maxDiscount = discount;
                 }
             }
         }
-        if (maxDiscountEvent != null) {
-            return maxDiscountEvent.getDiscount();
-        } else {
-            return 0.0;
-        }
+
+        return maxDiscount;
+    }
+
+    private boolean isActiveEvent(Event event, LocalDateTime now) {
+        // 이벤트가 활성화되어 있고, 현재 시간이 이벤트의 유효 기간에 속하는지 여부를 반환
+        return event.getActive() && now.isEqual(event.getStartDate()) || now.isAfter(event.getStartDate()) && now.isBefore(event.getEndDate());
     }
 
     private Map<String, Object> gradeCalculate(List<Review> reviewList) {

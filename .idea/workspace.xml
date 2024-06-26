@@ -4,6 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
+
     <list default="true" id="5d760995-21c2-435e-b554-c440830f5356" name="Changes" comment="">
       <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/Controllers/WebSocketController.java" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/DTOs/ChatMessageRequestDTO.java" afterDir="false" />
@@ -21,6 +22,13 @@
       <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/Domains/ChatRoom.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/Domains/ChatRoom.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/Domains/Review.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/Domains/Review.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/Enums/Type.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/Enums/Type.java" afterDir="false" />
+    <list default="true" id="896430db-190c-47f3-9b43-d1c8610f775f" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/Repositories/Custom/ArticleRepositoryCustom.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/Repositories/Custom/Impls/ArticleRepositoryImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/Controllers/ArticleController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/Controllers/ArticleController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/Repositories/ArticleRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/Repositories/ArticleRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/Services/Module/ArticleService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/Services/Module/ArticleService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/Services/MultiService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/team/shopping/Services/MultiService.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -40,6 +48,32 @@
   &quot;associatedIndex&quot;: 4
 }</component>
   <component name="ProjectId" id="2i7VwV6gClC8wy50dZIUReqq8z1" />
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Interface" />
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="d00ca286de337e45f4bfb1f63b25a81070b75e97" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectCodeStyleSettingsMigration">
+    <option name="version" value="2" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 0
+}</component>
+  <component name="ProjectId" id="2hlbSbSRc0Oqdid8GI0QKRbBfOI" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -62,6 +96,25 @@
     <configuration default="true" type="KotlinStandaloneScriptRunConfigurationType">
       <module name="ShoppingMall" />
       <option name="filePath" />
+    &quot;Application.ShoppingApplication.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;LEE&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Modules&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.0&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;
+  }
+}</component>
+  <component name="RunManager">
+    <configuration name="ShoppingApplication" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="com.team.shopping.ShoppingApplication" />
+      <module name="shopping.main" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.team.shopping.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -73,6 +126,12 @@
         <option value="jdk-21.0.2-openjdk-21.0.2-4caba194b151-4f524021" />
       </set>
     </attachedChunks>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Application.ShoppingApplication" />
+        <item itemvalue="Application.ShoppingApplication" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
@@ -84,5 +143,24 @@
       <updated>1718841841309</updated>
     </task>
     <servers />
+  </component>
+      <changelist id="896430db-190c-47f3-9b43-d1c8610f775f" name="Changes" comment="" />
+      <created>1718171611195</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1718171611195</updated>
+    </task>
+    <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
 </project>
