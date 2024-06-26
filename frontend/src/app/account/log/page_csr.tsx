@@ -9,6 +9,7 @@ import { redirect } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import 'react-quill/dist/quill.snow.css';
 import ReactQuill from "react-quill";
+import { getCategories } from "@/app/API/NonUserAPI";
 
 interface pageProps {
     categories: any[];
@@ -93,6 +94,7 @@ export default function Page(props: pageProps) {
                     getPayment()
                         .then(r => setPlayments(r))
                         .catch(e => console.log(e));
+                    getCategories().then(r => setCategories(r)).catch(e => console.log(e));
                 })
                 .catch(e => console.log(e));
         else

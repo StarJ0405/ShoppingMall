@@ -36,7 +36,7 @@ export default function Page() {
             return setError('비밀번호가 일치하지 않습니다.');
         if (!Check('^([가-힣]){2,}$', name))
             return setError('이름은 한글 2글자 이상으로 구성되어야 합니다.');
-        if (birthday !== '')
+        if (birthday === '')
             return setError('생일을 입력해주세요.');
         if (!Check('^[a-zA-Z0-9.+_-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{3,}$', email))
             return setError('이메일 형식이 맞지 않습니다.');
