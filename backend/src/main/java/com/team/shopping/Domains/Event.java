@@ -40,6 +40,6 @@ public class Event {
         this.discount = discount;
         this.creator = creator;
         this.createDate = LocalDateTime.now();
-        this.active = true;
+        this.active = false;
     }
 }

@@ -1174,6 +1174,19 @@ public class MultiService {
      * Review
      */
 
+    @Transactional
+    public List<ReviewResponseDTO> getMyReview(String username) {
+        SiteUser user = userService.get(username);
+        if (user == null) {
+            throw new DataNotFoundException("not found user");
+        }
+        List<Review> reviewList = reviewService.getMyReview(user);
+        List<ReviewResponseDTO> responseDTOList = new ArrayList<>();
+        for (Review review : reviewList)
+            responseDTOList.add(this.getReview(review));
+        return responseDTOList;
+    }
+
     private ReviewResponseDTO getReview(Review review) {
         String _username = review.getAuthor().getUsername();
         Optional<FileSystem> _fileSystem = fileSystemService.get(ImageKey.USER.getKey(_username));
@@ -1531,15 +1544,21 @@ public class MultiService {
 
     // 초 분 시 일 월 주
 
-    @Scheduled(cron = "0 * * * * *")
+    @Scheduled(cron = "0 0 0/1 * * *")
     public void disableEvent() {
 
         LocalDateTime now = LocalDateTime.now();
         List<Event> eventList = this.eventService.findByEndDateAfter(now);
 
+        List<Event> _eventList = this.eventService.findByStartDateAfter(now);
+
         for (Event event : eventList) {
-            this.eventService.disableActive(event);
+            this.eventService.changeActive(event);
         }
+        for (Event event : _eventList) {
+            this.eventService.changeActive(event);
+        }
+
     }
 
     private EventResponseDTO getEventDTO(Event event) {
@@ -1670,17 +1689,7 @@ public class MultiService {
         }
     }
 
-    public List<ReviewResponseDTO> getMyReview(String username) {
-        SiteUser user = userService.get(username);
-        if (user == null) {
-            throw new DataNotFoundException("not found user");
-        }
-        List<Review> reviewList = reviewService.getMyReview(user);
-        List<ReviewResponseDTO> responseDTOList = new ArrayList<>();
-        for (Review review : reviewList)
-            responseDTOList.add(this.getReview(review));
-        return responseDTOList;
-    }
+
 }
 
 
