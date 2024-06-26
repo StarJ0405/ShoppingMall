@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import Main from './Global/Layout/MainLayout';
 import { getRecent, getUser } from './API/UserAPI';
 import { MonthDate } from './Global/Method';
-import { getProductRecentList } from './API/NonUserAPI';
+import { getCategories, getProductRecentList } from './API/NonUserAPI';
 
 interface pageProps {
     productList: any;
@@ -17,6 +17,7 @@ export default function Page(props: pageProps) {
     const [recentList, setRecentList] = useState(null as unknown as any[]);
     const [page, setPage] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
+    const [categories, setCategories] = useState(props.categories);
     useEffect(() => {
         if (ACCESS_TOKEN)
             getUser()
@@ -25,6 +26,8 @@ export default function Page(props: pageProps) {
                     getRecent()
                         .then(r => setRecentList(r))
                         .catch(e => console.log(e));
+                    getProductRecentList(0).then(r => {setProductList(r.content); setMaxPage(r.totalPages)}).catch(e => console.log(e));
+                    getCategories().then(r => setCategories(r)).catch(e => console.log(e));
                 })
                 .catch(e => console.log(e));
     }, [ACCESS_TOKEN]);
@@ -55,14 +58,14 @@ export default function Page(props: pageProps) {
         window.addEventListener('scroll', loadPage);
         return () => window.removeEventListener('scroll', loadPage);
     }, [page]);
-    return <Main user={user} recentList={recentList} setRecentList={setRecentList} categories={props.categories}>
+    return <Main user={user} recentList={recentList} setRecentList={setRecentList} categories={categories}>
         <div className='w-full h-full flex justify-center'>
             <div className='flex flex-wrap w-[1240px]'>
                 {(productList as any[]).map((product, index) =>
                     <a href={'/product/' + product.id} key={index} className='mr-4'>
                         <div className='w-[394px] h-[431px] flex flex-col p-4 hover:border border-gray-500'>
                             <img src={product?.url ? product.url : '/empty_product.png'} className='w-[190px] h-[190px]' />
-                            <label className='text-lg mt-2'>{product?.title?product?.title:'제목 없음'}</label>
+                            <label className='text-lg mt-2'>{product?.title ? product?.title : '제목 없음'}</label>
                             {/* <span className='text-xl mt-2'><label className='text-red-500 text-2xl'>9% </label> <label className='font-bold text-2xl'>10,400원</label>~ <label className='text-gray-300 line-through'>11,550원</label></span> */}
                             <label className='text-xl mt-2 font-bold text-2xl'>{product?.price.toLocaleString('ko-KR')}원</label>
                             <div className='mt-2 flex'>

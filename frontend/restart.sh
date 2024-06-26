@@ -1,24 +1,25 @@
 #!/bin/bash
 
-SOCIAL_PID=$(ps -ef | grep next-server | awk '{print $2}')
+SHOPPING_PID=$(ps -ef | grep next-server | awk '{print $2}')
 
 
-if [ -z "$SOCIAL_PID" ];
+if [ -z "$SHOPPING_PID" ];
 
 then
 
-    echo "SOCIAL_FRONT is not running"
+    echo "SHOPPING_FRONT is not running"
 
 else
 
-    kill -9 $SOCIAL_PID
+    kill -9 $SHOPPING_PID
 
-    echo "SOCIAL_FRONT stopped."
+    echo "SHOPPING_FRONT stopped."
 
 fi
 
 
-LOG=/home/ubuntu/social/frontend/social.log
+LOG=/home/ubuntu/shopping/frontend/shopping.log
 
-
+echo "SHOPPING_FRONT started."
+ 
 nohup npm run start > $LOG 2>&1 &

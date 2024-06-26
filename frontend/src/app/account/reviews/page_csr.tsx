@@ -1,5 +1,6 @@
 "use client";
 
+import { getCategories } from "@/app/API/NonUserAPI";
 import { getMyReviews, getRecent, getUser } from "@/app/API/UserAPI";
 import Profile from "@/app/Global/Layout/ProfileLayout";
 import { getDateTimeFormat } from "@/app/Global/Method";
@@ -16,6 +17,7 @@ export default function Page(props: pageProps) {
     const [recentList, setRecentList] = useState(null as unknown as any[]);
     const [reviewList, setReviewList] = useState(null as unknown as any[]);
     const [review, setReview] = useState(null as any);
+    const [categories, setCategories] = useState(props.categories);
     useEffect(() => {
         if (ACCESS_TOKEN)
             getUser()
@@ -27,13 +29,14 @@ export default function Page(props: pageProps) {
                     getMyReviews()
                         .then(r => setReviewList(r))
                         .catch(e => console.log(e));
+                    getCategories().then(r => setCategories(r)).catch(e => console.log(e));
                 })
                 .catch(e => console.log(e));
         else
             redirect('/account/login');
     }, [ACCESS_TOKEN]);
     console.log(reviewList);
-    return <Profile categories={props.categories} user={user} recentList={recentList} setRecentList={setRecentList}>
+    return <Profile categories={categories} user={user} recentList={recentList} setRecentList={setRecentList}>
         <div className='flex items-end'>
             <label className='text-xl font-bold'>내 <label className='text-xl text-red-500 font-bold'>상품</label>목록</label>
             <label className='text-xs h-[14px] border-l-2 border-gray-400 ml-2 mb-[5px] pl-2'>고객님의 상품으로 들어가서 상품을 수정하실 수 있습니다.</label>
@@ -57,13 +60,16 @@ export default function Page(props: pageProps) {
                     <td>{review?.grade}점</td>
                     <td>{getDateTimeFormat(review?.createDate)}</td>
                     <td>
-                        <button className="btn btn-xs" onClick={()=>setReview(review)}>내용</button>
+                        <button className="btn btn-xs" onClick={() => setReview(review)}>내용</button>
                     </td>
                 </tr>)}
             </tbody>
         </table>
-        <Modal open={review !=null} onClose={()=>setReview(null)} escClose={true} outlineClose={true} className="">
-        <div className="flex flex-col w-[744px] h-[752px]">
+        <div className="flex justify-center font-bold text-2xl mt-8">
+            {recentList?.length == 0 ? <label>리뷰 내역이 없습니다.</label> : <></>}
+        </div>
+        <Modal open={review != null} onClose={() => setReview(null)} escClose={true} outlineClose={true} className="">
+            <div className="flex flex-col w-[744px] h-[752px]">
                 <div className="text-white bg-red-500 h-[37px] py-2 px-4">리뷰</div>
                 <div className="px-4 flex flex-col">
                     {/* <label className="font-bold text-sm mt-2">상품 정보</label>
@@ -76,8 +82,8 @@ export default function Page(props: pageProps) {
                         <label className="font-bold text-2xl min-w-[75px]">내용</label>
                         <div className="input input-bordered w-full overflow-scroll h-[500px]" dangerouslySetInnerHTML={{ __html: review?.content }} />
                     </div>
-                    <button className="btn btn-error btn-sm self-center mt-4 text-white" onClick={()=>setReview(null)}>닫기</button>
-                </div>                
+                    <button className="btn btn-error btn-sm self-center mt-4 text-white" onClick={() => setReview(null)}>닫기</button>
+                </div>
             </div>
         </Modal>
     </Profile>;

@@ -1,4 +1,5 @@
 "use client"
+import { getCategories } from "@/app/API/NonUserAPI";
 import { deleteWish, deleteWishList, getRecent, getUser, getWishList, postCartList } from "@/app/API/UserAPI";
 import Profile from "@/app/Global/Layout/ProfileLayout";
 import { redirect } from "next/navigation";
@@ -12,6 +13,7 @@ export default function Page(props: pageProps) {
   const ACCESS_TOKEN = typeof window == 'undefined' ? null : localStorage.getItem('accessToken');
   const [wishList, setWishList] = useState(null as unknown as any[]);
   const [recentList, setRecentList] = useState(null as unknown as any[]);
+  const [categories, setCategories] = useState(props.categories);
   useEffect(() => {
     if (ACCESS_TOKEN)
       getUser()
@@ -25,6 +27,7 @@ export default function Page(props: pageProps) {
           getRecent()
             .then(r => setRecentList(r))
             .catch(e => console.log(e));
+          getCategories().then(r => setCategories(r)).catch(e => console.log(e));
         })
         .catch(e => console.log(e));
     else
@@ -70,7 +73,7 @@ export default function Page(props: pageProps) {
   function SelectAll(e: any) {
     document.getElementsByName('check').forEach((check: any) => check.checked = e.target.checked);
   }
-  return <Profile user={user} recentList={recentList} setRecentList={setRecentList} categories={props.categories}>
+  return <Profile user={user} recentList={recentList} setRecentList={setRecentList} categories={categories}>
     <label className="font-bold text-xl"><label className="text-red-500">찜한</label> 상품</label>
     <li className="list-disc text-xs">찜한 상품은 등록일로부터 <label className="font-bold">최대 1년간</label> 저장됩니다.</li>
     <table>

@@ -26,5 +26,5 @@ export default async function Home({ searchParams }: { searchParams: any }) {
     );
 
     const search = await getCategorySearch({ CategoryId: CategoryId, Page: page, Sort: sort, Keyword: encodeURIComponent(keyword) });
-    return <Page categories={categories} search={search} keyword={keyword} page={page} sort={sort} CategoryId={CategoryId} topCategory={topCategory} secondCategory={secondCategory} bottomCatrgory={bottomCatrgory}/>;
+    return <Page categories={categories} search={search} keyword={keyword} page={page} sort={sort} CategoryId={CategoryId} topCategory={topCategory} secondCategory={secondCategory} bottomCategory={bottomCatrgory}/>;
 }

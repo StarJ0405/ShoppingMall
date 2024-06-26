@@ -6,6 +6,7 @@ import { getEventList, getMyProducts, getRecent, getUser, postEvent, updateEvent
 import { redirect } from "next/navigation";
 import { getDateTimeFormat, getDateTimeFormatInput } from "../Global/Method";
 import Modal from "../Global/Modal";
+import { getCategories } from "../API/NonUserAPI";
 
 interface pageProps {
     categories: any[];
@@ -25,6 +26,8 @@ export default function Page(props: pageProps) {
     const [discount, setDiscount] = useState(0);
     const [isModify, setIsModify] = useState(false);
     const [eventId, setEventId] = useState(-1);
+    const [categories, setCategories] = useState(props.categories);
+
     useEffect(() => {
         if (ACCESS_TOKEN)
             getUser()
@@ -39,12 +42,15 @@ export default function Page(props: pageProps) {
                     getEventList()
                         .then(r => setEventList(r))
                         .catch(e => console.log(e));
+                    getCategories()
+                        .then(r => setCategories(r))
+                        .then(e => console.log(e));
                 })
                 .catch(e => console.log(e));
         else
             redirect('/account/login');
     }, [ACCESS_TOKEN]);
-    return <Main categories={props.categories} user={use} setRecentList={setRecentList} recentList={recentList}>
+    return <Main categories={categories} user={use} setRecentList={setRecentList} recentList={recentList}>
         <div className="w-[1240px] flex flex-col">
             <table className="mb-4">
                 <thead>
@@ -92,7 +98,7 @@ export default function Page(props: pageProps) {
                             <div className="w-[100px]">시작일</div>
                             <input className="input input-bordered input-sm" type="datetime-local" defaultValue={getDateTimeFormatInput(startDate)} onChange={e => {
                                 let value = e.target.value;
-                                if(value == '' )
+                                if (value == '')
                                     return;
                                 value = value.split(":")[0] + ":00"
                                 e.target.value = value;
@@ -103,7 +109,7 @@ export default function Page(props: pageProps) {
                             <div className="w-[100px]">종료일</div>
                             <input className="input input-bordered input-sm" type="datetime-local" defaultValue={getDateTimeFormatInput(endDate)} onChange={e => {
                                 let value = e.target.value;
-                                if(value == '' )
+                                if (value == '')
                                     return;
                                 console.log(value);
                                 value = value.split(":")[0] + ":00"

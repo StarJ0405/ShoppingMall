@@ -7,14 +7,14 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import 'react-quill/dist/quill.snow.css';
 import QuillNoSSRWrapper from '@/app/Global/QuillNoSSRWrapper';
 import ReactQuill from 'react-quill';
+import { getCategories } from '@/app/API/NonUserAPI';
 
-interface pageProps{
-    categories:any[]
+interface pageProps {
+    categories: any[]
 }
 
-export default function Page(props:pageProps) {
+export default function Page(props: pageProps) {
     const [user, setUser] = useState(null as any);
-    const categories = props.categories;
     const [isImageHover, setIsImageHover] = useState(false);
 
     const [firstCategory, setFirstCategory] = useState(-1);
@@ -38,8 +38,9 @@ export default function Page(props:pageProps) {
     const [selectedOption, setSelectedOption] = useState(null as any);
     const [isModalOpen, setISModalOpen] = useState(-1);
     const [recentList, setRecentList] = useState(null as unknown as any[]);
-    const quillInstance = useRef<ReactQuill>(null);
+    const [categories, setCategories] = useState(props.categories);
 
+    const quillInstance = useRef<ReactQuill>(null);
     const ACCESS_TOKEN = typeof window == 'undefined' ? null : localStorage.getItem('accessToken');
 
     const imageHandler = () => {
@@ -110,6 +111,7 @@ export default function Page(props:pageProps) {
                         .catch(e => console.log(e));
                     deleteImage();
                     deleteImageList();
+                    getCategories().then(r => setCategories(r)).catch(e => console.log(e));
                 })
                 .catch(e => console.log(e));
         else

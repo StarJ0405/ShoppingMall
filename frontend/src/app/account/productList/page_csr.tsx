@@ -1,8 +1,9 @@
 "use client";
 
+import { getCategories } from "@/app/API/NonUserAPI";
 import { getMyProducts, getRecent, getUser } from "@/app/API/UserAPI";
 import Profile from "@/app/Global/Layout/ProfileLayout";
-import {getDateTimeFormat } from "@/app/Global/Method";
+import { getDateTimeFormat } from "@/app/Global/Method";
 import { redirect } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -14,6 +15,7 @@ export default function Page(props: pageProps) {
     const ACCESS_TOKEN = typeof window == 'undefined' ? null : localStorage.getItem('accessToken');
     const [recentList, setRecentList] = useState(null as unknown as any[]);
     const [productList, setProductList] = useState(null as unknown as any[]);
+    const [categories, setCategories] = useState(props.categories);
     useEffect(() => {
         if (ACCESS_TOKEN)
             getUser()
@@ -25,13 +27,16 @@ export default function Page(props: pageProps) {
                     getMyProducts()
                         .then(r => setProductList(r))
                         .catch(e => console.log(e));
+                    getCategories()
+                        .then(r => setCategories(r))
+                        .catch(e => console.log(e));
                 })
                 .catch(e => console.log(e));
         else
             redirect('/account/login');
     }, [ACCESS_TOKEN]);
 
-    return <Profile categories={props.categories} user={user} recentList={recentList} setRecentList={setRecentList}>
+    return <Profile categories={categories} user={user} recentList={recentList} setRecentList={setRecentList}>
         <div className='flex items-end'>
             <label className='text-xl font-bold'>내 <label className='text-xl text-red-500 font-bold'>상품</label>목록</label>
             <label className='text-xs h-[14px] border-l-2 border-gray-400 ml-2 mb-[5px] pl-2'>고객님의 상품으로 들어가서 상품을 수정하실 수 있습니다.</label>

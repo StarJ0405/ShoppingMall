@@ -8,6 +8,7 @@ import 'react-quill/dist/quill.snow.css';
 import QuillNoSSRWrapper from '@/app/Global/QuillNoSSRWrapper';
 import ReactQuill from 'react-quill';
 import { getDateTimeFormatInput } from '@/app/Global/Method';
+import { getCategories, getProduct } from '@/app/API/NonUserAPI';
 
 interface pageProps {
     categories: any[]
@@ -16,8 +17,8 @@ interface pageProps {
 
 export default function Page(props: pageProps) {
     const [user, setUser] = useState(null as any);
-    const product = props.product;
-    const categories = props.categories;
+    const [product, setProudct] = useState(props.product);
+    const [categories, setCategories] = useState(props.categories);
     const [isImageHover, setIsImageHover] = useState(false);
     const [firstCategory, setFirstCategory] = useState(categories.findIndex(category => category?.name == product?.topCategoryName));
     const [secondCategory, setSecondCategory] = useState((categories[firstCategory].categoryResponseDTOList as any[]).findIndex(category => category?.name == product?.middleCategoryName));
@@ -110,7 +111,8 @@ export default function Page(props: pageProps) {
                         .catch(e => console.log(e));
                     deleteImage();
                     deleteImageList();
-                    console.log(product);
+                    getCategories().then(r => setCategories(r)).catch(e => console.log(e));
+                    getProduct(product?.id).then(r => setProudct(r)).catch(e => console.log(e));
                 })
                 .catch(e => console.log(e));
         else
@@ -133,7 +135,6 @@ export default function Page(props: pageProps) {
     }
     function addTag() {
         const tag = document.getElementById('tag') as HTMLInputElement;
-
         if (tag?.value) {
             const value = tag.value.replaceAll(' ', '');
             if (!tags.includes(value)) {

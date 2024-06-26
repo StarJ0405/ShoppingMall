@@ -4,7 +4,7 @@ import Main from "../Global/Layout/MainLayout";
 import { deleteArticle, getRecent, getUser, postArticle, updateArticle } from "../API/UserAPI";
 import Modal from "../Global/Modal";
 import { getDateTimeFormat } from "../Global/Method";
-import { getArticleList } from "../API/NonUserAPI";
+import { getArticleList, getCategories } from "../API/NonUserAPI";
 
 interface pageProps {
     categories: any[];
@@ -23,7 +23,7 @@ export default function Page(props: pageProps) {
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
     const [isModify, setIsModify] = useState(false);
-    console.log(props.articleList);
+    const [categories, setCategories] = useState(props.categories);
     useEffect(() => {
         if (ACCESS_TOKEN)
             getUser()
@@ -32,6 +32,12 @@ export default function Page(props: pageProps) {
                     getRecent()
                         .then(r => setRecentList(r))
                         .catch(e => console.log(e));
+                    getCategories().then(r => setCategories(r)).catch(e => console.log(e));
+                    getArticleList({ Type: 2, Page: 0 })
+                        .then(r => {
+                            setArticleList(r.content);
+                            setMaxPage(r.totalPages);
+                        }).catch(e => console.log(e));
                 })
                 .catch(e => console.log(e));
     }, [ACCESS_TOKEN]);
@@ -51,7 +57,7 @@ export default function Page(props: pageProps) {
             });
         }
     }
-    return <Main categories={props.categories} recentList={recentList} setRecentList={setRecentList} user={user}>
+    return <Main categories={categories} recentList={recentList} setRecentList={setRecentList} user={user}>
         <div className="w-[1240px] flex flex-col">
             <div className="flex justify-between">
                 <label className="font-bold text-xl">공지사항</label>
