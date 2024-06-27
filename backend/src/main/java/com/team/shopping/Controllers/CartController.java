@@ -39,6 +39,7 @@ public class CartController {
             List<CartResponseDTO> cartResponseDTOList = this.multiService.selectCart(username, cartItemIdList);
             return tokenRecord.getResponseEntity(cartResponseDTOList);
         }
+
         return tokenRecord.getResponseEntity();
     }
 
@@ -52,9 +53,9 @@ public class CartController {
                 List<CartResponseDTO> cartResponseDTOList = this.multiService.addToCart(username, cartRequestDTO);
                 return tokenRecord.getResponseEntity(cartResponseDTOList);
             }
-        }catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("남은 재고보다 많은 수량을 담을 수 없음");
-        }catch (NoSuchElementException e) {
+        } catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("옵션 수량 확인 바람");
         }
 
@@ -71,7 +72,7 @@ public class CartController {
                 List<CartResponseDTO> cartResponseDTOList = this.multiService.updateToCart(username, cartRequestDTO);
                 return tokenRecord.getResponseEntity(cartResponseDTOList);
             }
-        }catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("남은 재고보다 많은 수량을 담을 수 없음");
         }
         return tokenRecord.getResponseEntity();
@@ -80,8 +81,8 @@ public class CartController {
 
 
     @DeleteMapping("/cartList")
-    public ResponseEntity<?> deleteToCartList (@RequestHeader("Authorization") String accessToken,
-                                               @RequestHeader("CartItemId") Long cartItemId) {
+    public ResponseEntity<?> deleteToCartList(@RequestHeader("Authorization") String accessToken,
+                                              @RequestHeader("CartItemId") Long cartItemId) {
         TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
         try {
             if (tokenRecord.isOK()) {
@@ -89,7 +90,7 @@ public class CartController {
                 List<CartResponseDTO> cartResponseDTOList = this.multiService.deleteToCart(username, cartItemId);
                 return tokenRecord.getResponseEntity(cartResponseDTOList);
             }
-        }catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("이미 지워지거나 없는 상품입니다.");
         }
         return tokenRecord.getResponseEntity();
@@ -105,7 +106,7 @@ public class CartController {
                 List<CartResponseDTO> cartResponseDTOList = this.multiService.deleteMultipleToCart(username, cartItemIdList);
                 return tokenRecord.getResponseEntity(cartResponseDTOList);
             }
-        }catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("이미 지워지거나 없는 상품입니다.");
         }
         return tokenRecord.getResponseEntity();

@@ -47,7 +47,6 @@ export default function Page(props: pageProps) {
       const numbers = [] as number[];
       const checks = document.getElementsByName('check');
       checks.forEach((check: any) => check.checked ? numbers.push(Number(check.id)) : null);
-      console.log(numbers);
       deleteWishList(numbers)
         .then(r => {
           setWishList(r);
@@ -60,11 +59,12 @@ export default function Page(props: pageProps) {
       postCartList({ productId: id, optionIdList: [], count: 1 })
         .then(() => window.location.href = "/account/cart")
         .catch(e => alert(e.response.data));
+        
   }
   function addCartList() {
     if (confirm("선택하신 찜한 상품들을 장바구니에 추가하시겠습니까?"))
       document.getElementsByName('check').forEach((check: any) => check.checked ?
-        (postCartList({ productId: check.value, optionIdList: [], count: 1 })
+        (postCartList({ productId: Number(check.id), optionIdList: [], count: 1 })
           .then(() => window.location.href = "/account/cart")
           .catch(e => alert(e.response.data))
         )
