@@ -358,3 +358,12 @@ export const getChatList = async (data: number) => {
     const response = await UserApi.get('/api/chat/chats', { headers: { roomId: data } });
     return response.data;
 }
+
+export const saveChatImage = async (data: any) => {
+    const response = await UserApi.post('/api/image/chat', data, {
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        }
+    });
+    return response.data;
+}

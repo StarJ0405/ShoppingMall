@@ -59,4 +59,15 @@ public class ImageController {
         return tokenRecord.getResponseEntity();
     }
 
+    @PostMapping("/chat")
+    public ResponseEntity<?> postChatImage(@RequestHeader("Authorization") String accessToken, ImageRequestDTO imageRequestDTO) {
+        TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
+        if (tokenRecord.isOK()) {
+            String username = tokenRecord.username();
+            String url = this.multiService.saveChatImageMessage(username,imageRequestDTO.getFile(),imageRequestDTO.getRoomId());
+            return tokenRecord.getResponseEntity(url);
+        }
+        return tokenRecord.getResponseEntity();
+    }
+
 }

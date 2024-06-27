@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import Main from '@/app/Global/Layout/MainLayout';
 import { checkWish, deleteWish, getUser, postAnswer, postCartList, postQuestion, postRecent, postWish } from '@/app/API/UserAPI';
 import DropDown, { Direcion } from '@/app/Global/DropDown';
-import { MonthDate, getDateTimeFormat } from '@/app/Global/Method';
+import { MonthDate, PhoneString, getDateTime, getDateTimeFormat } from '@/app/Global/Method';
 import { getCategories, getProduct, getProductQAList, getReviews, getWho } from '@/app/API/NonUserAPI';
 import Modal from '@/app/Global/Modal';
 import 'react-quill/dist/quill.snow.css';
@@ -50,7 +50,7 @@ export default function Page(props: pageProps) {
     const [answer, setAnswer] = useState('');
     const [focusQA, setFocustQA] = useState(-1);
     const quillInstance = useRef<ReactQuill>(null);
-
+    const [expiration, setExpiration] = useState(new Date() > new Date(product?.dateLimit));
     const modules = useMemo(
         () => ({
             toolbar: {
@@ -99,7 +99,10 @@ export default function Page(props: pageProps) {
                         .then(r => setProductQAList(r))
                         .catch(e => console.log(e));
                     setMounted(true);
-                    getProduct(product?.id).then(r => setProduct(r)).catch(e => console.log(e));
+                    getProduct(product?.id).then(r => {
+                        setProduct(r);
+                        setExpiration(new Date() > new Date(r.dateLimit));
+                    }).catch(e => console.log(e));
                     getWho(product.authorUsername).then(r => setSeller(r)).catch(e => console.log(e));
                     getCategories().then(r => {
                         setCategories(r);
@@ -108,15 +111,15 @@ export default function Page(props: pageProps) {
                         setMiddleCategory(topCategory?.categoryResponseDTOList.filter((category: any) => category.name == product.middleCategoryName)[0]);
                     }).catch(e => console.log(e));
                     getReviews(product.id)
-                    .then(r => setReviews(r))
-                    .catch(e => console.log(e));
+                        .then(r => setReviews(r))
+                        .catch(e => console.log(e));
                 })
                 .catch(e => console.log(e));
     }, [ACCESS_TOKEN]);
 
     function Move(data: number) {
         setFocus(data);
-        document.getElementById(String(data))?.scrollIntoView();
+        document.getElementById(data.toString())?.scrollIntoView();
     }
     function getDate(data: any) {
         const date = new Date(data);
@@ -203,6 +206,7 @@ export default function Page(props: pageProps) {
         return productQAList?.length > 0 ? answer / productQAList.length * 100 : 0;
     }
 
+
     return <Main user={user} recentList={recentList} setRecentList={setRecentList} categories={categories}>
         <div className='flex flex-col w-[1240px] min-h-[670px]'>
             <div className='text-sm flex'>
@@ -249,7 +253,10 @@ export default function Page(props: pageProps) {
                                     <input type='radio' className='bg-orange-500 mask mask-star-2 mask-half-1' defaultChecked={product?.grade > 4.25 && product?.grade <= 4.75} onClick={e => e.preventDefault()} />
                                     <input type='radio' className='bg-orange-500 mask mask-star-2 mask-half-2' defaultChecked={product?.grade > 4.75} onClick={e => e.preventDefault()} />
                                 </div>
-                                <a onClick={e => Move(1)} className='ml-2 cursor-pointer'>{product?.reviewSize.toLocaleString("ko-kr") + ' 리뷰보기 >'}</a>
+                                <div className='flex justify-between'>
+                                    <a onClick={() => Move(1)} className='ml-2 cursor-pointer'>{product?.reviewSize.toLocaleString("ko-kr") + ' 리뷰보기 >'}</a>
+                                    <label>{getDateTimeFormat(product?.dateLimit)}</label>
+                                </div>
                             </div>
                             <div className='mt-4 flex justify-between w-full'>
                                 <div>
@@ -277,7 +284,7 @@ export default function Page(props: pageProps) {
                         </div>
                     </div>
                     <div className='flex text-xl font-bold mt-4'>
-                        <button className={'w-[220px] h-[60px]' + (focus == 0 ? ' text-white bg-red-500' : '')} onClick={() => Move(0)}>상품정보</button>
+                        <button id='0' className={'w-[220px] h-[60px]' + (focus == 0 ? ' text-white bg-red-500' : '')} onClick={() => Move(0)}>상품정보</button>
                         <button className={'w-[220px] h-[60px]' + (focus == 1 ? ' text-white bg-red-500' : '')} onClick={() => Move(1)}>리뷰</button>
                         <button className={'w-[220px] h-[60px]' + (focus == 2 ? ' text-white bg-red-500' : '')} onClick={() => Move(2)}>Q&A</button>
                         <button className={'w-[220px] h-[60px]' + (focus == 3 ? ' text-white bg-red-500' : '')} onClick={() => Move(3)}>판매자정보<label className={'text-base font-normal' + (focus == 3 ? ' text-white' : ' text-gray-600')}>(반품/교환)</label></button>
@@ -315,7 +322,7 @@ export default function Page(props: pageProps) {
                             <img src={'/exclamation.png'} className='w-[30px] h-[30px] mr-2' />
                             판매자가<label className='text-black ml-2'>현금결제를 요구하면 거부</label>하시고 즉시 <a href='?' className='underline'>52번가로 신고</a>해 주세요.
                         </div>
-                        <div id='0' className='p-4'>
+                        <div className='p-4'>
                             <div dangerouslySetInnerHTML={{ __html: product.detail }} />
                         </div>
                         <label id='1' className='font-bold text-2xl'>상품리뷰</label>
@@ -386,7 +393,7 @@ export default function Page(props: pageProps) {
                         </div>)}
                     </div>
                     <label className='font-bold text-2xl'>문의/답변<label className='font-normal text-sm ml-2'>{product?.reviewSize.toLocaleString("ko-kr")}건</label></label>
-                    <div className='flex text-center mb-2'>
+                    <div id="2" className='flex text-center mb-2'>
                         <div className='w-[604px]'>문의/답변</div>
                         <div className='w-[96px]'>작성자</div>
                         <div className='w-[150px]'>작성일</div>
@@ -429,6 +436,25 @@ export default function Page(props: pageProps) {
                     <div className='min-h-[100px] w-full flex flex-col items-center justify-center'>
                         {productQAList && productQAList.length <= 0 ? <label>등록된 Q&A가 없습니다.</label> : <></>}
                         <button className='btn btn-warning ml-auto btn-sm text-white' onClick={openQModal}>상품 문의하기</button>
+                    </div>
+                    <label id="3" className='font-bold text-2xl'>판매자정보<label className='font-normal text-sm ml-2'>{product?.reviewSize.toLocaleString("ko-kr")}건</label></label>
+                    <div className='flex text-center mb-2'>
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <th className='w-[150px]'>반품/교환 배송비</th>
+                                    <td className='w-[750px] p-2 text-start'>(구매자귀책) 2,500원/5,000원 초기배송비 무료시 반품배송비 부과방법 : 왕복(편도x2)</td>
+                                </tr>
+                                <tr>
+                                    <th>반품/교환 문의</th>
+                                    <td className='text-start p-2'>{seller?.email}</td>
+                                </tr>
+                                <tr>
+                                    <th>반품/교환 안내</th>
+                                    <td className='text-start p-2'>{PhoneString(seller?.phoneNumber)}</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                     <Modal open={isQOpen} onClose={() => setIsQOpen(false)} className='' escClose={true} outlineClose={true}>
                         <div className="flex flex-col w-[744px] h-[552px]">
@@ -511,14 +537,17 @@ export default function Page(props: pageProps) {
                             <label>총 <input type='number' id="count" className='[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none m-0 input input-sm min-w-[30px]' defaultValue={product?.remain >= 1 ? 1 : product?.remain} min={product?.remain >= 1 ? 1 : product?.remain} max={getMax()} onChange={(e) => { let value = Number(e.target.value); if (value > getMax()) value = getMax(); else if (value < 0) value = 0; e.target.value = value.toString(); setCount(value); }} />개</label>
                             <label>{(getDiscountPrice() * count).toLocaleString('ko-kr')}원</label>
                         </div>
-                        {product?.remain > 0 ?
-                            <button className='btn btn-error text-white w-full mt-2' onClick={() =>
-                                postCartList({ productId: product.id, optionIdList: options, count: count }).then(() => window.location.href = "/account/cart").catch(e => console.log(e))
-                            }>장바구니 담기</button>
+                        {expiration ?
+                            <button className='btn w-full mt-2' disabled>판매 기한 만료</button>
                             :
-                            <button className='btn w-full mt-2' disabled>재입고 예정</button>
+                            product?.remain > 0 ?
+                                <button className='btn btn-error text-white w-full mt-2' onClick={() =>
+                                    postCartList({ productId: product.id, optionIdList: options, count: count }).then(() => window.location.href = "/account/cart").catch(e => console.log(e))
+                                }>장바구니 담기</button>
+                                :
+                                <button className='btn w-full mt-2' disabled>재입고 예정</button>
                         }
-                        <button className='btn btn-sm btn-warning text-white w-full mt-1' onClick={()=>location.href="/account/chat/"+seller?.username}>실시간 상담</button>
+                        <button className='btn btn-sm btn-warning text-white w-full mt-1' onClick={() => location.href = "/account/chat/" + seller?.username}>실시간 상담</button>
                     </div>
                 </div>
             </div>
