@@ -1,6 +1,7 @@
 package com.team.shopping.Controllers;
 
 import com.team.shopping.DTOs.*;
+import com.team.shopping.Domains.Product;
 import com.team.shopping.Records.TokenRecord;
 import com.team.shopping.Services.MultiService;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +25,7 @@ public class ProductController {
         if (tokenRecord.isOK()) {
             String username = tokenRecord.username();
             List<OptionListRequestDTO> listRequestDTOS = requestDTO.getOptionLists();
-            if (listRequestDTOS != null) this.multiService.saveProduct(requestDTO, username);
+            this.multiService.saveProduct(requestDTO, username);
             return tokenRecord.getResponseEntity("문제 없음");
         }
         return tokenRecord.getResponseEntity();
@@ -36,8 +37,8 @@ public class ProductController {
         TokenRecord tokenRecord = this.multiService.checkToken(accessToken);
         if (tokenRecord.isOK()) {
             String username = tokenRecord.username();
-            ProductResponseDTO responseDTO = multiService.updateProduct(username, requestDTO);
-            return tokenRecord.getResponseEntity(responseDTO);
+            multiService.updateProduct(username, requestDTO);
+            return tokenRecord.getResponseEntity("문제 없음");
         }
         return tokenRecord.getResponseEntity();
     }
