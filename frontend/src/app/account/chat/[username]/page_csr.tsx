@@ -110,16 +110,17 @@ export default function Page(props: pageProps) {
                 </Modal>
             </div>
             <div className="w-[1225px] py-2 px-4 border border-gray-500 rounded-lg flex">
-                <input type="text" className="outline-none w-full" placeholder="채팅.." autoFocus onKeyDown={e => {
-                    if (e.key == "Enter" && isReady) {
-                        const value = (e.target as HTMLInputElement);
-                        if ((value.value as string) == "" || value.value == null)
-                            return;
-                        socket.publish({ destination: "/api/pub/chat/" + chatroom?.id, body: JSON.stringify({ sender: user?.username, message: value.value, type: 0 }) });
-                        socket.publish({ destination: "/api/pub/alarm/" + target?.username, body: JSON.stringify({ sender: user?.username, message: value.value, url: "/account/chat/" + user?.username }) });
-                        (e.target as HTMLInputElement).value = '';
-                    }
+                <input id="text" type="text" className="outline-none w-full" placeholder="채팅.." autoFocus onKeyDown={e => {
+                    if (e.key == "Enter" && isReady) document.getElementById('submit')?.click();
                 }} />
+                <button id="submit" className="w-[75px]" onClick={() => {
+                    const text = document.getElementById('text') as HTMLInputElement;
+                    if ((text.value as string) == "" || text.value == null)
+                        return;
+                    socket.publish({ destination: "/api/pub/chat/" + chatroom?.id, body: JSON.stringify({ sender: user?.username, message: text.value, type: 0 }) });
+                    socket.publish({ destination: "/api/pub/alarm/" + target?.username, body: JSON.stringify({ sender: user?.username, message: text.value, url: "/account/chat/" + user?.username }) });
+                    text.value = '';
+                }}>보내기</button>
                 <img src="/image.png" className="w-[24px] h-[24px] cursor-pointer ml-2" onClick={() => document.getElementById('file')?.click()} />
                 <input id="file" type="file" hidden onChange={(e) => {
                     const formData = new FormData();

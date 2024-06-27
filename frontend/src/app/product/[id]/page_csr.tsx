@@ -89,32 +89,32 @@ export default function Page(props: pageProps) {
             getUser()
                 .then(r => {
                     setUser(r);
-                    checkWish(product.id)
-                        .then(r => setLove(r))
-                        .catch(e => console.log(e));
-                    postRecent(product.id)
-                        .then(r => setRecentList(r))
-                        .catch(e => console.log(e));
-                    getProductQAList(product.id)
-                        .then(r => setProductQAList(r))
-                        .catch(e => console.log(e));
-                    setMounted(true);
-                    getProduct(product?.id).then(r => {
-                        setProduct(r);
-                        setExpiration(new Date() > new Date(r.dateLimit));
-                    }).catch(e => console.log(e));
-                    getWho(product.authorUsername).then(r => setSeller(r)).catch(e => console.log(e));
-                    getCategories().then(r => {
-                        setCategories(r);
-                        const topCategory = r.filter((cateogry: any) => cateogry.name == product.topCategoryName)[0]
-                        setTopCategory(topCategory);
-                        setMiddleCategory(topCategory?.categoryResponseDTOList.filter((category: any) => category.name == product.middleCategoryName)[0]);
-                    }).catch(e => console.log(e));
-                    getReviews(product.id)
-                        .then(r => setReviews(r))
-                        .catch(e => console.log(e));
                 })
                 .catch(e => console.log(e));
+        checkWish(product.id)
+            .then(r => setLove(r))
+            .catch(e => console.log(e));
+        postRecent(product.id)
+            .then(r => setRecentList(r))
+            .catch(e => console.log(e));
+        getProductQAList(product.id)
+            .then(r => setProductQAList(r))
+            .catch(e => console.log(e));
+        setMounted(true);
+        getProduct(product?.id).then(r => {
+            setProduct(r);
+            setExpiration(new Date() > new Date(r.dateLimit));
+        }).catch(e => console.log(e));
+        getWho(product.authorUsername).then(r => setSeller(r)).catch(e => console.log(e));
+        getCategories().then(r => {
+            setCategories(r);
+            const topCategory = r.filter((cateogry: any) => cateogry.name == product.topCategoryName)[0]
+            setTopCategory(topCategory);
+            setMiddleCategory(topCategory?.categoryResponseDTOList.filter((category: any) => category.name == product.middleCategoryName)[0]);
+        }).catch(e => console.log(e));
+        getReviews(product.id)
+            .then(r => setReviews(r))
+            .catch(e => console.log(e));
     }, [ACCESS_TOKEN]);
 
     function Move(data: number) {
@@ -255,7 +255,7 @@ export default function Page(props: pageProps) {
                                 </div>
                                 <div className='flex justify-between'>
                                     <a onClick={() => Move(1)} className='ml-2 cursor-pointer'>{product?.reviewSize.toLocaleString("ko-kr") + ' 리뷰보기 >'}</a>
-                                    <label>{getDateTimeFormat(product?.dateLimit)}</label>
+                                    <label>{getDateTimeFormat(product?.dateLimit)}까지</label>
                                 </div>
                             </div>
                             <div className='mt-4 flex justify-between w-full'>
@@ -267,11 +267,11 @@ export default function Page(props: pageProps) {
                             <label className='text-gray-500 text-lg'>원산지:상세설명 참조</label>
                             {product?.discount > 0 ?
                                 <div className='flex flex-col'>
-                                    <label className='text-sm mt-2 text-gray-500 line-through'>{getPrice().toLocaleString('ko-kr')}원</label>
-                                    <label className='text-xl mt-2 font-bold'><label className='text-2xl'>{product?.discount}% {getDiscountPrice().toLocaleString('ko-kr', { maximumFractionDigits: 0 })}</label>원</label>
+                                    <label className='text-sm mt-2 text-gray-500 line-through'>{product?.price.toLocaleString('ko-kr')}원</label>
+                                    <label className='text-xl mt-2 font-bold'><label className='text-2xl'>{product?.discount}% {(product?.price * (100-product?.discount)/100).toLocaleString('ko-kr', { maximumFractionDigits: 0 })}</label>원</label>
                                 </div>
                                 :
-                                <label className='text-xl mt-2 font-bold'><label className='text-2xl font-bold'>{getPrice().toLocaleString('ko-kr')}</label>원</label>
+                                <label className='text-xl mt-2 font-bold'><label className='text-2xl font-bold'>{product?.price.toLocaleString('ko-kr')}</label>원</label>
                             }
 
                             <div className='flex justify-between mt-auto'>

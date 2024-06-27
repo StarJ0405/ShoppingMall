@@ -33,22 +33,22 @@ export default function Page(props: pageProps) {
             getUser()
                 .then(r => {
                     setUser(r);
-                    getRecent()
-                        .then(r => setRecentList(r))
-                        .catch(e => console.log(e));
-                    getMyProducts()
-                        .then(r => setProductList(r))
-                        .catch(e => console.log(e));
-                    getEventList()
-                        .then(r => setEventList(r))
-                        .catch(e => console.log(e));
-                    getCategories()
-                        .then(r => setCategories(r))
-                        .then(e => console.log(e));
                 })
                 .catch(e => console.log(e));
         else
             redirect('/account/login');
+        getRecent()
+            .then(r => setRecentList(r))
+            .catch(e => console.log(e));
+        getMyProducts()
+            .then(r => setProductList(r))
+            .catch(e => console.log(e));
+        getEventList()
+            .then(r => setEventList(r))
+            .catch(e => console.log(e));
+        getCategories()
+            .then(r => setCategories(r))
+            .then(e => console.log(e));
     }, [ACCESS_TOKEN]);
     return <Main categories={categories} user={use} setRecentList={setRecentList} recentList={recentList}>
         <div className="w-[1240px] flex flex-col">

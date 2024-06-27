@@ -23,13 +23,13 @@ export default function Page(props: pageProps) {
             getUser()
                 .then(r => {
                     setUser(r);
-                    getRecent()
-                        .then(r => setRecentList(r))
-                        .catch(e => console.log(e));
-                    getProductRecentList(0).then(r => {setProductList(r.content); setMaxPage(r.totalPages)}).catch(e => console.log(e));
-                    getCategories().then(r => setCategories(r)).catch(e => console.log(e));
                 })
                 .catch(e => console.log(e));
+        getRecent()
+            .then(r => setRecentList(r))
+            .catch(e => console.log(e));
+        getProductRecentList(0).then(r => {setProductList([...r.content]); setMaxPage(r.totalPages) }).catch(e => console.log(e));
+        getCategories().then(r => setCategories(r)).catch(e => console.log(e));
     }, [ACCESS_TOKEN]);
     useEffect(() => {
         const loadPage = () => {
@@ -69,20 +69,20 @@ export default function Page(props: pageProps) {
                             {/* <span className='text-xl mt-2'><label className='text-red-500 text-2xl'>9% </label> <label className='font-bold text-2xl'>10,400원</label>~ <label className='text-gray-300 line-through'>11,550원</label></span> */}
                             <label className='text-xl mt-2 font-bold text-2xl'>{product?.price.toLocaleString('ko-KR')}원</label>
                             <div className='mt-2 flex'>
-                                <div className='rating rating-xs rating-half'>
-                                    <input type='radio' className='rating-hidden' defaultChecked={!product?.grade || (product?.grade == 0 && product?.grade < 0.25)} onClick={e => e.preventDefault()} />
-                                    <input type='radio' className='bg-orange-500 mask mask-star-2 mask-half-1' defaultChecked={product?.grade > 0.25 && product?.grade <= 0.75} onClick={e => e.preventDefault()} />
-                                    <input type='radio' className='bg-orange-500 mask mask-star-2 mask-half-2' defaultChecked={product?.grade > 0.75 && product?.grade <= 1.25} onClick={e => e.preventDefault()} />
-                                    <input type='radio' className='bg-orange-500 mask mask-star-2 mask-half-1' defaultChecked={product?.grade > 1.25 && product?.grade <= 1.75} onClick={e => e.preventDefault()} />
-                                    <input type='radio' className='bg-orange-500 mask mask-star-2 mask-half-2' defaultChecked={product?.grade > 1.75 && product?.grade <= 2.25} onClick={e => e.preventDefault()} />
-                                    <input type='radio' className='bg-orange-500 mask mask-star-2 mask-half-1' defaultChecked={product?.grade > 2.25 && product?.grade <= 2.75} onClick={e => e.preventDefault()} />
-                                    <input type='radio' className='bg-orange-500 mask mask-star-2 mask-half-2' defaultChecked={product?.grade > 2.75 && product?.grade <= 3.25} onClick={e => e.preventDefault()} />
-                                    <input type='radio' className='bg-orange-500 mask mask-star-2 mask-half-1' defaultChecked={product?.grade > 3.25 && product?.grade <= 3.75} onClick={e => e.preventDefault()} />
-                                    <input type='radio' className='bg-orange-500 mask mask-star-2 mask-half-2' defaultChecked={product?.grade > 3.75 && product?.grade <= 4.25} onClick={e => e.preventDefault()} />
-                                    <input type='radio' className='bg-orange-500 mask mask-star-2 mask-half-1' defaultChecked={product?.grade > 4.25 && product?.grade <= 4.75} onClick={e => e.preventDefault()} />
-                                    <input type='radio' className='bg-orange-500 mask mask-star-2 mask-half-2' defaultChecked={product?.grade > 4.75} onClick={e => e.preventDefault()} />
-                                </div>
-                                <label className='text-xs self-center ml-2'>{product?.reviewSize.toLocaleString("ko-kr")}</label></div>
+                                {/* <div className='rating rating-xs rating-half'>
+                                    <input type='radio' name={"grade"+index} className='rating-hidden' defaultChecked={!product?.grade || (product?.grade == 0 && product?.grade < 0.25)} onClick={e => e.preventDefault()} />
+                                    <input type='radio' name={"grade"+index} className='bg-orange-500 mask mask-star-2 mask-half-1' defaultChecked={product?.grade > 0.25 && product?.grade <= 0.75} onClick={e => e.preventDefault()} />
+                                    <input type='radio' name={"grade"+index} className='bg-orange-500 mask mask-star-2 mask-half-2' defaultChecked={product?.grade > 0.75 && product?.grade <= 1.25} onClick={e => e.preventDefault()} />
+                                    <input type='radio' name={"grade"+index} className='bg-orange-500 mask mask-star-2 mask-half-1' defaultChecked={product?.grade > 1.25 && product?.grade <= 1.75} onClick={e => e.preventDefault()} />
+                                    <input type='radio' name={"grade"+index} className='bg-orange-500 mask mask-star-2 mask-half-2' defaultChecked={product?.grade > 1.75 && product?.grade <= 2.25} onClick={e => e.preventDefault()} />
+                                    <input type='radio' name={"grade"+index} className='bg-orange-500 mask mask-star-2 mask-half-1' defaultChecked={product?.grade > 2.25 && product?.grade <= 2.75} onClick={e => e.preventDefault()} />
+                                    <input type='radio' name={"grade"+index} className='bg-orange-500 mask mask-star-2 mask-half-2' defaultChecked={product?.grade > 2.75 && product?.grade <= 3.25} onClick={e => e.preventDefault()} />
+                                    <input type='radio' name={"grade"+index} className='bg-orange-500 mask mask-star-2 mask-half-1' defaultChecked={product?.grade > 3.25 && product?.grade <= 3.75} onClick={e => e.preventDefault()} />
+                                    <input type='radio' name={"grade"+index} className='bg-orange-500 mask mask-star-2 mask-half-2' defaultChecked={product?.grade > 3.75 && product?.grade <= 4.25} onClick={e => e.preventDefault()} />
+                                    <input type='radio' name={"grade"+index} className='bg-orange-500 mask mask-star-2 mask-half-1' defaultChecked={product?.grade > 4.25 && product?.grade <= 4.75} onClick={e => e.preventDefault()} />
+                                    <input type='radio' name={"grade"+index} className='bg-orange-500 mask mask-star-2 mask-half-2' defaultChecked={product?.grade > 4.75} onClick={e => e.preventDefault()} />
+                                </div> */}
+                                <label className='text-xs self-center'>별점 <label className='text-orange-500'>{product?.reviewSize.toLocaleString("ko-kr")}</label> 점</label></div>
                             <label className='mt-1 text-sm'>포인트 최대 <label className='text-blue-400'>{(product?.price / 100).toLocaleString("ko-kr", { maximumFractionDigits: 0 })}P</label> 적립</label>
                             <div className='text-sm flex justify-between w-full mt-auto'>
                                 <label>무료배송 <label className='text-blue-400'>{MonthDate()} 도착</label></label>

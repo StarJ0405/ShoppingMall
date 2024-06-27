@@ -20,12 +20,12 @@ export default function Page(props: pageProps) {
             getUser()
                 .then(r => {
                     setUser(r);
-                    getRecent()
-                        .then(r => setRecentList(r))
-                        .catch(e => console.log(e));
-                    getProductBest().then(r => setBestList(r)).catch(e => console.log(e));
                 })
                 .catch(e => console.log(e));
+        getRecent()
+            .then(r => setRecentList(r))
+            .catch(e => console.log(e));
+        getProductBest().then(r => setBestList(r)).catch(e => console.log(e));
     }, [ACCESS_TOKEN]);
 
     return <Main user={user} recentList={recentList} setRecentList={setRecentList} categories={categories}>
