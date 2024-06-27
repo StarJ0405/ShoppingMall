@@ -32,7 +32,7 @@ public class QChatMessage extends EntityPathBase<ChatMessage> {
 
     public final QSiteUser sender;
 
-    public final EnumPath<com.team.shopping.Enums.Type> type = createEnum("type", com.team.shopping.Enums.Type.class);
+    public final EnumPath<com.team.shopping.Enums.ChatType> type = createEnum("type", com.team.shopping.Enums.ChatType.class);
 
     public QChatMessage(String variable) {
         this(ChatMessage.class, forVariable(variable), INITS);

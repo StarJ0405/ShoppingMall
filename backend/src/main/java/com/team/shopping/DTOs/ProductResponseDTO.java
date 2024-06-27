@@ -14,7 +14,6 @@ import java.util.Map;
 @Setter
 @NoArgsConstructor
 public class ProductResponseDTO {
-
     private Long id;
     private String authorUsername;
     private String topCategoryName;

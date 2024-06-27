@@ -6,7 +6,7 @@ export interface Subscribe {
     location: string,
     active: (r: any) => void,
 }
-export function getSocket(username: string, subs: Subscribe[], setIsReady: () => void) {
+export function getSocket(subs: Subscribe[], setIsReady: () => void) {
     const Socket = new Client({
         webSocketFactory: () => {
             // return new SockJS("http://localhost:8080/api/ws-stomp");
@@ -26,7 +26,6 @@ export function getSocket(username: string, subs: Subscribe[], setIsReady: () =>
                 Socket.subscribe(sub.location, (e) => sub.active(JSON.parse(e.body)));
             })
             const interval = setInterval(() => { setIsReady(); clearInterval(interval); }, 100);
-            // Socket.subscribe("/sub/alram/" + username, () => { console.log(username + " recive alarm") });
         }
     });
     Socket.activate();
