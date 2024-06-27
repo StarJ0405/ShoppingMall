@@ -64,6 +64,6 @@ public class SiteUser {
         this.role = role;
         this.phoneNumber = phoneNumber;
         this.createDate = LocalDateTime.now();
-
+        this.point = 0L;
     }
 }

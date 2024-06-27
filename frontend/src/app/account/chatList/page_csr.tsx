@@ -53,11 +53,11 @@ export default function Page(props: pageProps) {
                 {chatRooms?.map((chatRoom, index) => <tr key={index}>
                     <td>
                         <div className="flex items-center" >
-                            <img src={chatRoom?.acceptUsername_url?chatRoom?.acceptUsername_url:'/base_profile.png'} className="w-[36px] h-[36px] mr-2" />
-                            <label className="hover:underline cursor-pointer" onClick={()=>location.href="/account/chat/"+chatRoom?.acceptUsername}>{chatRoom?.acceptUsername}</label>
+                            <img src={chatRoom?.acceptUsername_url ? chatRoom?.acceptUsername_url : '/base_profile.png'} className="w-[36px] h-[36px] mr-2" />
+                            <label className="hover:underline cursor-pointer" onClick={() => location.href = "/account/chat/" + chatRoom?.acceptUsername}>{chatRoom?.acceptUsername}</label>
                         </div>
                     </td>
-                    <td>{chatRoom?.lastMessage}</td>
+                    <td>{chatRoom?.type == 1 ? '<사진>' : chatRoom?.lastMessage}</td>
                     <td>{getDateTimeFormat(chatRoom?.modifyDate)}</td>
                 </tr>)}
             </tbody>

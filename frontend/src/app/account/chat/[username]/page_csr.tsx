@@ -2,11 +2,12 @@
 
 import { getCategories, getWho } from "@/app/API/NonUserAPI";
 import { Subscribe, getSocket } from "@/app/API/SocketAPI";
-import { getChatList, getChatRoom, getRecent, getUser } from "@/app/API/UserAPI";
+import { getChatList, getChatRoom, getRecent, getUser, saveChatImage } from "@/app/API/UserAPI";
 import Main from "@/app/Global/Layout/MainLayout";
 import { getDateTimeFormat } from "@/app/Global/Method";
+import Modal from "@/app/Global/Modal";
 import { redirect } from "next/navigation";
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 
 interface pageProps {
     target: string;
@@ -23,6 +24,7 @@ export default function Page(props: pageProps) {
     const [target, setTarget] = useState(null as any);
     const [chatroom, setChatroom] = useState(null as any);
     const [chatList, setChatList] = useState([] as any[]);
+    const [selectedUrl, setSelectedUrl] = useState('');
     useEffect(() => {
         if (ACCESS_TOKEN)
             getUser()
@@ -32,10 +34,10 @@ export default function Page(props: pageProps) {
                         .then(r => setRecentList(r))
                         .catch(e => console.log(e));
                     getCategories().then(r => setCategories(r)).catch(e => console.log(e));
-
                     getWho(props.target)
-                        .then(r => {setTarget(r);
-                            if(user?.username == r?.username)
+                        .then(r => {
+                            setTarget(r);
+                            if (user?.username == r?.username)
                                 redirect('/');
                         })
                         .catch(e => console.log(e));
@@ -44,10 +46,22 @@ export default function Page(props: pageProps) {
                             setChatroom(r);
                             const subs = [] as Subscribe[];
                             subs.push({
-                                location: "/api/sub/chat/" + r.id, active: () => getChatList(r.id).then(r => setChatList(r)).catch(e => console.log(e))
+                                location: "/api/sub/chat/" + r.id, active: () => getChatList(r.id).then(r => {
+                                    setChatList(r);
+                                    const timer = setInterval(() => {
+                                        document.getElementById((r?.length - 1).toString())?.scrollIntoView();
+                                        clearInterval(timer);
+                                    }, 100);
+                                }).catch(e => console.log(e))
                             });
                             setSocket(getSocket(r.username, subs, () => setIsReady(true)));
-                            getChatList(r.id).then(r => setChatList(r)).catch(e => console.log(e));
+                            getChatList(r.id).then(r => {
+                                setChatList(r);
+                                const timer = setInterval(() => {
+                                    document.getElementById((r?.length - 1).toString())?.scrollIntoView();
+                                    clearInterval(timer);
+                                }, 100);
+                            }).catch(e => console.log(e));
                         })
                         .catch(e => console.log(e));
                 })
@@ -55,16 +69,19 @@ export default function Page(props: pageProps) {
         else
             redirect('/account/login');
     }, [ACCESS_TOKEN]);
-
     return <Main user={user} categories={categories} recentList={recentList} setRecentList={setRecentList} >
         <div className="flex flex-col w-[1240px]">
             <div className="flex flex-col w-full h-[500px] bg-gray-300 p-4 overflow-y-scroll">
                 {chatList?.length == 0 ? <label className="self-center text-2xl my-auto font-bold">문의하실 내용을 입력해주세요.</label> : <></>}
                 {chatList?.map((chat, index) => {
                     if (chat.sender == user?.username)
-                        return <div key={index} className="self-end py-2 px-4 flex items-center">
-                            <div className="flex flex-col border border-gray-500 rounded-l-full py-4 pl-4 pr-8 break-words text-start">
-                                <div className="self-start max-w-[600px]">{chat?.message}</div>
+                        return <div id={index.toString()} key={index} className="self-end py-2 px-4 flex items-center justify-end">
+                            <div className="flex flex-col border border-gray-500 rounded-l-full py-4 pr-4 pl-8 break-words text-start">
+                                {chat?.type == 0 ?
+                                    <div className="self-start max-w-[600px]">{chat?.message}</div>
+                                    :
+                                    <img src={chat?.message} onClick={() => setSelectedUrl(chat?.message)} className="w-[64px] h-[64px] self-center cursor-pointer mb-2" />
+                                }
                                 <label className="self-start text-xs">{getDateTimeFormat(chat?.createDate)}</label>
                             </div>
                             <div className="flex flex-col items-center ml-2">
@@ -73,24 +90,35 @@ export default function Page(props: pageProps) {
                             </div>
                         </div>
                     else
-                        return <div key={index} className="self-start py-2 px-4 flex items-center">
+                        return <div id={index.toString()} key={index} className="self-start py-2 px-4 flex items-center">
                             <div className="flex flex-col items-center mr-2">
                                 <img src={target?.url ? target?.url : '/base_profile.png'} className="w-[36px] h-[36px]" />
                                 <label>{target?.nickname}</label>
                             </div>
                             <div className="flex flex-col border border-gray-500 rounded-r-full py-4 pr-4 pl-8 break-words text-end">
-                                <div className="self-end max-w-[600px]">{chat?.message}</div>
+                                {chat?.type == 0 ?
+                                    <div className="self-end max-w-[600px]">{chat?.message}</div>
+                                    :
+                                    <img src={chat?.message} onClick={() => setSelectedUrl(chat?.message)} className="w-[64px] h-[64px] self-center cursor-pointer mb-2" />
+                                }
                                 <label className="self-end text-xs">{getDateTimeFormat(chat?.createDate)}</label>
                             </div>
                         </div>
                 })}
-
-
+                <Modal open={selectedUrl != ''} onClose={() => setSelectedUrl('')} className="bg-opacity-0" escClose={true} outlineClose={true}>
+                    <img src={selectedUrl} onClick={()=> setSelectedUrl('')}  className="cursor-pointer"/>
+                </Modal>
             </div>
             <div className="w-[1225px] py-2 px-4 border border-gray-500 rounded-lg flex">
-                <input type="text" className="outline-none w-full" placeholder="채팅.." autoFocus onKeyDown={e => { if (e.key == "Enter" && isReady) { socket.publish({ destination: "/api/pub/chat/" + chatroom?.id, body: JSON.stringify({ sender: user?.username, message: (e.target as HTMLInputElement).value, type: 0 }) }); (e.target as HTMLInputElement).value = '' } }} />
+                <input type="text" className="outline-none w-full" placeholder="채팅.." autoFocus onKeyDown={e => { if (e.key == "Enter" && isReady) { const value = (e.target as HTMLInputElement); if ((value.value as string) == "" || value.value == null) return; socket.publish({ destination: "/api/pub/chat/" + chatroom?.id, body: JSON.stringify({ sender: user?.username, message: value.value, type: 0 }) }); (e.target as HTMLInputElement).value = '' } }} />
                 <img src="/image.png" className="w-[24px] h-[24px] cursor-pointer ml-2" onClick={() => document.getElementById('file')?.click()} />
-                <input id="file" type="file" hidden onChange={() => { alert('이미지 시도') }} />
+                <input id="file" type="file" hidden onChange={(e) => {
+                    const formData = new FormData();
+                    formData.append('file', e.target.files?.[0] as any);
+                    formData.append('roomId', chatroom?.id);
+                    saveChatImage(formData).then(r =>
+                        socket.publish({ destination: "/api/pub/chat/" + chatroom?.id, body: JSON.stringify({ sender: user?.username, message: r, type: 1 }) })).catch(e => console.log(e));
+                }} />
             </div>
         </div>
     </Main>

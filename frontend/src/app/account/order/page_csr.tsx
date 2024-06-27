@@ -210,7 +210,7 @@ export default function Page(props: pageProps) {
                             <input type="number" className="input input-sm" defaultValue={0} min={0} max={getMaxPoint()} onChange={e => { let value = Number(e.target.value); if (value < 0) value = 0; else if (value > getMaxPoint()) value = getMaxPoint(); e.target.value = value?.toString(); setPoint(value); }} />
                             <label>원</label>
                         </div>
-                        <label className="ml-4">사용가능<label className="text-red-500 font-bold ml-2">{user?.point.toLocaleString('ko-kr')}P</label></label>
+                        <label className="ml-4">사용가능<label className="text-red-500 font-bold ml-2">{(user?.point ? user?.point : 0).toLocaleString('ko-kr')}P</label></label>
                     </div>
                 </div>
                 <div className='w-[300px] min-h-[750px] ml-[60px] relative'>

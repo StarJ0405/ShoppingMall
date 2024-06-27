@@ -9,4 +9,5 @@ import org.springframework.web.multipart.MultipartFile;
 public class ImageRequestDTO {
 
     private MultipartFile file;
+    private Long roomId;
 }

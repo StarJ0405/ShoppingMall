@@ -24,6 +24,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
@@ -1563,8 +1564,7 @@ public class MultiService {
         }
     }
 
-    // 초 분 시 일 월 주
-
+    // 초 분 시 일 월 요일
     @Scheduled(cron = "0 0 0/1 * * *")
     public void disableEvent() {
 
@@ -1579,8 +1579,8 @@ public class MultiService {
         for (Event event : _eventList) {
             this.eventService.changeActive(event);
         }
-
     }
+
 
     private EventResponseDTO getEventDTO(Event event) {
 
@@ -1739,7 +1739,7 @@ public class MultiService {
         if (chatRoom != null && senderUser != null) {
             chatRoomService.update(chatRoom);
             ChatMessage chatMessage = chatMessageService.save(chatRoom, senderUser, message, type);
-            return ChatMessageResponseDTO.builder().message(chatMessage.getMessage()).sender(chatMessage.getSender().getUsername()).createDate(this.dateTimeTransfer(chatMessage.getCreateDate())).build();
+            return ChatMessageResponseDTO.builder().message(chatMessage.getMessage()).sender(chatMessage.getSender().getUsername()).createDate(this.dateTimeTransfer(chatMessage.getCreateDate())).type(chatMessage.getType()).build();
         }
         return null;
     }
@@ -1751,7 +1751,7 @@ public class MultiService {
         if (chatRoom != null && senderUser != null) {
             List<ChatMessage> chatMessages = chatMessageService.getChatList(chatRoom);
             for (ChatMessage chatMessage : chatMessages) {
-                ChatMessageResponseDTO chatMessageResponseDTO = ChatMessageResponseDTO.builder().message(chatMessage.getMessage()).sender(chatMessage.getSender().getUsername()).createDate(this.dateTimeTransfer(chatMessage.getCreateDate())).build();
+                ChatMessageResponseDTO chatMessageResponseDTO = ChatMessageResponseDTO.builder().message(chatMessage.getMessage()).sender(chatMessage.getSender().getUsername()).createDate(this.dateTimeTransfer(chatMessage.getCreateDate())).type(chatMessage.getType()).build();
                 list.add(chatMessageResponseDTO);
             }
         }
@@ -1762,18 +1762,13 @@ public class MultiService {
         List<ChatRoom> rooms = chatRoomService.getList(username);
         List<ChatRoomResponseDTO> list = new ArrayList<>();
         for (ChatRoom room : rooms) {
-
             String target = room.getUser1().getUsername().equals(username) ? room.getUser2().getUsername() : room.getUser1().getUsername();
-
-
             ChatRoomResponseDTO.ChatRoomResponseDTOBuilder builder = ChatRoomResponseDTO.builder() //
                     .id(room.getId()) //
                     .acceptUsername(target) //
                     .createDate(this.dateTimeTransfer(room.getCreateDate())) //
                     .modifyDate(this.dateTimeTransfer(room.getModifyDate()));
-
             fileSystemService.get(ImageKey.USER.getKey(target)).ifPresent(fileSystem -> builder.acceptUsername_url(fileSystem.getV()));
-
             List<ChatMessage> messages = chatMessageService.getChatList(room);
             if (!messages.isEmpty()) {
                 ChatMessage message = messages.getLast();
@@ -1782,5 +1777,25 @@ public class MultiService {
             list.add(builder.build());
         }
         return list;
+    }
+
+    public String saveChatImageMessage(String username, MultipartFile image, Long roomId) {
+        try {
+            SiteUser sender = userService.get(username);
+            ChatRoom room = chatRoomService.get(roomId);
+            if (sender != null && room != null) {
+                String path = ShoppingApplication.getOsType().getLoc();
+                UUID uuid = UUID.randomUUID();
+                String url = "/api/rooms" + "/" + roomId.toString() + "/" + uuid + "." + image.getContentType().split("/")[1];
+                File file = new File(path + url);
+                if (!file.getParentFile().exists())
+                    file.getParentFile().mkdirs();
+                image.transferTo(file);
+                return url;
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return "";
     }
 }
