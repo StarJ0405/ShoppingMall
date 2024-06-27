@@ -1,10 +1,11 @@
 'use client'
 
-import { useState } from 'react';
+import { use, useEffect, useState } from 'react';
 import Side from '../Side';
 import DropDown, { Direcion } from '../DropDown';
 import { deleteRecent } from '@/app/API/UserAPI';
-import { getDate } from '../Method';
+import { getDate, getDateTimeFormat, getDateTimeFormatInput } from '../Method';
+import { Subscribe, getSocket } from '@/app/API/SocketAPI';
 
 
 
@@ -25,11 +26,46 @@ export default function Main(props: Readonly<pageInterface>) {
   const [isRecentOpen, setIsRecentOpen] = useState(false);
   const [hover, setHover] = useState(-1);
   const [isSideOpen, setIsSideOpen] = useState(false);
+  const [isAlarmOpen, setIsAlarmOpen] = useState(false);
   const [userHover, setUserHover] = useState(false);
   const [userHoverInterval, setUserHoverInterval] = useState(null as any);
   const categories = props.categories
   const [topCategoryHover, setTopCategoryHover] = useState(null as any);
   const [topCategoryHoverInterval, setCategoryHoverInterval] = useState(null as any);
+  const [socket, setSocket] = useState(null as any);
+  const [isReady, setIsReady] = useState(false);
+  const [alarmTemp, setAlarmTemp] = useState(null as any);
+  const [alarmTimer, setAlarmTimer] = useState([] as any[]);
+  const [alarmRemove, setAlarmRemove] = useState(null as any);
+  useEffect(() => {
+    if (user) {
+      const subs = [] as Subscribe[];
+      subs.push({
+        location: "/api/sub/alarm/" + user?.username, active: (r) => {
+          setAlarmTemp(r);
+        }
+      });
+      setSocket(getSocket(subs, () => setIsReady(true)));
+    }
+  }, [user]);
+  useEffect(() => {
+    if (alarmTemp) {
+      if (alarmTimer.filter(alarm => alarm?.id == alarmTemp.id).length == 0) {
+        setAlarmTimer([alarmTemp, ...alarmTimer]);
+        const timer = setInterval(() => {
+          setAlarmRemove(alarmTemp);
+          clearInterval(timer);
+        }, 2000);
+        setAlarmTemp(null);
+      }
+    }
+  }, [alarmTemp]);
+
+  useEffect(() => {
+    if (alarmRemove) {
+      setAlarmTimer([...alarmTimer.filter(alarm => alarm?.id != alarmRemove?.id)])
+    }
+  }, [alarmRemove])
   function openUserHover() {
     clearInterval(userHoverInterval);
     setUserHover(true);
@@ -67,6 +103,7 @@ export default function Main(props: Readonly<pageInterface>) {
           <a href='/account/log'><img alt='delivery' src='/delivery.png' className='w-[60px] h-[48px]' onMouseEnter={e => (e.target as any).src = '/delivery_red.png'} onMouseLeave={e => (e.target as any).src = '/delivery.png'}></img></a>
           <a href='/account/cart'><img alt='cart' src='/cart.png' className='w-[48px] h-[48px]' onMouseEnter={e => (e.target as any).src = '/cart_red.png'} onMouseLeave={e => (e.target as any).src = '/cart.png'}></img></a>
           <a className='cursor-pointer' onClick={() => setIsRecentOpen(true)}><img alt='recent' src='/recent.png' className='w-[48px] h-[48px]' onMouseEnter={e => (e.target as any).src = '/recent_red.png'} onMouseLeave={e => (e.target as any).src = '/recent.png'}></img></a>
+          {/* <a className='cursor-pointer' onClick={() => setIsAlarmOpen(true)}><img alt='recent' src='/alarm.png' className='w-[48px] h-[48px]' onMouseEnter={e => (e.target as any).src = '/alarm_red.png'} onMouseLeave={e => (e.target as any).src = '/alarm.png'}></img></a> */}
         </div>
       </header>
       <DropDown open={userHover} onClose={() => closeUserHover()} className='bg-white' background='main' button='user' defaultDriection={Direcion.DOWN} height={235} width={170}>
@@ -131,6 +168,9 @@ export default function Main(props: Readonly<pageInterface>) {
           </li>)}
         </ul>
       </Side>
+      <Side open={isAlarmOpen} onClose={() => setIsAlarmOpen(false)} className='px-4 py-4 w-[400px] right-0 top-0 h-full' outlineClassName='bg-opacity-5' escClose={true} outlineClose={true}>
+        a
+      </Side>
       <nav className='flex w-[1240px] h-[66px] items-center justify-between'>
         <div className='flex items-center'>
           <a href='/product/best' className='text-lg border-red-500 hover:border-b-2'>베스트</a>
@@ -152,6 +192,19 @@ export default function Main(props: Readonly<pageInterface>) {
         <label className='text-xs'>대표이사 : 홍성재, 이동원, 황준하, 이순재, 주소: 대전광역시 서구 둔산로 52, Tel: 042-369-5890</label>
         <label className='text-xs'>사업자등록번호 : 889-86-02332, 통신판매업신고 : 제 2021-대전서구-1956호</label>
       </footer>
+      {alarmTimer?.length > 0 ?
+        <div className='flex flex-col fixed right-[10px] bottom-[10px]'>
+          {alarmTimer?.map((alarm, index) =>
+            <div key={index} className='w-[300px] border border-black rounded-full flex flex-col text-end px-5 mt-2'>
+              <a href={alarm?.url} className='text-2xl hover:underline px-2 truncate'>{alarm?.message}</a>
+              <label className='mr-4'>{alarm?.sender}</label>
+              <label className='mr-4'>{getDateTimeFormat(alarm?.createDate)}</label>
+            </div>)}
+        </div>
+        :
+        <></>
+      }
+
     </main>
   );
 }

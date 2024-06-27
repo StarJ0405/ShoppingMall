@@ -54,7 +54,7 @@ export default function Page(props: pageProps) {
                                     }, 100);
                                 }).catch(e => console.log(e))
                             });
-                            setSocket(getSocket(r.username, subs, () => setIsReady(true)));
+                            setSocket(getSocket(subs, () => setIsReady(true)));
                             getChatList(r.id).then(r => {
                                 setChatList(r);
                                 const timer = setInterval(() => {
@@ -106,18 +106,29 @@ export default function Page(props: pageProps) {
                         </div>
                 })}
                 <Modal open={selectedUrl != ''} onClose={() => setSelectedUrl('')} className="bg-opacity-0" escClose={true} outlineClose={true}>
-                    <img src={selectedUrl} onClick={()=> setSelectedUrl('')}  className="cursor-pointer"/>
+                    <img src={selectedUrl} onClick={() => setSelectedUrl('')} className="cursor-pointer" />
                 </Modal>
             </div>
             <div className="w-[1225px] py-2 px-4 border border-gray-500 rounded-lg flex">
-                <input type="text" className="outline-none w-full" placeholder="채팅.." autoFocus onKeyDown={e => { if (e.key == "Enter" && isReady) { const value = (e.target as HTMLInputElement); if ((value.value as string) == "" || value.value == null) return; socket.publish({ destination: "/api/pub/chat/" + chatroom?.id, body: JSON.stringify({ sender: user?.username, message: value.value, type: 0 }) }); (e.target as HTMLInputElement).value = '' } }} />
+                <input type="text" className="outline-none w-full" placeholder="채팅.." autoFocus onKeyDown={e => {
+                    if (e.key == "Enter" && isReady) {
+                        const value = (e.target as HTMLInputElement);
+                        if ((value.value as string) == "" || value.value == null)
+                            return;
+                        socket.publish({ destination: "/api/pub/chat/" + chatroom?.id, body: JSON.stringify({ sender: user?.username, message: value.value, type: 0 }) });
+                        socket.publish({ destination: "/api/pub/alarm/" + target?.username, body: JSON.stringify({ sender: user?.username, message: value.value, url: "/account/chat/" + user?.username }) });
+                        (e.target as HTMLInputElement).value = '';
+                    }
+                }} />
                 <img src="/image.png" className="w-[24px] h-[24px] cursor-pointer ml-2" onClick={() => document.getElementById('file')?.click()} />
                 <input id="file" type="file" hidden onChange={(e) => {
                     const formData = new FormData();
                     formData.append('file', e.target.files?.[0] as any);
                     formData.append('roomId', chatroom?.id);
-                    saveChatImage(formData).then(r =>
-                        socket.publish({ destination: "/api/pub/chat/" + chatroom?.id, body: JSON.stringify({ sender: user?.username, message: r, type: 1 }) })).catch(e => console.log(e));
+                    saveChatImage(formData).then(r => {
+                        socket.publish({ destination: "/api/pub/chat/" + chatroom?.id, body: JSON.stringify({ sender: user?.username, message: r, type: 1 }) });
+                        socket.publish({ destination: "/api/pub/alarm/" + target?.username, body: JSON.stringify({ sender: user?.username, message: "사진", url: "/account/chat/" + user?.username }) });
+                    }).catch(e => console.log(e));
                 }} />
             </div>
         </div>

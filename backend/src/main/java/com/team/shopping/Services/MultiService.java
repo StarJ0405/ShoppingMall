@@ -68,6 +68,7 @@ public class MultiService {
     private final EventProductService eventProductService;
     private final ChatRoomService chatRoomService;
     private final ChatMessageService chatMessageService;
+    private final AlarmService alarmService;
 
 
     /**
@@ -1790,5 +1791,29 @@ public class MultiService {
             throw new RuntimeException(e);
         }
         return "";
+    }
+
+    /*
+     * Alarm
+     */
+    @Transactional
+    public AlarmResponseDTO postAlarm(String username, AlarmRequestDTO alarmRequest) {
+        SiteUser user = userService.get(username);
+        if (user != null) {
+            Alarm alarm = alarmService.save(user, alarmRequest.message(), alarmRequest.sender(), alarmRequest.url(), alarmRequest.isRead());
+            return AlarmResponseDTO.builder().id(alarm.getId()).createDate(this.dateTimeTransfer(alarm.getCreateDate())).isRead(alarm.isRead()).sender(alarm.getSender()).message(alarm.getMessage()).url(alarm.getUrl()).build();
+        }
+        return null;
+    }
+
+    public List<AlarmResponseDTO> getAlarmList(String username) {
+        List<AlarmResponseDTO> list = new ArrayList<>();
+        SiteUser user = userService.get(username);
+        if (user != null) {
+            List<Alarm> alarmList = alarmService.getList(username);
+            for (Alarm alarm : alarmList)
+                list.add(AlarmResponseDTO.builder().id(alarm.getId()).message(alarm.getMessage()).url(alarm.getUrl()).isRead(alarm.isRead()).createDate(this.dateTimeTransfer(alarm.getCreateDate())).sender(alarm.getSender()).build());
+        }
+        return list;
     }
 }
