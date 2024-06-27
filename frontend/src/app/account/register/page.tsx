@@ -65,7 +65,7 @@ export default function Page() {
     return <div className='w-full h-full flex justify-center'>
         <div className='flex flex-col w-[960px] pt-[20px] items-center'>
             <div className='flex items-center h-[85px] self-start p-2'>
-                <a href='/account/login'><img src='/logo.png' style={{ width: '69px', height: '30px' }} /></a>
+                <a href='/account/login'><img src='/logo.png' style={{ width: '69px', height: '50px' }} /></a>
                 <label className='ml-3 text-3xl font-bold'>회원가입</label>
             </div>
             <div className='divider divider-neutral mt-0'></div>
