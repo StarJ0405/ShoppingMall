@@ -367,7 +367,7 @@ export default function Page(props: pageProps) {
                                 <div className='flex flex-col p-2 w-full'>
                                     <div className='flex justify-between w-full items-center'>
                                         <label className='font-bold text-lg'>{review?.nickname}</label>
-                                        <a href='/' className='text-gray-500 text-sm'>{getDate(review?.createDate)} 신고</a>
+                                        <a className='text-gray-500 text-sm'>{getDate(review?.createDate)}</a>
                                     </div>
                                     <div>
                                         <div className='rating rating-sm rating-half'>
@@ -385,7 +385,7 @@ export default function Page(props: pageProps) {
                                         </div>
                                         <label className='ml-2'>{review?.grade}</label>
                                         <div><div dangerouslySetInnerHTML={{ __html: review?.content }} /></div>
-                                        <button className='btn btn-info btn-sm'>추천</button>
+                                        {/* <button className='btn btn-info btn-sm'>추천</button> */}
                                     </div>
                                 </div>
                             </div>
