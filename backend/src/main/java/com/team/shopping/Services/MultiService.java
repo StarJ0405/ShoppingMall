@@ -707,9 +707,10 @@ public class MultiService {
     @Transactional
     public void saveOptionList(OptionListRequestDTO optionListRequestDTO, Product product) {
         OptionList optionList = optionListService.save(optionListRequestDTO.getName(), product);
-        for (OptionRequestDTO optionRequestDTO : optionListRequestDTO.getChild()) {
-            this.saveOptions(optionRequestDTO, optionList);
-        }
+        if (optionListRequestDTO.getChild() != null)
+            for (OptionRequestDTO optionRequestDTO : optionListRequestDTO.getChild()) {
+                this.saveOptions(optionRequestDTO, optionList);
+            }
     }
 
     /**

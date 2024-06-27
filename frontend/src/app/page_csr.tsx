@@ -28,8 +28,10 @@ export default function Page(props: pageProps) {
         getRecent()
             .then(r => setRecentList(r))
             .catch(e => console.log(e));
+
         getProductRecentList(0).then(r => {setProductList([...r.content]); setMaxPage(r.totalPages) }).catch(e => console.log(e));
         getCategories().then(r => setCategories(r)).catch(e => console.log(e));
+        
     }, [ACCESS_TOKEN]);
     useEffect(() => {
         const loadPage = () => {
