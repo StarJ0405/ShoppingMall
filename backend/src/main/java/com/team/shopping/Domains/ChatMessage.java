@@ -1,6 +1,6 @@
 package com.team.shopping.Domains;
 
-import com.team.shopping.Enums.Type;
+import com.team.shopping.Enums.ChatType;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
@@ -28,12 +28,12 @@ public class ChatMessage {
     @Column(length = 200)
     private String message;
 
-    private Type type;
+    private ChatType type;
 
     private LocalDateTime createDate;
 
     @Builder
-    public ChatMessage(SiteUser sender, ChatRoom chatRoom, String message, Type type) {
+    public ChatMessage(SiteUser sender, ChatRoom chatRoom, String message, ChatType type) {
         this.sender = sender;
         this.chatRoom = chatRoom;
         this.message = message;

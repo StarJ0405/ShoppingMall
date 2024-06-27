@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -28,5 +29,13 @@ public class ChatRoomService {
 
     public ChatRoom get(Long roomId) {
         return chatRoomRepository.getReferenceById(roomId);
+    }
+
+    public List<ChatRoom> getList(String username){
+        return chatRoomRepository.getChatRoomList(username);
+    }
+    public void update(ChatRoom room){
+        room.setModifyDate(LocalDateTime.now());
+        chatRoomRepository.save(room);
     }
 }

@@ -33,5 +33,6 @@ public class ChatRoom {
         this.user1 = user1;
         this.user2 = user2;
         this.createDate = LocalDateTime.now();
+        this.modifyDate= LocalDateTime.now();
     }
 }

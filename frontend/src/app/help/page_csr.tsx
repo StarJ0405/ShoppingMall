@@ -64,7 +64,7 @@ export default function Page(props: pageProps) {
                 <label className="font-bold text-xl">FAQ</label>
                 <div className="flex items-center">
                     <button className="btn btn-info btn-sm w-[100px] text-white" onClick={() => {
-                        location.href = "/account/chat";
+                        location.href = "/account/chat/admin";
                     }}>문의하기</button>
                     {user?.role == "ADMIN" ? <button className="btn btn-outline btn-sm ml-2" onClick={openModal}>등록하기</button> : <></>}
                 </div>
