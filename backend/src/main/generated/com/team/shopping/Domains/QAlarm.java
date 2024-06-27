@@ -30,7 +30,11 @@ public class QAlarm extends EntityPathBase<Alarm> {
 
     public final StringPath message = createString("message");
 
+    public final StringPath sender = createString("sender");
+
     public final QSiteUser target;
+
+    public final StringPath url = createString("url");
 
     public QAlarm(String variable) {
         this(Alarm.class, forVariable(variable), INITS);
