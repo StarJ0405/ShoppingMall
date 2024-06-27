@@ -805,25 +805,32 @@ public class MultiService {
             }
         }
         Optional<MultiKey> _multiKey = multiKeyService.get(ImageKey.TEMP.getKey(username));
-        _multiKey.ifPresent(multiKey -> this.updateProductContent(username, product, multiKey));
+        _multiKey.ifPresent(multiKey -> this.updateProductContent(product, multiKey));
     }
 
     @Transactional
-    public ProductResponseDTO updateProduct(String username, ProductCreateRequestDTO requestDTO) {
+    public void updateProduct(String username, ProductCreateRequestDTO requestDTO) {
         Product product = productService.getProduct(requestDTO.getProductId());
-
         if (product != null) {
             Optional<MultiKey> _multiKey = multiKeyService.get(ImageKey.TEMP.getKey(username));
-            if (_multiKey.isPresent()) {
-                Category category = this.categoryService.get(requestDTO.getCategoryId());
-                Product newProduct = productService.updateProduct(product, requestDTO, category);
-                return getProduct(this.updateProductContent(username, newProduct, _multiKey.get()));
+            Category category = this.categoryService.get(requestDTO.getCategoryId());
+            if (requestDTO.getTagList() != null) {
+                this.deleteTag(product);
+                this.saveTag(requestDTO.getTagList(), product);
             }
+            if (requestDTO.getOptionLists() != null) {
+                for (OptionListRequestDTO optionListRequestDTO : requestDTO.getOptionLists()) {
+                    this.deleteOptionList(product);
+                    this.saveOptionList(optionListRequestDTO, product);
+                }
+            }
+            Product newProduct = productService.updateProduct(product, requestDTO, category);
+            _multiKey.ifPresent(multiKey -> this.getProduct(this.updateProductContent(newProduct, multiKey)));
         }
-        return null;
+
     }
 
-    private Product updateProductContent(String username, Product product, MultiKey multiKey) {
+    private Product updateProductContent(Product product, MultiKey multiKey) {
         String detail = product.getDetail();
         for (String keyName : multiKey.getVs()) {
             Optional<MultiKey> _productMulti = multiKeyService.get(ImageKey.PRODUCT.getKey(product.getId().toString()));
