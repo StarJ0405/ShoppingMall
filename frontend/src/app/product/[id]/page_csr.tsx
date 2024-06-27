@@ -518,6 +518,7 @@ export default function Page(props: pageProps) {
                             :
                             <button className='btn w-full mt-2' disabled>재입고 예정</button>
                         }
+                        <button className='btn btn-sm btn-warning text-white w-full mt-1' onClick={()=>location.href="/account/chat/"+seller?.username}>실시간 상담</button>
                     </div>
                 </div>
             </div>

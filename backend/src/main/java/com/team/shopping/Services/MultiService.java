@@ -586,8 +586,7 @@ public class MultiService {
             String url = this.getImageUrl(product);
             Optional<Review> review = this.reviewService.findByPaymentProductId(paymentProduct.getId());
             ReviewResponseDTO reviewResponseDTO = null;
-            if (review.isPresent())
-                reviewResponseDTO = this.getReview(review.get());
+            if (review.isPresent()) reviewResponseDTO = this.getReview(review.get());
             PaymentProductResponseDTO paymentProductResponseDTO = DTOConverter.toPaymentProductResponseDTO(paymentProduct, paymentProductDetailList, url, reviewResponseDTO);
             paymentProductResponseDTOList.add(paymentProductResponseDTO);
         }
@@ -644,8 +643,7 @@ public class MultiService {
                 String url = this.getImageUrl(product);
                 Optional<Review> review = this.reviewService.findByPaymentProductId(paymentProduct.getId());
                 ReviewResponseDTO reviewResponseDTO = null;
-                if (review.isPresent())
-                    reviewResponseDTO = this.getReview(review.get());
+                if (review.isPresent()) reviewResponseDTO = this.getReview(review.get());
                 PaymentProductResponseDTO paymentProductResponseDTO = DTOConverter.toPaymentProductResponseDTO(paymentProduct, paymentProductDetailList, url, reviewResponseDTO);
                 paymentProductResponseDTOList.add(paymentProductResponseDTO);
             }
@@ -991,8 +989,7 @@ public class MultiService {
         Optional<ProductQA> _productQA = productQAService.getProductQA(requestDTO.getProductQAId());
         Product product = productService.getProduct(requestDTO.getProductId());
         if (user == null) throw new NoSuchElementException("not user");
-        if (product == null)
-            throw new NoSuchElementException("not product");
+        if (product == null) throw new NoSuchElementException("not product");
         if (!product.getSeller().getUsername().equals(user.getUsername()))
             throw new IllegalArgumentException("not owner");
         _productQA.ifPresent(productQA -> this.productQAService.update(requestDTO.getAnswer(), user, productQA));
@@ -1385,11 +1382,7 @@ public class MultiService {
     }
 
     private ArticleResponseDTO getArticleResponseDTO(Article article) {
-        return ArticleResponseDTO.builder()
-                .article(article).siteUser(article.getAuthor())
-                .createDate(this.dateTimeTransfer(article.getCreateDate()))
-                .modifyDate(this.dateTimeTransfer(article.getModifyDate()))
-                .build();
+        return ArticleResponseDTO.builder().article(article).siteUser(article.getAuthor()).createDate(this.dateTimeTransfer(article.getCreateDate())).modifyDate(this.dateTimeTransfer(article.getModifyDate())).build();
     }
 
     /**
@@ -1458,8 +1451,7 @@ public class MultiService {
     }
 
     @Transactional
-    public Page<ProductResponseDTO> categorySearchByKeyword(int page, String encodedKeyword, int sort, Long
-            categoryId) {
+    public Page<ProductResponseDTO> categorySearchByKeyword(int page, String encodedKeyword, int sort, Long categoryId) {
         String keyword = URLDecoder.decode(encodedKeyword, StandardCharsets.UTF_8);
         Sorts sorts = Sorts.values()[sort];
 
@@ -1716,53 +1708,72 @@ public class MultiService {
      */
 
     @Transactional
-    public ChatRoomResponseDTO ChatRoom(String username, String targetName) {
+    public ChatRoomResponseDTO saveChatRoom(String username, String targetName) {
         SiteUser sendUser = userService.get(username);
         SiteUser acceptUser = userService.get(targetName);
 
         if (sendUser != null && acceptUser != null) {
             Optional<ChatRoom> _chatRoom = chatRoomService.getChatRoom(sendUser, acceptUser);
-            if (_chatRoom.isEmpty())
-                _chatRoom = Optional.ofNullable(chatRoomService.save(sendUser, acceptUser));
+            ChatRoom chatRoom = _chatRoom.orElseGet(() -> chatRoomService.save(sendUser, acceptUser));
 
-            if (_chatRoom.isPresent())
-                return ChatRoomResponseDTO.builder().id(_chatRoom.get().getId())
-                        .sendUsername(_chatRoom.get().getUser1().getUsername())
-                        .acceptUsername(_chatRoom.get().getUser2().getUsername())
-                        .createDate(this.dateTimeTransfer(_chatRoom.get().getCreateDate()))
-                        .modifyDate(this.dateTimeTransfer(_chatRoom.get().getModifyDate()))
-                        .build();
-        }
-        return null;
-    }
-
-    @Transactional
-    public ChatRoomResponseDTO saveChatMessage(Long roomId, String message, String sender, int type) {
-        SiteUser senderUser = userService.get(sender);
-        ChatRoom chatRoom = chatRoomService.get(roomId);
-        if (chatRoom != null && senderUser != null) {
-            chatMessageService.save(chatRoom, senderUser, message, type);
-            List<ChatMessage> chatMessages = chatMessageService.getChatList(chatRoom);
-            List<ChatMessageResponseDTO> list = new ArrayList<>();
-            for (ChatMessage chatMessage : chatMessages) {
-                ChatMessageResponseDTO chatMessageResponseDTO = ChatMessageResponseDTO.builder()
-                        .message(chatMessage.getMessage())
-                        .sender(chatMessage.getSender().getUsername())
-                        .createDate(this.dateTimeTransfer(chatMessage.getCreateDate())).build();
-                list.add(chatMessageResponseDTO);
-            }
-            return ChatRoomResponseDTO.builder()
-                    .id(chatRoom.getId())
-                    .sendUsername(chatRoom.getUser1().getUsername())
-                    .acceptUsername(chatRoom.getUser2().getUsername())
-                    .createDate(this.dateTimeTransfer(chatRoom.getCreateDate()))
-                    .modifyDate(this.dateTimeTransfer(chatRoom.getModifyDate()))
-                    .chats(list)
+            return ChatRoomResponseDTO.builder().id(chatRoom.getId()) //
+                    .acceptUsername(chatRoom.getUser2().getUsername()) //
+                    .createDate(this.dateTimeTransfer(chatRoom.getCreateDate())) //
+                    .modifyDate(this.dateTimeTransfer(chatRoom.getModifyDate())) //
                     .build();
         }
         return null;
     }
 
+    @Transactional
+    public ChatMessageResponseDTO saveChatMessage(Long roomId, String message, String sender, int type) {
+        SiteUser senderUser = userService.get(sender);
+        ChatRoom chatRoom = chatRoomService.get(roomId);
+        if (chatRoom != null && senderUser != null) {
+            chatRoomService.update(chatRoom);
+            ChatMessage chatMessage = chatMessageService.save(chatRoom, senderUser, message, type);
+            return ChatMessageResponseDTO.builder().message(chatMessage.getMessage()).sender(chatMessage.getSender().getUsername()).createDate(this.dateTimeTransfer(chatMessage.getCreateDate())).build();
+        }
+        return null;
+    }
+
+    public List<ChatMessageResponseDTO> getChatList(String username, Long roomId) {
+        List<ChatMessageResponseDTO> list = new ArrayList<>();
+        SiteUser senderUser = userService.get(username);
+        ChatRoom chatRoom = chatRoomService.get(roomId);
+        if (chatRoom != null && senderUser != null) {
+            List<ChatMessage> chatMessages = chatMessageService.getChatList(chatRoom);
+            for (ChatMessage chatMessage : chatMessages) {
+                ChatMessageResponseDTO chatMessageResponseDTO = ChatMessageResponseDTO.builder().message(chatMessage.getMessage()).sender(chatMessage.getSender().getUsername()).createDate(this.dateTimeTransfer(chatMessage.getCreateDate())).build();
+                list.add(chatMessageResponseDTO);
+            }
+        }
+        return list;
+    }
+
+    public List<ChatRoomResponseDTO> getChatRooms(String username) {
+        List<ChatRoom> rooms = chatRoomService.getList(username);
+        List<ChatRoomResponseDTO> list = new ArrayList<>();
+        for (ChatRoom room : rooms) {
+
+            String target = room.getUser1().getUsername().equals(username) ? room.getUser2().getUsername() : room.getUser1().getUsername();
+
+
+            ChatRoomResponseDTO.ChatRoomResponseDTOBuilder builder = ChatRoomResponseDTO.builder() //
+                    .id(room.getId()) //
+                    .acceptUsername(target) //
+                    .createDate(this.dateTimeTransfer(room.getCreateDate())) //
+                    .modifyDate(this.dateTimeTransfer(room.getModifyDate()));
+
+            fileSystemService.get(ImageKey.USER.getKey(target)).ifPresent(fileSystem -> builder.acceptUsername_url(fileSystem.getV()));
+
+            List<ChatMessage> messages = chatMessageService.getChatList(room);
+            if (!messages.isEmpty()) {
+                ChatMessage message = messages.getLast();
+                builder.type(message.getType().ordinal()).lastMessage(message.getMessage());
+            }
+            list.add(builder.build());
+        }
+        return list;
+    }
 }
-
-

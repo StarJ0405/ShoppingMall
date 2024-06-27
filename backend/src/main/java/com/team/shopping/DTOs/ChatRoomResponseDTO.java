@@ -5,26 +5,26 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.List;
-
 @Getter
 @Setter
 @NoArgsConstructor
 public class ChatRoomResponseDTO {
     private Long id;
-    private String sendUsername;
     private String acceptUsername;
+    private String acceptUsername_url;
     private Long createDate;
     private Long modifyDate;
-    private List<ChatMessageResponseDTO> chats;
+    private int type;
+    private String lastMessage;
 
     @Builder
-    public ChatRoomResponseDTO(Long id, String sendUsername, String acceptUsername, Long createDate, Long modifyDate, List<ChatMessageResponseDTO> chats) {
+    public ChatRoomResponseDTO(Long id, String acceptUsername, Long createDate, Long modifyDate, int type, String lastMessage, String acceptUsername_url) {
         this.id = id;
-        this.sendUsername = sendUsername;
         this.acceptUsername = acceptUsername;
         this.createDate = createDate;
         this.modifyDate = modifyDate;
-        this.chats = chats;
+        this.type = type;
+        this.lastMessage = lastMessage;
+        this.acceptUsername_url = acceptUsername_url;
     }
 }

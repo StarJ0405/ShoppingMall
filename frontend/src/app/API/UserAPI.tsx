@@ -343,3 +343,18 @@ export const updateArticle = async (data: putArticle) => {
     const response = await UserApi.put('/api/article', data);
     return response.data;
 }
+
+export const getChatRoom = async (data: string) => {
+    const response = await UserApi.get('/api/chat', { headers: { Username: data } });
+    return response.data;
+}
+
+export const getChatRoomList = async () => {
+    const response = await UserApi.get('/api/chat/rooms');
+    return response.data;
+}
+
+export const getChatList = async (data: number) => {
+    const response = await UserApi.get('/api/chat/chats', { headers: { roomId: data } });
+    return response.data;
+}
