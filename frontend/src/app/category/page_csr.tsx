@@ -37,24 +37,23 @@ export default function Page(props: pageProps) {
                     getRecent()
                         .then(r => setRecentList(r))
                         .catch(e => console.log(e));
-                    getCategories().then(r => {
-                        setCategories(r);
-                        (r as any[]).forEach(top =>
-                            (top.categoryResponseDTOList as any[])?.forEach(second =>
-                                (second.categoryResponseDTOList as any[])?.forEach(bottom => {
-                                    if (bottom.id == props.CategoryId) {
-                                        setTopCategory(top);
-                                        setSecondCategory(second);
-                                        setBottomCategory(bottom);
-                                    };
-                                })
-                            )
-                        );
-
-                    }).catch(e => console.log(e));
-
                 })
                 .catch(e => console.log(e));
+        getCategories().then(r => {
+            setCategories(r);
+            (r as any[]).forEach(top =>
+                (top.categoryResponseDTOList as any[])?.forEach(second =>
+                    (second.categoryResponseDTOList as any[])?.forEach(bottom => {
+                        if (bottom.id == props.CategoryId) {
+                            setTopCategory(top);
+                            setSecondCategory(second);
+                            setBottomCategory(bottom);
+                        };
+                    })
+                )
+            );
+
+        }).catch(e => console.log(e));
     }, [ACCESS_TOKEN]);
     function Pages() {
         const start = props.page - (props.page % 10);

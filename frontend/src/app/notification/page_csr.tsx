@@ -27,19 +27,17 @@ export default function Page(props: pageProps) {
     useEffect(() => {
         if (ACCESS_TOKEN)
             getUser()
-                .then(r => {
-                    setUser(r);
-                    getRecent()
-                        .then(r => setRecentList(r))
-                        .catch(e => console.log(e));
-                    getCategories().then(r => setCategories(r)).catch(e => console.log(e));
-                    getArticleList({ Type: 2, Page: 0 })
-                        .then(r => {
-                            setArticleList(r.content);
-                            setMaxPage(r.totalPages);
-                        }).catch(e => console.log(e));
-                })
+                .then(r => setUser(r))
                 .catch(e => console.log(e));
+        getRecent()
+            .then(r => setRecentList(r))
+            .catch(e => console.log(e));
+        getCategories().then(r => setCategories(r)).catch(e => console.log(e));
+        getArticleList({ Type: 2, Page: 0 })
+            .then(r => {
+                setArticleList(r.content);
+                setMaxPage(r.totalPages);
+            }).catch(e => console.log(e));
     }, [ACCESS_TOKEN]);
     function openModal() {
         setIsModalOpen(true);

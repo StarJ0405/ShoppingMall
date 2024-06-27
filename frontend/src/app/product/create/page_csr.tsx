@@ -106,16 +106,16 @@ export default function Page(props: pageProps) {
                     setUser(r);
                     setAS(r.phoneNumber);
                     setBrand(r.nickname);
-                    getRecent()
-                        .then(r => setRecentList(r))
-                        .catch(e => console.log(e));
-                    deleteImage();
-                    deleteImageList();
-                    getCategories().then(r => setCategories(r)).catch(e => console.log(e));
                 })
                 .catch(e => console.log(e));
         else
             redirect('/account/login');
+        getRecent()
+            .then(r => setRecentList(r))
+            .catch(e => console.log(e));
+        deleteImage();
+        deleteImageList();
+        getCategories().then(r => setCategories(r)).catch(e => console.log(e));
     }, [ACCESS_TOKEN]);
     function Regist() {
         if (category != -1)

@@ -30,17 +30,17 @@ export default function Page(props: pageProps) {
             getUser()
                 .then(r => {
                     setUser(r);
-                    getRecent()
-                        .then(r => setRecentList(r))
-                        .catch(e => console.log(e));
-                    getCategories().then(r => setCategories(r)).catch(e => console.log(e));
-                    getArticleList({ Type: 1, Page: 0 })
-                        .then(r => {
-                            setArticleList(r.content);
-                            setMaxPage(r.totalPages);
-                        }).catch(e => console.log(e));
                 })
                 .catch(e => console.log(e));
+        getRecent()
+            .then(r => setRecentList(r))
+            .catch(e => console.log(e));
+        getCategories().then(r => setCategories(r)).catch(e => console.log(e));
+        getArticleList({ Type: 1, Page: 0 })
+            .then(r => {
+                setArticleList(r.content);
+                setMaxPage(r.totalPages);
+            }).catch(e => console.log(e));
     }, [ACCESS_TOKEN]);
     function openModal() {
         setIsModalOpen(true);

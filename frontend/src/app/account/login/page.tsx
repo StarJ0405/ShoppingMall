@@ -26,7 +26,7 @@ export default function Page() {
                     default:
                         console.log(error);
                 }
-                
+
             });
     }
 
@@ -39,8 +39,8 @@ export default function Page() {
             <div className='w-[396px] mt-1'><input type='checkbox' onChange={() => setCanSee(!canSee)} /> <label>비밀번호 확인</label></div>
             <button id='submit' className='btn btn-error text-white text-lg w-[396px] mt-[24px]' onClick={() => Sumbit()}>로그인</button>
             <div className='flex justify-evenly w-[396px] mt-[12px]'>
-                <a href='/'>아이디찾기</a>
-                <a href='/'>비밀번호찾기</a>
+                <a>아이디찾기</a>
+                <a>비밀번호찾기</a>
                 <a href='/account/register'>회원가입</a>
             </div>
             <label className='text-gray-400 text-sm mt-[50px]'>Copyright © 2019 11Street Co.,Ltd. All Rights Reserved.</label>
