@@ -268,7 +268,7 @@ export default function Page(props: pageProps) {
                             {product?.discount > 0 ?
                                 <div className='flex flex-col'>
                                     <label className='text-sm mt-2 text-gray-500 line-through'>{product?.price.toLocaleString('ko-kr')}원</label>
-                                    <label className='text-xl mt-2 font-bold'><label className='text-2xl'>{product?.discount}% {(product?.price * (100-product?.discount)/100).toLocaleString('ko-kr', { maximumFractionDigits: 0 })}</label>원</label>
+                                    <label className='text-xl mt-2 font-bold'><label className='text-2xl'>{product?.discount}% {(product?.price * (100 - product?.discount) / 100).toLocaleString('ko-kr', { maximumFractionDigits: 0 })}</label>원</label>
                                 </div>
                                 :
                                 <label className='text-xl mt-2 font-bold'><label className='text-2xl font-bold'>{product?.price.toLocaleString('ko-kr')}</label>원</label>
@@ -509,13 +509,14 @@ export default function Page(props: pageProps) {
                         <div className='h-[550px] overflow-y-scroll pr-1'>
                             {(product.optionListResponseDTOList as any[])?.map((list, index) =>
                                 <div key={index} className={'border border-black mb-2'}>
-                                    <div className={'p-2 border-black cursor-pointer' + (option != index ? " " : " border-b")} onClick={() => {
+                                    <div className={'font-bold p-2 border-black cursor-pointer flex flex-col' + (option != index ? " " : " border-4 bg-red-500 text-white")} onClick={() => {
                                         if (option == index)
                                             setOption(-1);
                                         else
                                             setOption(index);
                                     }}>
                                         {list.optionListName}
+                                        {(list.optionResponseDTOList as any[]).filter(opt=> options?.includes(opt.optionId)).map((option,index)=><label className='text-xs' key={index}>선택: {option?.optionName}</label>)}
                                     </div>
                                     {mounted ? <div className={(option == index ? '' : ' hidden')}>
                                         <div className={'flex relative flex-col mt-2' + (typeof window !== "undefined" && (document?.getElementById(list.optionListName) as HTMLInputElement)?.checked ? " bg-red-500 text-white" : "")}>
@@ -535,7 +536,7 @@ export default function Page(props: pageProps) {
                         </div>
                         <div className='flex justify-between'>
                             <label>총 <input type='number' id="count" className='[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none m-0 input input-sm min-w-[30px]' defaultValue={product?.remain >= 1 ? 1 : product?.remain} min={product?.remain >= 1 ? 1 : product?.remain} max={getMax()} onChange={(e) => { let value = Number(e.target.value); if (value > getMax()) value = getMax(); else if (value < 0) value = 0; e.target.value = value.toString(); setCount(value); }} />개</label>
-                            <label>{(getDiscountPrice() * count).toLocaleString('ko-kr')}원</label>
+                            <label>{(getDiscountPrice() * count).toLocaleString('ko-kr', { maximumFractionDigits: 0 })}원</label>
                         </div>
                         {expiration ?
                             <button className='btn w-full mt-2' disabled>판매 기한 만료</button>

@@ -27,7 +27,7 @@ public class SiteUser {
     @Column(columnDefinition = "TEXT")
     private String password;
 
-    @Column(columnDefinition = "TEXT", unique = true)
+    @Column(length = 100, unique = true)
     private String email;
 
     @Column(length = 24, unique = true)
