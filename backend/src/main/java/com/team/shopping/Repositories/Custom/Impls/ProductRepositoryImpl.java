@@ -56,7 +56,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
                 query.leftJoin(qReview)
                         .on(qProduct.id.eq(qReview.product.id))
                         .groupBy(qProduct.id)
-                        .orderBy(qReview.count().desc());
+                        .orderBy(qReview.id.count().desc());
                 break;
             default:
                 throw new IllegalArgumentException("Invalid sort option: " + sorts);

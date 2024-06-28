@@ -124,6 +124,14 @@ class ShoppingApplicationTests {
     }
 
     @Test
+    void addUnit() {
+        Random r = new Random();
+        int i = 0;
+        userRepository.save(SiteUser.builder().username("user" + i).email("user" + i + "@naver.com").birthday(LocalDate.now().minusDays(r.nextInt(31)).minusMonths(r.nextInt(12)).minusYears(r.nextInt(70))).role(UserRole.USER).name("사용자" + i).gender(Gender.values()[r.nextInt(Gender.values().length)]).nickname("구매자" + i).password(passwordEncoder.encode("1")).phoneNumber("011000000" + (i < 10 ? "0" + i : i)).build());
+        userRepository.save(SiteUser.builder().username("seller" + i).email("seller" + i + "@naver.com").birthday(LocalDate.now().minusDays(r.nextInt(31)).minusMonths(r.nextInt(12)).minusYears(r.nextInt(70))).role(UserRole.SELLER).name("이용자" + i).gender(Gender.values()[r.nextInt(Gender.values().length)]).nickname("판매자" + i).password(passwordEncoder.encode("1")).phoneNumber("011000001" + (i < 10 ? "0" + i : i)).build());
+    }
+
+    @Test
     void insertData() {
         Random r = new Random();
         List<SiteUser> sellers = new ArrayList<>();

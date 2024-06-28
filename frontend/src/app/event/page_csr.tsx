@@ -33,19 +33,19 @@ export default function Page(props: pageProps) {
             getUser()
                 .then(r => {
                     setUser(r);
+                    getRecent()
+                        .then(r => setRecentList(r))
+                        .catch(e => console.log(e));
+                    getMyProducts()
+                        .then(r => setProductList(r))
+                        .catch(e => console.log(e));
+                    getEventList()
+                        .then(r => setEventList(r))
+                        .catch(e => console.log(e));
                 })
                 .catch(e => console.log(e));
         else
             redirect('/account/login');
-        getRecent()
-            .then(r => setRecentList(r))
-            .catch(e => console.log(e));
-        getMyProducts()
-            .then(r => setProductList(r))
-            .catch(e => console.log(e));
-        getEventList()
-            .then(r => setEventList(r))
-            .catch(e => console.log(e));
         getCategories()
             .then(r => setCategories(r))
             .then(e => console.log(e));
@@ -194,10 +194,10 @@ export default function Page(props: pageProps) {
                                 {product?.id}
                             </div>
                             <div className="w-[300px]">
-                                {product?.title}
+                                <a className="hover:underline" href={"/product/" + product?.id}>{product?.title}</a>
                             </div>
                             <div className="w-[300px]">
-                                {product?.detail}
+                                {product?.description}
                             </div>
                         </div>)}
                     </div>

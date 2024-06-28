@@ -27,11 +27,14 @@ export default function Page(props: pageProps) {
     useEffect(() => {
         if (ACCESS_TOKEN)
             getUser()
-                .then(r => setUser(r))
+                .then(r => {
+                    setUser(r);
+                    getRecent()
+                        .then(r => setRecentList(r))
+                        .catch(e => console.log(e));
+                })
                 .catch(e => console.log(e));
-        getRecent()
-            .then(r => setRecentList(r))
-            .catch(e => console.log(e));
+
         getCategories().then(r => setCategories(r)).catch(e => console.log(e));
         getArticleList({ Type: 2, Page: 0 })
             .then(r => {

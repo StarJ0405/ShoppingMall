@@ -175,15 +175,16 @@ public class MultiService {
             if (old.exists()) old.delete();
         }
         // 새로 생성
+        String newUrl= null;
         if (newUserRequestDTO.getUrl() != null && !newUserRequestDTO.getUrl().isBlank()) {
             String newFile = "/api/user" + "/" + siteUser.getUsername() + "/";
             Optional<FileSystem> _ordFileSystem = fileSystemService.get(ImageKey.TEMP.getKey(username));
             if (_ordFileSystem.isPresent()) {
-                String newUrl = this.fileMove(newUserRequestDTO.getUrl(), newFile, _ordFileSystem.get());
+                newUrl = this.fileMove(newUserRequestDTO.getUrl(), newFile, _ordFileSystem.get());
                 if (newUrl != null) fileSystemService.save(ImageKey.USER.getKey(username), newUrl);
             }
         }
-        return UserResponseDTO.builder().username(siteUser.getUsername()).gender(siteUser.getGender().toString()).email(siteUser.getEmail()).point(siteUser.getPoint()).phoneNumber(siteUser.getPhoneNumber()).nickname(siteUser.getNickname()).birthday(this.dateTimeTransfer(siteUser.getBirthday())).createDate(this.dateTimeTransfer(siteUser.getCreateDate())).modifyDate(this.dateTimeTransfer(siteUser.getModifyDate())).url(_fileSystem.get().getV()).name(siteUser.getName()).build();
+        return UserResponseDTO.builder().username(siteUser.getUsername()).gender(siteUser.getGender().toString()).email(siteUser.getEmail()).point(siteUser.getPoint()).phoneNumber(siteUser.getPhoneNumber()).nickname(siteUser.getNickname()).birthday(this.dateTimeTransfer(siteUser.getBirthday())).createDate(this.dateTimeTransfer(siteUser.getCreateDate())).modifyDate(this.dateTimeTransfer(siteUser.getModifyDate())).url(newUrl).name(siteUser.getName()).build();
     }
 
     @Transactional

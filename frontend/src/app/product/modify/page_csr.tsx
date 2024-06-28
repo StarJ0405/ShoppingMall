@@ -106,15 +106,15 @@ export default function Page(props: pageProps) {
                     setUser(r);
                     setAS(r.phoneNumber);
                     setBrand(r.nickname);
+                    deleteImage();
+                    deleteImageList();
+                    getRecent()
+                        .then(r => setRecentList(r))
+                        .catch(e => console.log(e));
                 })
                 .catch(e => console.log(e));
         else
             redirect('/account/login');
-        getRecent()
-            .then(r => setRecentList(r))
-            .catch(e => console.log(e));
-        deleteImage();
-        deleteImageList();
         getCategories().then(r => setCategories(r)).catch(e => console.log(e));
         getProduct(product?.id).then(r => setProudct(r)).catch(e => console.log(e));
     }, [ACCESS_TOKEN]);
@@ -299,7 +299,7 @@ export default function Page(props: pageProps) {
             </table>
             <div className=''>
                 <button className='btn btn-xs btn-info' onClick={() => Regist()}>상품 수정</button>
-                <button className='btn btn-xs btn-error' onClick={()=>location.href="/product/"+product?.id}>취소</button>
+                <button className='btn btn-xs btn-error' onClick={() => location.href = "/product/" + product?.id}>취소</button>
             </div>
         </div>
         <Modal open={isModalOpen > -1} onClose={() => setISModalOpen(-1)} className='w-[300px] h-[150px] flex flex-col justify-center items-center' escClose={true} outlineClose={true} >

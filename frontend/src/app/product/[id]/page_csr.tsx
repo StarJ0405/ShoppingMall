@@ -89,23 +89,25 @@ export default function Page(props: pageProps) {
             getUser()
                 .then(r => {
                     setUser(r);
+                    checkWish(product.id)
+                        .then(r => setLove(r))
+                        .catch(e => console.log(e));
+                    setMounted(true);
+                    postRecent(product.id)
+                        .then(r => setRecentList(r))
+                        .catch(e => console.log(e));
                 })
                 .catch(e => console.log(e));
-        checkWish(product.id)
-            .then(r => setLove(r))
-            .catch(e => console.log(e));
-        postRecent(product.id)
-            .then(r => setRecentList(r))
-            .catch(e => console.log(e));
         getProductQAList(product.id)
             .then(r => setProductQAList(r))
             .catch(e => console.log(e));
-        setMounted(true);
         getProduct(product?.id).then(r => {
             setProduct(r);
             setExpiration(new Date() > new Date(r.dateLimit));
-        }).catch(e => console.log(e));
-        getWho(product.authorUsername).then(r => setSeller(r)).catch(e => console.log(e));
+            getWho(r?.authorUsername).then(r => setSeller(r)).catch(e => console.log(e));
+        })
+            .catch(e => console.log(e));
+
         getCategories().then(r => {
             setCategories(r);
             const topCategory = r.filter((cateogry: any) => cateogry.name == product.topCategoryName)[0]
@@ -258,7 +260,8 @@ export default function Page(props: pageProps) {
                                     <label>{getDateTimeFormat(product?.dateLimit)}까지</label>
                                 </div>
                             </div>
-                            <div className='mt-4 flex justify-between w-full'>
+                            <label className='mt-4 text-sm'>{product?.description}</label>
+                            <div className='flex justify-between w-full'>
                                 <div>
                                     <label className={'text-3xl' + (product?.remain > 0 ? '' : ' line-through text-gray-500')}>{product?.title ? product?.title : '제목 없음'}</label>
                                 </div>
@@ -363,7 +366,7 @@ export default function Page(props: pageProps) {
                             : <></>}
                         {reviews?.map((review, index) => <div key={index} className='w-full'>
                             <div className='flex'>
-                                <img className='min-w-[52px] w-[52px] min-h-[52px] h-[52px]' src={review?.url ? review.url : '/base_profile.png'} />
+                                <img className='min-w-[52px] w-[52px] min-h-[52px] h-[52px]' src={review?.profileUrl ? review.profileUrl : '/base_profile.png'} />
                                 <div className='flex flex-col p-2 w-full'>
                                     <div className='flex justify-between w-full items-center'>
                                         <label className='font-bold text-lg'>{review?.nickname}</label>
@@ -516,7 +519,7 @@ export default function Page(props: pageProps) {
                                             setOption(index);
                                     }}>
                                         {list.optionListName}
-                                        {(list.optionResponseDTOList as any[]).filter(opt=> options?.includes(opt.optionId)).map((option,index)=><label className='text-xs' key={index}>선택: {option?.optionName}</label>)}
+                                        {(list.optionResponseDTOList as any[]).filter(opt => options?.includes(opt.optionId)).map((option, index) => <label className='text-xs' key={index}>선택: {option?.optionName}</label>)}
                                     </div>
                                     {mounted ? <div className={(option == index ? '' : ' hidden')}>
                                         <div className={'flex relative flex-col mt-2' + (typeof window !== "undefined" && (document?.getElementById(list.optionListName) as HTMLInputElement)?.checked ? " bg-red-500 text-white" : "")}>

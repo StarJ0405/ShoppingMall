@@ -16,13 +16,17 @@ public class OptionListResponseDTO {
     private Long optionListId;
 
     private String optionListName;
-
+    private String name;
     private List<OptionResponseDTO> optionResponseDTOList;
+    private List<OptionRequestDTO> child;
 
     @Builder
     public OptionListResponseDTO (OptionList optionList, List<OptionResponseDTO> optionResponseDTOList) {
         this.optionListId = optionList.getId();
         this.optionListName = optionList.getName();
+        this.name=optionListName;
         this.optionResponseDTOList = optionResponseDTOList;
+        this.child = optionResponseDTOList.stream().map(option->OptionRequestDTO.builder().name(option.getOptionName()).price(option.getOptionPrice()).count(option.getOptionRemain()).build()).toList();
+
     }
 }
