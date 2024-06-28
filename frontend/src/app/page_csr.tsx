@@ -23,12 +23,11 @@ export default function Page(props: pageProps) {
             getUser()
                 .then(r => {
                     setUser(r);
+                    getRecent()
+                        .then(r => setRecentList(r))
+                        .catch(e => console.log(e));
                 })
                 .catch(e => console.log(e));
-        getRecent()
-            .then(r => setRecentList(r))
-            .catch(e => console.log(e));
-
         getProductRecentList(0).then(r => { setProductList([...r.content]); setMaxPage(r.totalPages) }).catch(e => console.log(e));
         getCategories().then(r => setCategories(r)).catch(e => console.log(e));
 
@@ -91,7 +90,7 @@ export default function Page(props: pageProps) {
                                 </div> */}
                                 <label className='text-xs self-center'>별점 <label className='text-orange-500'>{product?.grade.toLocaleString("ko-kr")}</label> 점</label>
                                 <label className='text-xs self-center ml-4'>리뷰 {product?.reviewSize.toLocaleString("ko-kr")}개</label></div>
-                            <label className='mt-1 text-sm'>포인트 최대 <label className='text-blue-400'>{(product?.price / 100).toLocaleString("ko-kr", { maximumFractionDigits: 0 })}P</label> 적립</label>
+                            <label className='mt-1 text-sm'>포인트 최대 <label className='text-blue-400'>{((product?.price * (100 - product?.discount) / 100) / 100).toLocaleString("ko-kr", { maximumFractionDigits: 0 })}P</label> 적립</label>
                             <div className='text-sm flex justify-between w-full mt-auto'>
                                 <label>무료배송 <label className='text-blue-400'>{MonthDate()} 도착</label></label>
                                 <label>{product?.remain.toLocaleString('ko-KR')}개 남음</label>

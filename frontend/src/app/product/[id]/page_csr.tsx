@@ -89,23 +89,25 @@ export default function Page(props: pageProps) {
             getUser()
                 .then(r => {
                     setUser(r);
+                    checkWish(product.id)
+                        .then(r => setLove(r))
+                        .catch(e => console.log(e));
+                    setMounted(true);
+                    postRecent(product.id)
+                        .then(r => setRecentList(r))
+                        .catch(e => console.log(e));
                 })
                 .catch(e => console.log(e));
-        checkWish(product.id)
-            .then(r => setLove(r))
-            .catch(e => console.log(e));
-        postRecent(product.id)
-            .then(r => setRecentList(r))
-            .catch(e => console.log(e));
         getProductQAList(product.id)
             .then(r => setProductQAList(r))
             .catch(e => console.log(e));
-        setMounted(true);
         getProduct(product?.id).then(r => {
             setProduct(r);
             setExpiration(new Date() > new Date(r.dateLimit));
-        }).catch(e => console.log(e));
-        getWho(product.authorUsername).then(r => setSeller(r)).catch(e => console.log(e));
+            getWho(r?.authorUsername).then(r => setSeller(r)).catch(e => console.log(e));
+        })
+            .catch(e => console.log(e));
+
         getCategories().then(r => {
             setCategories(r);
             const topCategory = r.filter((cateogry: any) => cateogry.name == product.topCategoryName)[0]
@@ -516,7 +518,7 @@ export default function Page(props: pageProps) {
                                             setOption(index);
                                     }}>
                                         {list.optionListName}
-                                        {(list.optionResponseDTOList as any[]).filter(opt=> options?.includes(opt.optionId)).map((option,index)=><label className='text-xs' key={index}>선택: {option?.optionName}</label>)}
+                                        {(list.optionResponseDTOList as any[]).filter(opt => options?.includes(opt.optionId)).map((option, index) => <label className='text-xs' key={index}>선택: {option?.optionName}</label>)}
                                     </div>
                                     {mounted ? <div className={(option == index ? '' : ' hidden')}>
                                         <div className={'flex relative flex-col mt-2' + (typeof window !== "undefined" && (document?.getElementById(list.optionListName) as HTMLInputElement)?.checked ? " bg-red-500 text-white" : "")}>
