@@ -29,9 +29,9 @@ export default function Page(props: pageProps) {
             .then(r => setRecentList(r))
             .catch(e => console.log(e));
 
-        getProductRecentList(0).then(r => {setProductList([...r.content]); setMaxPage(r.totalPages) }).catch(e => console.log(e));
+        getProductRecentList(0).then(r => { setProductList([...r.content]); setMaxPage(r.totalPages) }).catch(e => console.log(e));
         getCategories().then(r => setCategories(r)).catch(e => console.log(e));
-        
+
     }, [ACCESS_TOKEN]);
     useEffect(() => {
         const loadPage = () => {
@@ -68,8 +68,13 @@ export default function Page(props: pageProps) {
                         <div className='w-[394px] h-[431px] flex flex-col p-4 hover:border border-gray-500'>
                             <img src={product?.url ? product.url : '/empty_product.png'} className='w-[190px] h-[190px]' />
                             <label className='text-lg mt-2'>{product?.title ? product?.title : '제목 없음'}</label>
-                            {/* <span className='text-xl mt-2'><label className='text-red-500 text-2xl'>9% </label> <label className='font-bold text-2xl'>10,400원</label>~ <label className='text-gray-300 line-through'>11,550원</label></span> */}
-                            <label className='text-xl mt-2 font-bold text-2xl'>{product?.price.toLocaleString('ko-KR')}원</label>
+                            {product?.discount > 0 ?
+                                <span className='text-xl mt-2'><label className='text-red-500 text-2xl'>{product?.discount}% </label> <label className='font-bold text-2xl'>{(product?.price * (100 - product?.discount) / 100).toLocaleString('ko-KR', { maximumFractionDigits: 0 })}원</label>~ <label className='text-gray-300 line-through'>{product?.price.toLocaleString('ko-KR', { maximumFractionDigits: 0 })}원</label></span>
+                                :
+                                <label className='text-xl mt-2 font-bold text-2xl'>{product?.price.toLocaleString('ko-KR')}원</label>
+                            }
+
+
                             <div className='mt-2 flex'>
                                 {/* <div className='rating rating-xs rating-half'>
                                     <input type='radio' name={"grade"+index} className='rating-hidden' defaultChecked={!product?.grade || (product?.grade == 0 && product?.grade < 0.25)} onClick={e => e.preventDefault()} />
@@ -94,27 +99,6 @@ export default function Page(props: pageProps) {
                         </div>
                     </a>
                 )}
-                {/* <a href='/'>
-                        <div className='w-[394px] h-[431px] flex flex-col p-4 hover:border border-gray-500'>
-                            <img src='/empty_product.png' className='w-[190px] h-[190px]' />
-                            <label className='text-lg mt-2'>제목</label>
-                            <span className='text-xl mt-2'><label className='text-red-500 text-2xl'>9%</label> <label className='font-bold text-2xl'>10,400원</label>~ <label className='text-gray-300 line-through'>11,550원</label></span>
-                            <div className='mt-4'>
-                                <div className='rating rating-xs'>
-                                    <input type='radio' name='rating-5' className='mask mask-star-2 bg-orange-400' />
-                                    <input type='radio' name='rating-5' className='mask mask-star-2 bg-orange-400' checked />
-                                    <input type='radio' name='rating-5' className='mask mask-star-2 bg-orange-400' />
-                                    <input type='radio' name='rating-5' className='mask mask-star-2 bg-orange-400' />
-                                    <input type='radio' name='rating-5' className='mask mask-star-2 bg-orange-400' />
-                                </div>
-                                <label className='text-xs'> 6,123</label></div>
-                            <label className='mt-1 text-sm'>포인트 최대 <label className='text-blue-400'>150P</label> 적립</label>
-                            <div className='text-sm flex justify-between w-full mt-auto'>
-                                <label>무료배송 <label className='text-blue-400'>6/15(토) 도착</label></label>
-                                <label>1,523개 남음</label>
-                            </div>
-                        </div>
-                    </a> */}
                 {isLoading ? <div className='w-full flex justify-center'> <img src="/loading.png" style={{ width: 50 + 'px', height: 50 + 'px' }} /> </div> : null}
             </div>
         </div>

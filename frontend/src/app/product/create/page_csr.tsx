@@ -297,7 +297,8 @@ export default function Page(props: pageProps) {
                 </tbody>
             </table>
             <div className=''>
-                <button className='btn btn-xs btn-info' onClick={() => Regist()}>상품 등록</button><button className='btn btn-xs btn-error'>취소</button>
+                <button className='btn btn-xs btn-info' onClick={() => Regist()}>상품 등록</button>
+                <button className='btn btn-xs btn-error' onClick={() =>location.href= "/"}>취소</button>
             </div>
         </div>
         <Modal open={isModalOpen > -1} onClose={() => setISModalOpen(-1)} className='w-[300px] h-[150px] flex flex-col justify-center items-center' escClose={true} outlineClose={true} >

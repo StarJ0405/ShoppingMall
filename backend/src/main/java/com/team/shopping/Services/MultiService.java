@@ -127,7 +127,9 @@ public class MultiService {
     @Transactional
     public void signup(SignupRequestDTO signupRequestDTO) throws DataDuplicateException {
         userService.usernameCheck(signupRequestDTO.getUsername());
-        userService.otherCheck(signupRequestDTO.getEmail(), signupRequestDTO.getNickname(), signupRequestDTO.getPhoneNumber());
+        userService.otherEmailCheck(signupRequestDTO.getEmail());
+        userService.otherNickNameCheck(signupRequestDTO.getNickname());
+        userService.otherPhoneCheck(signupRequestDTO.getPhoneNumber());
         userService.save(signupRequestDTO);
     }
 
@@ -156,9 +158,15 @@ public class MultiService {
 
     @Transactional
     public UserResponseDTO updateProfile(String username, UserRequestDTO newUserRequestDTO) {
-        userService.otherCheck(newUserRequestDTO.getEmail(), newUserRequestDTO.getNickname(), newUserRequestDTO.getPhoneNumber());
-
         SiteUser siteUser = userService.updateProfile(username, newUserRequestDTO);
+        if (!siteUser.getEmail().equals(newUserRequestDTO.getEmail()))
+            userService.otherEmailCheck(newUserRequestDTO.getEmail());
+        if (!siteUser.getNickname().equals(newUserRequestDTO.getNickname()))
+            userService.otherNickNameCheck(newUserRequestDTO.getNickname());
+        if (!siteUser.getPhoneNumber().equals(newUserRequestDTO.getPhoneNumber()))
+            userService.otherPhoneCheck(newUserRequestDTO.getPhoneNumber());
+
+
         Optional<FileSystem> _fileSystem = fileSystemService.get(ImageKey.USER.getKey(username));
         String path = ShoppingApplication.getOsType().getLoc();
         // 삭제 or 동일하지 않는 경우만 진행
@@ -184,7 +192,6 @@ public class MultiService {
         if (!this.userService.isMatch(userRequestDTO.getPassword(), user.getPassword()))
             throw new IllegalArgumentException("not match");
         SiteUser siteUser = userService.updatePassword(user, userRequestDTO.getNewPassword());
-
         return UserResponseDTO.builder().username(siteUser.getUsername()).gender(siteUser.getGender().toString()).email(siteUser.getEmail()).point(siteUser.getPoint()).phoneNumber(siteUser.getPhoneNumber()).nickname(siteUser.getNickname()).birthday(this.dateTimeTransfer(siteUser.getBirthday())).createDate(this.dateTimeTransfer(siteUser.getCreateDate())).modifyDate(this.dateTimeTransfer(siteUser.getModifyDate())).name(siteUser.getName()).build();
     }
 
@@ -1790,8 +1797,7 @@ public class MultiService {
                 UUID uuid = UUID.randomUUID();
                 String url = "/api/rooms" + "/" + roomId.toString() + "/" + uuid + "." + image.getContentType().split("/")[1];
                 File file = new File(path + url);
-                if (!file.getParentFile().exists())
-                    file.getParentFile().mkdirs();
+                if (!file.getParentFile().exists()) file.getParentFile().mkdirs();
                 image.transferTo(file);
                 return url;
             }

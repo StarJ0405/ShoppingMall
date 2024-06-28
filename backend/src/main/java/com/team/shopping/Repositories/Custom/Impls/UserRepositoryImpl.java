@@ -30,6 +30,6 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
 
     @Override
     public List<SiteUser> isDuplicatePhone(String phone) {
-        return jpaQueryFactory.select(qSiteUser).from(qSiteUser).where(qSiteUser.password.eq(phone)).fetch();
+        return jpaQueryFactory.select(qSiteUser).from(qSiteUser).where(qSiteUser.phoneNumber.eq(phone)).fetch();
     }
 }
