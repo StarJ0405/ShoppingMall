@@ -194,10 +194,10 @@ export default function Page(props: pageProps) {
                                 {product?.id}
                             </div>
                             <div className="w-[300px]">
-                                {product?.title}
+                                <a className="hover:underline" href={"/product/" + product?.id}>{product?.title}</a>
                             </div>
                             <div className="w-[300px]">
-                                {product?.detail}
+                                {product?.description}
                             </div>
                         </div>)}
                     </div>

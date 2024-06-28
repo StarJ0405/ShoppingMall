@@ -99,7 +99,6 @@ export default function Page(props: pageProps) {
         'align',
         'image',
     ];
-    console.log(options);
     useEffect(() => {
         if (ACCESS_TOKEN)
             getUser()

@@ -260,7 +260,8 @@ export default function Page(props: pageProps) {
                                     <label>{getDateTimeFormat(product?.dateLimit)}까지</label>
                                 </div>
                             </div>
-                            <div className='mt-4 flex justify-between w-full'>
+                            <label className='mt-4 text-sm'>{product?.description}</label>
+                            <div className='flex justify-between w-full'>
                                 <div>
                                     <label className={'text-3xl' + (product?.remain > 0 ? '' : ' line-through text-gray-500')}>{product?.title ? product?.title : '제목 없음'}</label>
                                 </div>
@@ -365,7 +366,7 @@ export default function Page(props: pageProps) {
                             : <></>}
                         {reviews?.map((review, index) => <div key={index} className='w-full'>
                             <div className='flex'>
-                                <img className='min-w-[52px] w-[52px] min-h-[52px] h-[52px]' src={review?.url ? review.url : '/base_profile.png'} />
+                                <img className='min-w-[52px] w-[52px] min-h-[52px] h-[52px]' src={review?.profileUrl ? review.profileUrl : '/base_profile.png'} />
                                 <div className='flex flex-col p-2 w-full'>
                                     <div className='flex justify-between w-full items-center'>
                                         <label className='font-bold text-lg'>{review?.nickname}</label>
