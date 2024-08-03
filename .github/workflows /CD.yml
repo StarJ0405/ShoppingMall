@@ -1,0 +1,83 @@
+name: CD with Docker Hub
+on:
+  push:
+    branches:
+      - main
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: application.yml 생성
+        env:
+          ACTIONS_STEP_DEBUG: true
+          APPLICATION_SECRET: ${{secrets.APPLICATION_SECRET}}
+        run: echo "$APPLICATION_SECRET" > backend/src/main/resources/application.yml
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{secrets.DOCKERHUB_USERNAME}} # 도커 허브 이름
+          password: ${{secrets.DOCKERHUB_TOKEN}} # 도커 허브 access token
+      - name: Build and Release
+        run: |
+          docker build -t ${{secrets.DOCKERHUB_REPO}} .
+          docker tag ${{secrets.DOCKERHUB_REPO}}:latest ${{secrets.DOCKERHUB_USERNAME}}/${{secrets.DOCKERHUB_REPO}}:latest
+          docker push ${{secrets.DOCKERHUB_USERNAME}}/${{secrets.DOCKERHUB_REPO}}:latest
+      - name: Deploy to server
+        uses: appleboy/ssh-action@master
+        id: deploy
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.KEY }} # pem키
+          script: |
+            whoami
+            sudo docker pull ${{secrets.DOCKERHUB_USERNAME}}/${{secrets.DOCKERHUB_REPO}}:latest # 최신 도커 이미지 다운로드
+            # sub 시작
+            echo "sub start"
+            sudo docker rm -f $(sudo docker ps -aqf "name=^${{secrets.DOCKERHUB_REPO}}_sub") # 컨테이너 찾아서 종료
+            sudo docker run -d -p 13105:3000 -p 18185:8080 -v /HDD/starj0405/web/shopping/data:/home/ubuntu/shopping/data --name "${{secrets.DOCKERHUB_REPO}}_sub" ${{secrets.DOCKERHUB_USERNAME}}/${{secrets.DOCKERHUB_REPO}}:latest
+            count=0
+            while true; do
+              if [[ $(curl -s localhost:18185/api/track/health) =~ "UP" ]]; then
+                # sub 실행 완료 및 main 시작
+                sudo iptables -t nat -A PREROUTING -p tcp --dport 13104 -j REDIRECT --to-port 13105
+                sudo iptables -t nat -A PREROUTING -p tcp --dport 18184 -j REDIRECT --to-port 18185
+                sudo docker rm -f $(sudo docker ps -aqf "name=^${{secrets.DOCKERHUB_REPO}}_main") # 컨테이너 찾아서 종료
+                sudo docker run -d -p 13104:3000 -p 18184:8080 -v /HDD/starj0405/web/shopping/data:/home/ubuntu/shopping/data --name "${{secrets.DOCKERHUB_REPO}}_main" ${{secrets.DOCKERHUB_USERNAME}}/${{secrets.DOCKERHUB_REPO}}:latest
+                echo "sub finish main start"
+                break
+              else
+                # sub 실행 대기
+                count=$((count+1))
+                if [[ ${count} -gt 180 ]]; then
+                  echo "main timeout"
+                  break
+                else
+                  echo ${count}
+                  sleep 1
+                fi
+              fi
+            done
+            count=0
+            while true; do
+              if [[ $(curl -s localhost:18184/api/track/health) =~ "UP" ]]; then
+                # main 실행 완료 sub 종료
+                sudo iptables -t nat -D PREROUTING -p tcp --dport 13104 -j REDIRECT --to-port 13105
+                sudo iptables -t nat -D PREROUTING -p tcp --dport 18184 -j REDIRECT --to-port 18185
+                sudo docker rm -f $(sudo docker ps -aqf "name=^${{secrets.DOCKERHUB_REPO}}_sub") # 컨테이너 찾아서 종료        
+                echo "sub start"
+                sudo docker image prune -f
+                break
+              else
+                # main 실행 대기
+                count=$((count+1))
+                if [[ ${count} -gt 180 ]]; then
+                  echo "sub timeout"
+                  break
+                else
+                  echo ${count}
+                  sleep 1
+                fi
+              fi
+            done
