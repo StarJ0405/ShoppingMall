@@ -1,7 +1,7 @@
 #!/bin/bash
 
 JAR=shopping-0.0.1-SNAPSHOT.jar
-LOG=/home/ubuntu/social/data/api/back.log
+LOG=/home/ubuntu/shopping/data/api/back.log
 
 echo "BACK started."
 
