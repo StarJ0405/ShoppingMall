@@ -31,3 +31,9 @@ body {
     text-wrap: balance;
   }
 }
+
+@layer base {
+  html {
+    color-scheme: light !important;
+  }
+}
