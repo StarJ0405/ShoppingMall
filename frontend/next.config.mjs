@@ -28,7 +28,7 @@ const nextConfig = {
 		return [
 			{
 				source: '/api/:path*',
-				destination: 'http://15.164.124.78:8080/api/:path*',
+				destination: 'http://server.starj.kro.kr:18184/api/:path*',
 			}
 		]
 	},
